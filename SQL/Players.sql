@@ -1,0 +1,37 @@
+USE [kTVCSS]
+GO
+
+/****** Object:  Table [dbo].[Players]    Script Date: 06.12.2021 2:25:53 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Players](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[NAME] [nvarchar](30) NOT NULL,
+	[STEAMID] [nvarchar](30) NOT NULL,
+	[KILLS] [float] NULL,
+	[DEATHS] [float] NULL,
+	[HEADSHOTS] [float] NULL,
+	[KDR]  AS ([KILLS]/nullif([DEATHS],(0))) PERSISTED,
+	[HSR]  AS ([HEADSHOTS]/nullif([KILLS],(0))) PERSISTED,
+	[MMR] [int] NULL,
+	[RANKNAME]  AS ([dbo].[GetRankName]([MMR])),
+	[MATCHESPLAYED] [float] NULL,
+	[MATCHESWINS] [float] NULL,
+	[MATCHESLOOSES] [float] NULL,
+	[ISCALIBRATION] [tinyint] NULL,
+	[LASTMATCH] [datetime] NULL,
+	[VKID] [bigint] NULL,
+	[ANOUNCE] [tinyint] NULL,
+	[WINRATE]  AS (([MATCHESWINS]/nullif([MATCHESPLAYED],(0)))*(100)) PERSISTED,
+ CONSTRAINT [PK_Players] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
