@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreRCON.Parsers.Standard;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -117,7 +118,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        public static async Task FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId)
+        public static async Task FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId, List<Player> players, string winnerTeam)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
             {
@@ -163,6 +164,39 @@ namespace kTVCSS.Tools
                 query.Parameters.Add(asParam);
                 query.Parameters.Add(bsParam);
                 query.Parameters.Add(mapParam);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+                // updating players
+                foreach (Player player in players)
+                {
+                    if (player.Team == winnerTeam)
+                        await SetPlayerMatchResult(player.SteamId, 1);
+                    else await SetPlayerMatchResult(player.SteamId, 0);
+                }
+            }
+        }
+
+        private async static Task SetPlayerMatchResult(string steamId, int win)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[SetPlayerMatchResult]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                SqlParameter steamParam = new SqlParameter
+                {
+                    ParameterName = "@STEAMID",
+                    Value = steamId
+                };
+                SqlParameter winParam = new SqlParameter
+                {
+                    ParameterName = "@WIN",
+                    Value = win
+                };
+                query.Parameters.Add(steamParam);
+                query.Parameters.Add(winParam);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }

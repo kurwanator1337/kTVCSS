@@ -1,7 +1,7 @@
 USE [kTVCSS]
 GO
 
-/****** Object:  Table [dbo].[Players]    Script Date: 06.12.2021 2:25:53 ******/
+/****** Object:  Table [dbo].[Players]    Script Date: 08.12.2021 23:12:37 ******/
 SET ANSI_NULLS ON
 GO
 

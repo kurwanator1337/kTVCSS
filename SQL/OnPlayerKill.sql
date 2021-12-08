@@ -1,7 +1,7 @@
 USE [kTVCSS]
 GO
 
-/****** Object:  StoredProcedure [dbo].[OnPlayerKill]    Script Date: 06.12.2021 2:28:05 ******/
+/****** Object:  StoredProcedure [dbo].[OnPlayerKill]    Script Date: 08.12.2021 23:13:37 ******/
 SET ANSI_NULLS ON
 GO
 

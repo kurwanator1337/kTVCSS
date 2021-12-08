@@ -1,7 +1,7 @@
 USE [kTVCSS]
 GO
 
-/****** Object:  StoredProcedure [dbo].[EndMatch]    Script Date: 06.12.2021 2:27:31 ******/
+/****** Object:  StoredProcedure [dbo].[EndMatch]    Script Date: 08.12.2021 23:13:01 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -26,6 +26,7 @@ BEGIN
 	DECLARE @MATCHID int
 	SELECT @MATCHID = ID FROM [dbo].[MatchesLive] WHERE SERVERID = @SERVERID
 	UPDATE [dbo].[MatchesLive] SET FINISHED = 1 WHERE SERVERID = @SERVERID AND FINISHED = 0
+	UPDATE [dbo].[GameServers] SET BUSY = 0 WHERE ID = @SERVERID
 	--DELETE FROM [dbo].[MatchesLive] WHERE SERVERID = @SERVERID
 	INSERT INTO [dbo].[Matches] (ID, ANAME, BNAME, ASCORE, BSCORE, MATCHDATE, MAP, SERVERID)
 	VALUES (@MATCHID, @ANAME, @BNAME, @ASCORE, @BSCORE, SYSDATETIME(), @MAP, @SERVERID)

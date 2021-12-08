@@ -1,7 +1,7 @@
 USE [kTVCSS]
 GO
 
-/****** Object:  StoredProcedure [dbo].[OnPlayerConnectAuth]    Script Date: 06.12.2021 2:27:53 ******/
+/****** Object:  StoredProcedure [dbo].[OnPlayerConnectAuth]    Script Date: 08.12.2021 23:13:25 ******/
 SET ANSI_NULLS ON
 GO
 
