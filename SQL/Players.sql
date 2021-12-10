@@ -1,10 +1,7 @@
 USE [kTVCSS]
 GO
-
-/****** Object:  Table [dbo].[Players]    Script Date: 08.12.2021 23:12:37 ******/
 SET ANSI_NULLS ON
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 
@@ -18,6 +15,7 @@ CREATE TABLE [dbo].[Players](
 	[KDR]  AS ([KILLS]/nullif([DEATHS],(0))) PERSISTED,
 	[HSR]  AS ([HEADSHOTS]/nullif([KILLS],(0))) PERSISTED,
 	[MMR] [int] NULL,
+	[AVG] AS ([dbo].[GetPlayerAVG]([STEAMID])),
 	[RANKNAME]  AS ([dbo].[GetRankName]([MMR])),
 	[MATCHESPLAYED] [float] NULL,
 	[MATCHESWINS] [float] NULL,
