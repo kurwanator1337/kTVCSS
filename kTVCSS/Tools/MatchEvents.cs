@@ -118,7 +118,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        public static async Task FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId, List<Player> players, string winnerTeam)
+        public static async Task FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId, List<Player> players, string winnerTeam, Match match)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
             {
@@ -166,13 +166,87 @@ namespace kTVCSS.Tools
                 query.Parameters.Add(mapParam);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
-                // updating players
+
+                var teamTags = GetTeamNames(players);
+
                 foreach (Player player in players)
                 {
                     if (player.Team == winnerTeam)
                         await SetPlayerMatchResult(player.SteamId, 1);
                     else await SetPlayerMatchResult(player.SteamId, 0);
+                    await UpdateMatchesResults(player.SteamId, match.MatchId, teamTags[player.Team], player.Name, serverId);
                 }
+            }
+        }
+
+        public static Dictionary<string, string> GetTeamNames(List<Player> players)
+        {
+            Dictionary<string, string> tags = new Dictionary<string, string>();
+            tags.Add("TERRORIST", "Team Alpha");
+            tags.Add("CT", "Team Bravo");
+            List<string> ctTags = new List<string>();
+            List<string> terTags = new List<string>();
+
+            IEnumerable<Player> ctPlayers = players.Where(x => x.Team == "CT");
+            foreach (var player in ctPlayers)
+            {
+                ctTags.Add(player.Name.Split(' ')[0]);
+            }
+
+            IEnumerable<Player> terPlayers = players.Where(x => x.Team == "TERRORIST");
+            foreach (var player in terPlayers)
+            {
+                terTags.Add(player.Name.Split(' ')[0]);
+            }
+
+            foreach (var possibleTag in ctTags)
+            {
+                if (ctTags.Count(x => x == possibleTag) >= 3)
+                {
+                    tags["CT"] = possibleTag;
+                    break;
+                }
+            }
+
+            foreach (var possibleTag in terTags)
+            {
+                if (terTags.Count(x => x == possibleTag) >= 3)
+                {
+                    tags["T"] = possibleTag;
+                    break;
+                }
+            }
+
+            return tags;
+        }
+
+        private async static Task UpdateMatchesResults(string steamId, int matchId, string teamName, string playerName, int serverId)
+        {
+            string kills = string.Empty;
+            string deaths = string.Empty;
+            string headshots = string.Empty;
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [kTVCSS].[dbo].[MatchesResultsLive] WHERE ID = {matchId} AND STEAMID = '{steamId}'", connection);
+                using (var reader = await query.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        kills = reader[0].ToString();
+                        deaths = reader[1].ToString();
+                        headshots = reader[2].ToString();
+                    }
+                }
+                await connection.CloseAsync();
+            }
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand($"INSERT INTO [kTVCSS].[dbo].[MatchesResults] (ID, TEAMNAME, NAME, STEAMID, KILLS, DEATHS, HEADSHOTS, SERVERID)" +
+                    $" VALUES ({matchId}, '{teamName}', '{playerName}', '{steamId}', {kills}, {deaths}, {headshots}, {serverId})", connection);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
             }
         }
 

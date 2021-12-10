@@ -93,7 +93,8 @@ namespace kTVCSS
                                 if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
                                 {
                                     SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
-                                    await MatchEvents.FinishMatch(match.AScore, match.BScore, "test1", "test2", info.Map, server.ID, MatchPlayers, result.WinningTeam);
+                                    var tags = MatchEvents.GetTeamNames(MatchPlayers);
+                                    await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, result.WinningTeam, match);
                                     isCanBeginMatch = true;
                                     match.IsMatch = false;
                                 }

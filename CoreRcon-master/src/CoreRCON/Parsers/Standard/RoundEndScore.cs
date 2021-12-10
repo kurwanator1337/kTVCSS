@@ -12,7 +12,7 @@ namespace CoreRCON.Parsers.Standard
 
     public class RoundEndScoreParser : DefaultParser<RoundEndScore>
     {
-        public override string Pattern { get; } = @"Team ""(?<winning_team>.+?)"" triggered "".+?_Win"" \(CT ""(?<ct_score>\d+)""\) \(T ""(?<t_score>\d+)""\)";
+        public override string Pattern { get; } = @"Team ""(?<winning_team>.+?)"" triggered "".+?"" \(CT ""(?<ct_score>\d+)""\) \(T ""(?<t_score>\d+)""\)";
 
         public override RoundEndScore Load(GroupCollection groups)
         {
