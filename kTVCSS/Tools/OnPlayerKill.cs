@@ -9,7 +9,7 @@ namespace kTVCSS.Tools
 {
     public static class OnPlayerKill
     {
-        public static async Task SetValues(string killerSteamID, string killedSteamID, int killerHeadshot, int serverId, int matchId)
+        public static async Task SetValues(string killerName, string killedName, string killerSteamID, string killedSteamID, int killerHeadshot, int serverId, int matchId)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
             {
@@ -17,6 +17,16 @@ namespace kTVCSS.Tools
                 SqlCommand query = new SqlCommand("[dbo].[OnPlayerKill]", connection)
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
+                };
+                SqlParameter nameParam = new SqlParameter
+                {
+                    ParameterName = "@KILLERNAME",
+                    Value = killerName
+                };
+                SqlParameter namedParam = new SqlParameter
+                {
+                    ParameterName = "@KILLEDNAME",
+                    Value = killedName
                 };
                 SqlParameter killerSteamParam = new SqlParameter
                 {
@@ -47,6 +57,8 @@ namespace kTVCSS.Tools
                     Value = matchId
                 };
 
+                query.Parameters.Add(nameParam);
+                query.Parameters.Add(namedParam);
                 query.Parameters.Add(killerSteamParam);
                 query.Parameters.Add(killedSteamParam);
                 query.Parameters.Add(killedHeadshotParam);

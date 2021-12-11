@@ -18,7 +18,9 @@ namespace CoreRCON.Parsers.Standard
         {
             return new RoundEndScore
             {
+#pragma warning disable CA1062 // Validate arguments of public methods
                 WinningTeam = groups["winning_team"].Value,
+#pragma warning restore CA1062 // Validate arguments of public methods
                 TScore = int.Parse(groups["t_score"].Value),
                 CTScore = int.Parse(groups["ct_score"].Value),
             };

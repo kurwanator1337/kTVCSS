@@ -1,20 +1,15 @@
 USE [kTVCSS]
 GO
 
-/****** Object:  StoredProcedure [dbo].[OnPlayerKill]    Script Date: 08.12.2021 23:13:37 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
 CREATE PROCEDURE [dbo].[OnPlayerKill] 
-	-- Add the parameters for the stored procedure here
+	@KILLERNAME nvarchar(30),
+	@KILLEDNAME nvarchar(30),
 	@KILLERSTEAM nvarchar(30),
 	@KILLEDSTEAM nvarchar(30),
 	@KILLERHS tinyint,
@@ -40,8 +35,8 @@ BEGIN
 	UPDATE [dbo].[MatchesResultsLive] SET KILLS = 1 + KILLS, HEADSHOTS = @KILLERHS + HEADSHOTS WHERE STEAMID = @KILLERSTEAM AND ID = @ID;
 	UPDATE [dbo].[MatchesResultsLive] SET DEATHS = 1 + DEATHS WHERE STEAMID = @KILLEDSTEAM AND ID = @ID;
 
-	UPDATE [dbo].[Players] SET KILLS = 1 + KILLS, HEADSHOTS = @KILLERHS + HEADSHOTS WHERE STEAMID = @KILLERSTEAM;
-	UPDATE [dbo].[Players] SET DEATHS = 1 + DEATHS WHERE STEAMID = @KILLEDSTEAM;
+	UPDATE [dbo].[Players] SET NAME = @KILLERNAME, KILLS = 1 + KILLS, HEADSHOTS = @KILLERHS + HEADSHOTS WHERE STEAMID = @KILLERSTEAM;
+	UPDATE [dbo].[Players] SET NAME = @KILLEDNAME, DEATHS = 1 + DEATHS WHERE STEAMID = @KILLEDSTEAM;
 END
 GO
 
