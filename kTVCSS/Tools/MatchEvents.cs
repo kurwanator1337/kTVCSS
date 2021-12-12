@@ -278,6 +278,32 @@ namespace kTVCSS.Tools
             }
         }
 
+        public async static Task WeaponKill(string steamId, string weaponName)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[OnPlayerKillByWeapon]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                SqlParameter idParam = new SqlParameter
+                {
+                    ParameterName = "@STEAMID",
+                    Value = steamId
+                };
+                SqlParameter wParam = new SqlParameter
+                {
+                    ParameterName = "@WEAPON",
+                    Value = weaponName
+                };
+                query.Parameters.Add(idParam);
+                query.Parameters.Add(wParam);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+            }
+        }
+
         public async static Task ResetMatch(int matchId)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))

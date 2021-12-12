@@ -65,6 +65,7 @@ namespace kTVCSS
                             {
                                 match.OpenFragSteamID = kill.Killer.SteamId;
                             }
+                            await MatchEvents.WeaponKill(kill.Killer.SteamId, kill.Weapon);
                         }
                     }
                 });
@@ -221,10 +222,12 @@ namespace kTVCSS
                             match = new Match(3);
                             match.MatchId = recoveredMatchID;
                             match = await MatchEvents.GetLiveMatchResults(server.ID, match);
-                            if (match.AScore + match.BScore >= 15)
+                            match.RoundID = match.AScore + match.BScore;
+                            if (match.AScore + match.BScore >= match.MaxRounds)
                             {
                                 match.FirstHalf = false;
                             }
+                            await RconHelper.SendMessage(rcon, $"Счет матча: {tName} [{match.AScore}-{match.BScore}] {ctName}");
                         }
                         else
                         {
