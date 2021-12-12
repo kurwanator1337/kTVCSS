@@ -10,6 +10,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Data.SqlClient;
 
 namespace kTVCSS
 {
@@ -65,7 +66,7 @@ namespace kTVCSS
                                 match.OpenFragSteamID = kill.Killer.SteamId;
                             }
                         }
-                    }  
+                    }
                 });
 
                 log.Listen<RoundStart>(async result =>
@@ -186,20 +187,35 @@ namespace kTVCSS
                 {
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch)
                     {
-                        await RconHelper.SendMessage(rcon, "LIVE");
-                        SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
-                        match = new Match(3);
-                        match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
-                        MatchPlayers = new List<Player>();
-                        MatchPlayers = OnlinePlayers;
+                        if (match is null)
+                        {
+                            await RconHelper.SendMessage(rcon, "LIVE");
+                            SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                            match = new Match(3);
+                            match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
+                            MatchPlayers = new List<Player>();
+                            MatchPlayers = OnlinePlayers;
+                        }
+                        else
+                        {
+                            if (match.IsMatch)
+                            {
+                                await RconHelper.SendMessage(rcon, "Матч уже запущен");
+                            }
+                            else
+                            {
+                                await RconHelper.SendMessage(rcon, "LIVE");
+                                match.IsMatch = true;
+                            }
+                        }
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!recover") && isCanBeginMatch)
                     {
-                        await RconHelper.SendMessage(rcon, "RECOVERED LIVE");
                         var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
                         if (recoveredMatchID != 0)
                         {
+                            await RconHelper.SendMessage(rcon, "RECOVERED LIVE");
                             MatchPlayers = new List<Player>();
                             MatchPlayers = OnlinePlayers;
                             match = new Match(3);
@@ -209,6 +225,67 @@ namespace kTVCSS
                             {
                                 match.FirstHalf = false;
                             }
+                        }
+                        else
+                        {
+                            await RconHelper.SendMessage(rcon, "Не найдено матчей для восстановления");
+                        }
+                    }
+
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!nl") && match.IsMatch)
+                    {
+                        if (match is not null)
+                        {
+                            if (match.AScore + match.BScore == match.MaxRounds || (match.AScore == 0 && match.BScore == 0))
+                            {
+                                match.IsMatch = false;
+                                await RconHelper.SendMessage(rcon, "Текущая половина матча сброшена!");
+                                await RconHelper.SendCmd(rcon, "mp_restartgame 1");
+                            }
+                            else
+                            {
+                                await RconHelper.SendMessage(rcon, "Текущую половину уже нельзя сбросить!");
+                            }
+                        }
+                    }
+
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!score") && match is not null)
+                    {
+                        await RconHelper.SendMessage(rcon, $"Счет матча: {tName} [{match.AScore}-{match.BScore}] {ctName}");
+                    }
+
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!cm") && match.IsMatch)
+                    {
+                        if (match is not null)
+                        {
+                            if (match.AScore == 0 && match.BScore == 0)
+                            {
+                                await MatchEvents.ResetMatch(match.MatchId);
+                                await RconHelper.SendMessage(rcon, "Матч сброшен!");
+                                match = null;
+                                return;
+                            }
+                            string winner = string.Empty;
+                            string looser = string.Empty;
+                            if (match.AScore > match.BScore)
+                            {
+                                winner = tName;
+                                looser = ctName;
+                            }
+                            else
+                            {
+                                winner = ctName;
+                                looser = tName;
+                            }
+                            await RconHelper.SendMessage(rcon, "Матч сыгран!");
+                            await RconHelper.SendMessage(rcon, $"Поздравляем команду {winner} с победой!");
+                            await RconHelper.SendMessage(rcon, $"{looser}, в следующий раз вам повезет.");
+                            await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
+                            SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                            var tags = MatchEvents.GetTeamNames(MatchPlayers);
+                            await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winner, match);
+                            isCanBeginMatch = true;
+                            match.IsMatch = false;
                         }
                     }
                 });
@@ -224,7 +301,7 @@ namespace kTVCSS
                             if (match.IsMatch)
                             {
                                 MatchPlayers.Add(connection.Player);
-                            }  
+                            }
                         }
                         Logger.Print($"{connection.Player.Name} ({connection.Player.SteamId}) has been connected to {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                     }

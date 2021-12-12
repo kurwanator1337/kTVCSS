@@ -278,6 +278,26 @@ namespace kTVCSS.Tools
             }
         }
 
+        public async static Task ResetMatch(int matchId)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[ResetMatch]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                SqlParameter idParam = new SqlParameter
+                {
+                    ParameterName = "@MATCHID",
+                    Value = matchId
+                };
+                query.Parameters.Add(idParam);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+            }
+        }
+
         public async static Task SetOpenFrag(string steamId)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
