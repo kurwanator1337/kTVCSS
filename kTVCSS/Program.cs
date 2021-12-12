@@ -52,12 +52,32 @@ namespace kTVCSS
                             await OnPlayerKill.SetValues(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId);
                             if (!MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) MatchPlayers.Add(kill.Killer);
                             if (!MatchPlayers.Where(x => x.SteamId == kill.Killed.SteamId).Any()) MatchPlayers.Add(kill.Killed);
+                            if (!match.PlayerKills.ContainsKey(kill.Killer.SteamId))
+                            {
+                                match.PlayerKills.Add(kill.Killer.SteamId, 1);
+                            }
+                            else
+                            {
+                                match.PlayerKills[kill.Killer.SteamId]++;
+                            }
+                            if (match.OpenFragSteamID == string.Empty)
+                            {
+                                match.OpenFragSteamID = kill.Killer.SteamId;
+                            }
                         }
                     }  
                 });
 
                 log.Listen<RoundStart>(async result =>
                 {
+                    if (match is not null)
+                    {
+                        if (match.IsMatch)
+                        {
+                            match.PlayerKills.Clear();
+                            match.OpenFragSteamID = string.Empty;
+                        }
+                    }
                     if (isResetFreezeTime)
                     {
                         await RconHelper.SendCmd(rcon, "mp_freezetime 10");
@@ -104,6 +124,35 @@ namespace kTVCSS
                                     }
                                 }
                             }
+
+                            match.RoundID++;
+
+                            foreach (var player in match.PlayerKills)
+                            {
+                                if (player.Value >= 3)
+                                {
+                                    await MatchEvents.SetHighlight(player.Key, player.Value);
+                                    switch (player.Value)
+                                    {
+                                        case 3:
+                                            {
+                                                await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} TRIPPLE KILL!");
+                                                break;
+                                            }
+                                        case 4:
+                                            {
+                                                await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} QUADRO KILL!");
+                                                break;
+                                            }
+                                        case 5:
+                                            {
+                                                await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} RAMPAGE!!!");
+                                                break;
+                                            }
+                                    }
+                                }
+                            }
+                            await MatchEvents.SetOpenFrag(match.OpenFragSteamID);
                             await MatchEvents.UpdateMatchScore(match.AScore, match.BScore, server.ID, match.MatchId);
                             if (!match.FirstHalf)
                             {

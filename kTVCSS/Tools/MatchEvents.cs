@@ -250,6 +250,56 @@ namespace kTVCSS.Tools
             }
         }
 
+        public async static Task SetHighlight(string steamId, int killsCount)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[OnPlayerHighlight]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                SqlParameter killParam = new SqlParameter
+                {
+                    ParameterName = "@KILLS",
+                    Value = killsCount
+                };
+                SqlParameter steamParam = new SqlParameter
+                {
+                    ParameterName = "@STEAMID",
+                    Value = steamId
+                };
+                
+
+                query.Parameters.Add(killParam);
+                query.Parameters.Add(steamParam);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+            }
+        }
+
+        public async static Task SetOpenFrag(string steamId)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[OnPlayerOpenFrag]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                SqlParameter steamParam = new SqlParameter
+                {
+                    ParameterName = "@STEAMID",
+                    Value = steamId
+                };
+
+
+                query.Parameters.Add(steamParam);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+            }
+        }
+
         private async static Task SetPlayerMatchResult(string steamId, int win)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
