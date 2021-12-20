@@ -29,6 +29,11 @@ namespace kTVCSS
             private string ctName = "CT";
             Match match = null;
             private bool isResetFreezeTime = false;
+            private bool isBestOfOneStarted = false;
+            private string currentMapSelector = string.Empty;
+            private string terPlayerSelector = string.Empty;
+            private string ctPlayerSelector = string.Empty;
+            private Dictionary<int, string> mapPool = new Dictionary<int, string>();
 
             public async Task StartNode(Server server)
             {
@@ -186,11 +191,102 @@ namespace kTVCSS
 
                 log.Listen<ChatMessage>(async chat =>
                 {
+                    int.TryParse(chat.Message, out int mapNum);
+                    if (chat.Channel == MessageChannel.All && mapNum > 0 && mapNum < 10 && currentMapSelector == chat.Player.Name)
+                    {
+                        if (!mapPool.ContainsKey(mapNum))
+                        {
+                            await RconHelper.SendMessage(rcon, $"Вы ввели номер карты, который уже был забанен");
+                            return;
+                        }
+
+                        mapPool.Remove(mapNum);
+
+                        if (currentMapSelector == ctPlayerSelector)
+                        {
+                            currentMapSelector = terPlayerSelector;
+                        }
+                        else
+                        {
+                            currentMapSelector = ctPlayerSelector;
+                        }
+
+                        foreach (var map in mapPool)
+                        {
+                            await RconHelper.SendMessage(rcon, $"{map.Key} - {map.Value}");
+                        }
+
+                        if (mapPool.Count() == 1)
+                        {
+                            await RconHelper.SendMessage(rcon, $"Выбрана карта: {mapPool.FirstOrDefault().Value}");
+                            Thread.Sleep(5000);
+                            await RconHelper.SendCmd(rcon, $"changelevel {mapPool.FirstOrDefault().Value}");
+                            currentMapSelector = string.Empty;
+                            isBestOfOneStarted = false;
+                            terPlayerSelector = string.Empty;
+                            ctPlayerSelector = string.Empty;
+                            mapPool.Clear();
+                        }
+
+                        await RconHelper.SendMessage(rcon, $"{currentMapSelector}, напишите номер карты для бана");
+                    }   
+                    
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1"))
+                    {
+                        isBestOfOneStarted = true;
+                        using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
+                        {
+                            connection.Open();
+                            mapPool = new Dictionary<int, string>();
+                            SqlCommand query = new SqlCommand($"SELECT MAP FROM [dbo].[MapPool]", connection);
+                            using (var reader = query.ExecuteReader())
+                            {
+                                int i = 1;
+                                while (reader.Read())
+                                {
+                                    mapPool.Add(i, reader[0].ToString());
+                                    i++;
+                                }
+                            }
+                            connection.Close();
+                        }
+
+                        var result = await rcon.SendCommandAsync("sm_usrlst");
+
+                        var tempPlayers = result.Split('\n');
+                        terPlayerSelector = tempPlayers.First(x => x.Contains(";2")).Split(';')[0];
+                        ctPlayerSelector = tempPlayers.First(x => x.Contains(";3")).Split(';')[0];
+
+                        //terPlayerSelector = OnlinePlayers.First(x => x.Team == tName).SteamId;
+                        //ctPlayerSelector = OnlinePlayers.First(x => x.Team == ctName).SteamId;
+
+                        await RconHelper.SendMessage(rcon, "Список карт для черка:");
+
+                        foreach (var map in mapPool)
+                        {
+                            await RconHelper.SendMessage(rcon, $"{map.Key} - {map.Value}");
+                        }
+
+                        var random = new Random();
+                        var rnd = random.Next(0, 2);
+                        if (rnd == 0)
+                        {
+                            currentMapSelector = terPlayerSelector;
+                        }
+                        else
+                        {
+                            currentMapSelector = ctPlayerSelector;
+                        }
+
+                        await RconHelper.SendMessage(rcon, $"Первым начинает черк - {currentMapSelector}");
+                        await RconHelper.SendMessage(rcon, $"Напишите номер карты, чтобы забанить её: ");
+                    }
+
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch)
                     {
                         if (match is null)
                         {
-                            await RconHelper.SendMessage(rcon, "LIVE");
+                            await RconHelper.SendCmd(rcon, "zb_lo3");
                             SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                             match = new Match(3);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
