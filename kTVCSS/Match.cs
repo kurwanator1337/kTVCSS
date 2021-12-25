@@ -17,6 +17,9 @@ namespace kTVCSS
             BScore = 0;
             RoundID = 0;
             OpenFragSteamID = string.Empty;
+            IsOvertime = false;
+            AScoreOvertime = 0;
+            BScoreOvertime = 0;
         }
 
         public int MaxRounds { get; set; }
@@ -27,6 +30,9 @@ namespace kTVCSS
         public bool FirstHalf { get; set; }
         public int RoundID { get; set; }
         public string OpenFragSteamID { get; set; }
+        public bool IsOvertime { get; set; }
+        public int AScoreOvertime { get; set; }
+        public int BScoreOvertime { get; set; }
         public Dictionary<string, int> PlayerKills = new Dictionary<string, int>();
     }
 }

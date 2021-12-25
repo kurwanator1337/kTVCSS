@@ -84,11 +84,15 @@ namespace kTVCSS
                             match.PlayerKills.Clear();
                             match.OpenFragSteamID = string.Empty;
                         }
-                    }
-                    if (isResetFreezeTime)
-                    {
-                        await RconHelper.SendCmd(rcon, "mp_freezetime 10");
-                        isResetFreezeTime = !isResetFreezeTime;
+                        if (isResetFreezeTime)
+                        {
+                            await RconHelper.SendCmd(rcon, "zb_lo3");
+                            isResetFreezeTime = !isResetFreezeTime;
+                            if (match.IsOvertime)
+                            {
+                                await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
+                            }
+                        }
                     }
                 });
 
@@ -101,24 +105,33 @@ namespace kTVCSS
                             if (result.WinningTeam == tName)
                             {
                                 match.AScore += 1;
+                                if (match.IsOvertime)
+                                    match.AScoreOvertime += 1;
                             }
                             if (result.WinningTeam == ctName)
                             {
                                 match.BScore += 1;
+                                if (match.IsOvertime)
+                                    match.BScoreOvertime += 1;
                             }
                             await RconHelper.SendMessage(rcon, $"Счет матча: {tName} [{match.AScore}-{match.BScore}] {ctName}");
-                            if (match.AScore + match.BScore == match.MaxRounds)
+                            if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
                             {
                                 await RconHelper.SendMessage(rcon, "Половина матча сыграна! Смена сторон!");
                                 await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                Thread.Sleep(2000);
+                                await RconHelper.SendCmd(rcon, "sm_swap @all");
                                 await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
-                                await RconHelper.SendMessage(rcon, "После начала раунда сразу играется вторая половина!");
                                 isResetFreezeTime = true;
                                 match.FirstHalf = false;
                                 var _aScore = match.AScore;
                                 var _bScore = match.BScore;
+                                var _AOScore = match.AScoreOvertime;
+                                var _BOScore = match.BScoreOvertime;
                                 match.AScore = _bScore;
                                 match.BScore = _aScore;
+                                match.AScoreOvertime = _BOScore;
+                                match.BScoreOvertime = _AOScore;
                                 foreach (Player player in MatchPlayers)
                                 {
                                     if (player.Team == tName)
@@ -128,6 +141,47 @@ namespace kTVCSS
                                     else
                                     {
                                         player.Team = tName;
+                                    }
+                                }
+                            }
+
+                            if (match.AScore + match.BScore == match.MaxRounds * 2 || (match.AScoreOvertime + match.BScoreOvertime >= match.MaxRounds + 1 && match.IsOvertime))
+                            {
+                                if ((Math.Abs(match.AScoreOvertime - match.BScoreOvertime) >= 2) && (match.AScoreOvertime == match.MaxRounds + 1 || match.BScoreOvertime == match.MaxRounds + 1))
+                                {
+                                    string looser = string.Empty;
+                                    if (result.WinningTeam == tName)
+                                    {
+                                        looser = ctName;
+                                    }
+                                    else
+                                    {
+                                        looser = tName;
+                                    }
+                                    // score check
+                                    await RconHelper.SendMessage(rcon, "Матч сыгран!");
+                                    await RconHelper.SendMessage(rcon, $"Поздравляем команду {result.WinningTeam} с победой!");
+                                    await RconHelper.SendMessage(rcon, $"{looser}, в следующий раз вам повезет.");
+                                    await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
+                                    SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                                    var tags = MatchEvents.GetTeamNames(MatchPlayers);
+                                    await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, result.WinningTeam, match);
+                                    isCanBeginMatch = true;
+                                    match.IsMatch = false;
+                                }
+                                else
+                                {
+                                    if (match.AScore + match.BScore == match.MaxRounds * 2 || match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds * 2)
+                                    {
+                                        match.AScoreOvertime = 0;
+                                        match.BScoreOvertime = 0;
+                                        match.IsOvertime = true;
+                                        await RconHelper.SendMessage(rcon, "Овертайм!!!");
+                                        await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                        Thread.Sleep(2000);
+                                        await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
+                                        isResetFreezeTime = true;
+                                        match.MaxRounds = 3;
                                     }
                                 }
                             }
@@ -257,9 +311,6 @@ namespace kTVCSS
                         terPlayerSelector = tempPlayers.First(x => x.Contains(";2")).Split(';')[0];
                         ctPlayerSelector = tempPlayers.First(x => x.Contains(";3")).Split(';')[0];
 
-                        //terPlayerSelector = OnlinePlayers.First(x => x.Team == tName).SteamId;
-                        //ctPlayerSelector = OnlinePlayers.First(x => x.Team == ctName).SteamId;
-
                         await RconHelper.SendMessage(rcon, "Список карт для черка:");
 
                         foreach (var map in mapPool)
@@ -288,7 +339,7 @@ namespace kTVCSS
                         {
                             await RconHelper.SendCmd(rcon, "zb_lo3");
                             SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
-                            match = new Match(3);
+                            match = new Match(15);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
                             MatchPlayers = new List<Player>();
                             MatchPlayers = OnlinePlayers;
@@ -309,13 +360,14 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!recover") && isCanBeginMatch)
                     {
+                        // not done
                         var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
                         if (recoveredMatchID != 0)
                         {
                             await RconHelper.SendMessage(rcon, "RECOVERED LIVE");
                             MatchPlayers = new List<Player>();
                             MatchPlayers = OnlinePlayers;
-                            match = new Match(3);
+                            match = new Match(15);
                             match.MatchId = recoveredMatchID;
                             match = await MatchEvents.GetLiveMatchResults(server.ID, match);
                             match.RoundID = match.AScore + match.BScore;
