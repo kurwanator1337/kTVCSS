@@ -22,68 +22,101 @@ namespace kTVCSS
 
         public class Node
         {
+            public Node()
+            {
+                alertThread = new Thread(Alerter) { IsBackground = true };
+            }
+
+            private static Thread alertThread = null;
             public static List<Player> OnlinePlayers = new List<Player>();
             public List<Player> MatchPlayers = null;
             private bool isCanBeginMatch = true;
             private string tName = "TERRORIST";
             private string ctName = "CT";
-            Match match = null;
+            private Match match = null;
             private bool isResetFreezeTime = false;
             private bool isBestOfOneStarted = false;
             private string currentMapSelector = string.Empty;
             private string terPlayerSelector = string.Empty;
             private string ctPlayerSelector = string.Empty;
             private Dictionary<int, string> mapPool = new Dictionary<int, string>();
+            private bool knifeRound = false;
+            private RCON rcon = null;
+            private string demoName = string.Empty;
 
             public async Task StartNode(Server server)
             {
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(server.Host), server.GamePort);
-                RCON rcon = new RCON(endpoint, server.RconPassword);
-                await rcon.ConnectAsync();
+                rcon = new RCON(endpoint, server.RconPassword);
+                bool isRconConnectionEstablished = false;
+                while (!isRconConnectionEstablished)
+                {
+                    try
+                    {
+                        await rcon.ConnectAsync();
+                        isRconConnectionEstablished = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Print($"[#{server.ID}] {ex.Message}", LogLevel.Error);
+                        Thread.Sleep(30000);
+                    }
+                }
                 LogReceiver log = new LogReceiver(server.NodePort, endpoint);
                 ServerQueryPlayer[] players = await ServerQuery.Players(endpoint);
                 SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                 Logger.Print($"Created connection to {info.Name}", LogLevel.Trace);
                 await RconHelper.SendMessage(rcon, "Соединение до сервера kTVCSS было успешно установлено");
+                alertThread.Start(server);
 
                 log.Listen<KillFeed>(async kill =>
                 {
-                    if (match is not null)
+                    if (match is not null && match.IsMatch)
                     {
-                        if (match.IsMatch)
+                        int hs = 0;
+                        if (kill.Headshot)
+                            hs = 1;
+
+                        if (!match.PlayerKills.ContainsKey(kill.Killer.SteamId))
                         {
-                            int hs = 0;
-                            if (kill.Headshot)
-                                hs = 1;
-                            await OnPlayerKill.SetValues(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId);
-                            if (!MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) MatchPlayers.Add(kill.Killer);
-                            if (!MatchPlayers.Where(x => x.SteamId == kill.Killed.SteamId).Any()) MatchPlayers.Add(kill.Killed);
-                            if (!match.PlayerKills.ContainsKey(kill.Killer.SteamId))
-                            {
-                                match.PlayerKills.Add(kill.Killer.SteamId, 1);
-                            }
-                            else
-                            {
-                                match.PlayerKills[kill.Killer.SteamId]++;
-                            }
-                            if (match.OpenFragSteamID == string.Empty)
-                            {
-                                match.OpenFragSteamID = kill.Killer.SteamId;
-                            }
-                            await MatchEvents.WeaponKill(kill.Killer.SteamId, kill.Weapon);
+                            match.PlayerKills.Add(kill.Killer.SteamId, 1);
+                            await OnPlayerConnectAuth.AuthPlayer(kill.Killer.SteamId, kill.Killer.Name);
                         }
+                        else
+                        {
+                            match.PlayerKills[kill.Killer.SteamId]++;
+                        }
+
+                        await OnPlayerKill.SetValues(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId);
+
+                        if (!MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) MatchPlayers.Add(kill.Killer);
+                        else
+                        {
+                            MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).First().Name = kill.Killer.Name;
+                            MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).First().Team = kill.Killer.Team;
+                        }
+                        if (!MatchPlayers.Where(x => x.SteamId == kill.Killed.SteamId).Any()) MatchPlayers.Add(kill.Killed);
+                        else
+                        {
+                            MatchPlayers.Where(x => x.SteamId == kill.Killed.SteamId).First().Name = kill.Killed.Name;
+                            MatchPlayers.Where(x => x.SteamId == kill.Killed.SteamId).First().Team = kill.Killed.Team;
+                        }
+
+                        if (match.OpenFragSteamID == string.Empty)
+                        {
+                            match.OpenFragSteamID = kill.Killer.SteamId;
+                        }
+                        await MatchEvents.WeaponKill(kill.Killer.SteamId, kill.Weapon);
                     }
                 });
 
                 log.Listen<RoundStart>(async result =>
                 {
-                    if (match is not null)
+                    if (match is not null && match.IsMatch)
                     {
-                        if (match.IsMatch)
-                        {
-                            match.PlayerKills.Clear();
-                            match.OpenFragSteamID = string.Empty;
-                        }
+                        match.PlayerKills.Clear();
+                        match.OpenFragSteamID = string.Empty;
+
                         if (isResetFreezeTime)
                         {
                             await RconHelper.SendCmd(rcon, "zb_lo3");
@@ -98,148 +131,155 @@ namespace kTVCSS
 
                 log.Listen<RoundEndScore>(async result =>
                 {
-                    if (match is not null)
+                    if (match is not null && match.IsMatch)
                     {
-                        if (match.IsMatch)
+                        if (result.WinningTeam == tName)
                         {
-                            if (result.WinningTeam == tName)
-                            {
-                                match.AScore += 1;
-                                if (match.IsOvertime)
-                                    match.AScoreOvertime += 1;
-                            }
-                            if (result.WinningTeam == ctName)
-                            {
-                                match.BScore += 1;
-                                if (match.IsOvertime)
-                                    match.BScoreOvertime += 1;
-                            }
-                            await RconHelper.SendMessage(rcon, $"Счет матча: {tName} [{match.AScore}-{match.BScore}] {ctName}");
-                            if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
-                            {
-                                await RconHelper.SendMessage(rcon, "Половина матча сыграна! Смена сторон!");
-                                await RconHelper.SendCmd(rcon, "mp_freezetime 60");
-                                Thread.Sleep(2000);
-                                await RconHelper.SendCmd(rcon, "sm_swap @all");
-                                await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
-                                isResetFreezeTime = true;
-                                match.FirstHalf = false;
-                                var _aScore = match.AScore;
-                                var _bScore = match.BScore;
-                                var _AOScore = match.AScoreOvertime;
-                                var _BOScore = match.BScoreOvertime;
-                                match.AScore = _bScore;
-                                match.BScore = _aScore;
-                                match.AScoreOvertime = _BOScore;
-                                match.BScoreOvertime = _AOScore;
-                                foreach (Player player in MatchPlayers)
-                                {
-                                    if (player.Team == tName)
-                                    {
-                                        player.Team = ctName;
-                                    }
-                                    else
-                                    {
-                                        player.Team = tName;
-                                    }
-                                }
-                            }
+                            match.AScore += 1;
+                            if (match.IsOvertime)
+                                match.AScoreOvertime += 1;
+                        }
+                        if (result.WinningTeam == ctName)
+                        {
+                            match.BScore += 1;
+                            if (match.IsOvertime)
+                                match.BScoreOvertime += 1;
+                        }
 
-                            if (match.AScore + match.BScore == match.MaxRounds * 2 || (match.AScoreOvertime + match.BScoreOvertime >= match.MaxRounds + 1 && match.IsOvertime))
+                        SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                        var tags = MatchEvents.GetTeamNames(MatchPlayers);
+
+                        await RconHelper.SendMessage(rcon, $"Счет матча: {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
+                        if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
+                        {
+                            await RconHelper.SendMessage(rcon, "Половина матча сыграна! Смена сторон!");
+                            await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                            Thread.Sleep(2000);
+                            await RconHelper.SendCmd(rcon, "sm_swap @all");
+                            await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
+                            isResetFreezeTime = true;
+                            match.FirstHalf = false;
+                            var _aScore = match.AScore;
+                            var _bScore = match.BScore;
+                            var _AOScore = match.AScoreOvertime;
+                            var _BOScore = match.BScoreOvertime;
+                            match.AScore = _bScore;
+                            match.BScore = _aScore;
+                            match.AScoreOvertime = _BOScore;
+                            match.BScoreOvertime = _AOScore;
+                            foreach (Player player in MatchPlayers)
                             {
-                                if ((Math.Abs(match.AScoreOvertime - match.BScoreOvertime) >= 2) && (match.AScoreOvertime == match.MaxRounds + 1 || match.BScoreOvertime == match.MaxRounds + 1))
+                                if (player.Team == tName)
                                 {
-                                    string looser = string.Empty;
-                                    if (result.WinningTeam == tName)
-                                    {
-                                        looser = ctName;
-                                    }
-                                    else
-                                    {
-                                        looser = tName;
-                                    }
-                                    // score check
-                                    await RconHelper.SendMessage(rcon, "Матч сыгран!");
-                                    await RconHelper.SendMessage(rcon, $"Поздравляем команду {result.WinningTeam} с победой!");
-                                    await RconHelper.SendMessage(rcon, $"{looser}, в следующий раз вам повезет.");
-                                    await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
-                                    SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
-                                    var tags = MatchEvents.GetTeamNames(MatchPlayers);
-                                    await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, result.WinningTeam, match);
-                                    isCanBeginMatch = true;
-                                    match.IsMatch = false;
+                                    player.Team = ctName;
                                 }
                                 else
                                 {
-                                    if (match.AScore + match.BScore == match.MaxRounds * 2 || match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds * 2)
-                                    {
-                                        match.AScoreOvertime = 0;
-                                        match.BScoreOvertime = 0;
-                                        match.IsOvertime = true;
-                                        await RconHelper.SendMessage(rcon, "Овертайм!!!");
-                                        await RconHelper.SendCmd(rcon, "mp_freezetime 60");
-                                        Thread.Sleep(2000);
-                                        await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
-                                        isResetFreezeTime = true;
-                                        match.MaxRounds = 3;
-                                    }
-                                }
-                            }
-
-                            match.RoundID++;
-
-                            foreach (var player in match.PlayerKills)
-                            {
-                                if (player.Value >= 3)
-                                {
-                                    await MatchEvents.SetHighlight(player.Key, player.Value);
-                                    switch (player.Value)
-                                    {
-                                        case 3:
-                                            {
-                                                await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} TRIPPLE KILL!");
-                                                break;
-                                            }
-                                        case 4:
-                                            {
-                                                await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} QUADRO KILL!");
-                                                break;
-                                            }
-                                        case 5:
-                                            {
-                                                await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} RAMPAGE!!!");
-                                                break;
-                                            }
-                                    }
-                                }
-                            }
-                            await MatchEvents.SetOpenFrag(match.OpenFragSteamID);
-                            await MatchEvents.UpdateMatchScore(match.AScore, match.BScore, server.ID, match.MatchId);
-                            if (!match.FirstHalf)
-                            {
-                                if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
-                                {
-                                    string looser = string.Empty;
-                                    if (result.WinningTeam == tName)
-                                    {
-                                        looser = ctName;
-                                    }
-                                    else
-                                    {
-                                        looser = tName;
-                                    }
-                                    await RconHelper.SendMessage(rcon, "Матч сыгран!");
-                                    await RconHelper.SendMessage(rcon, $"Поздравляем команду {result.WinningTeam} с победой!");
-                                    await RconHelper.SendMessage(rcon, $"{looser}, в следующий раз вам повезет.");
-                                    await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
-                                    SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
-                                    var tags = MatchEvents.GetTeamNames(MatchPlayers);
-                                    await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, result.WinningTeam, match);
-                                    isCanBeginMatch = true;
-                                    match.IsMatch = false;
+                                    player.Team = tName;
                                 }
                             }
                         }
+
+                        if (match.AScore + match.BScore == match.MaxRounds * 2 || (match.AScoreOvertime + match.BScoreOvertime >= match.MaxRounds + 1 && match.IsOvertime))
+                        {
+                            if ((Math.Abs(match.AScoreOvertime - match.BScoreOvertime) >= 2) && (match.AScoreOvertime == match.MaxRounds + 1 || match.BScoreOvertime == match.MaxRounds + 1))
+                            {
+                                string looser = string.Empty;
+                                if (result.WinningTeam == tName)
+                                {
+                                    looser = ctName;
+                                }
+                                else
+                                {
+                                    looser = tName;
+                                }
+                                // score check
+                                await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                                await RconHelper.SendMessage(rcon, "Матч сыгран!");
+                                await RconHelper.SendMessage(rcon, $"Поздравляем команду {tags[result.WinningTeam]} с победой!");
+                                await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз вам повезет.");
+                                await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
+
+                                await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, result.WinningTeam, match);
+                                isCanBeginMatch = true;
+                                match.IsMatch = false;
+                            }
+                            else
+                            {
+                                if (match.AScore + match.BScore == match.MaxRounds * 2 || match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds * 2)
+                                {
+                                    match.AScoreOvertime = 0;
+                                    match.BScoreOvertime = 0;
+                                    match.IsOvertime = true;
+                                    await RconHelper.SendMessage(rcon, "Овертайм!!!");
+                                    await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                    Thread.Sleep(2000);
+                                    await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
+                                    isResetFreezeTime = true;
+                                    match.MaxRounds = 3;
+                                }
+                            }
+                        }
+
+                        match.RoundID++;
+
+                        foreach (var player in match.PlayerKills)
+                        {
+                            if (player.Value >= 3)
+                            {
+                                await MatchEvents.SetHighlight(player.Key, player.Value);
+                                switch (player.Value)
+                                {
+                                    case 3:
+                                        {
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} TRIPPLE KILL!");
+                                            break;
+                                        }
+                                    case 4:
+                                        {
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} QUADRO KILL!");
+                                            break;
+                                        }
+                                    case 5:
+                                        {
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} RAMPAGE!!!");
+                                            break;
+                                        }
+                                }
+                            }
+                        }
+                        await MatchEvents.SetOpenFrag(match.OpenFragSteamID);
+                        await MatchEvents.UpdateMatchScore(match.AScore, match.BScore, server.ID, match.MatchId);
+                        if (!match.FirstHalf)
+                        {
+                            if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
+                            {
+                                string looser = string.Empty;
+                                if (result.WinningTeam == tName)
+                                {
+                                    looser = ctName;
+                                }
+                                else
+                                {
+                                    looser = tName;
+                                }
+
+                                await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                                await RconHelper.SendMessage(rcon, "Матч сыгран!");
+                                await RconHelper.SendMessage(rcon, $"Поздравляем команду {tags[result.WinningTeam]} с победой!");
+                                await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз вам повезет.");
+                                await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
+
+                                await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, result.WinningTeam, match);
+                                isCanBeginMatch = true;
+                                match.IsMatch = false;
+                            }
+                        }
+                    }
+                    if (knifeRound)
+                    {
+                        await RconHelper.SendCmd(rcon, "sm_knife_round 0");
+                        knifeRound = false;
                     }
                 });
 
@@ -285,7 +325,7 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"{currentMapSelector}, напишите номер карты для бана");
                     }   
                     
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1"))
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted)
                     {
                         isBestOfOneStarted = true;
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
@@ -333,16 +373,39 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"Напишите номер карты, чтобы забанить её: ");
                     }
 
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!ko3") && isCanBeginMatch)
+                    {
+                        if (match is null)
+                        {
+                            await RconHelper.SendCmd(rcon, "zb_ko3");
+                            await RconHelper.SendCmd(rcon, "sm_knife_round 1");
+                            knifeRound = true;
+                        }
+                        else
+                        {
+                            if (match.IsMatch)
+                            {
+                                await RconHelper.SendMessage(rcon, "Матч уже запущен");
+                            }
+                        }
+                    }
+
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch)
                     {
                         if (match is null)
                         {
                             await RconHelper.SendCmd(rcon, "zb_lo3");
                             SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                            demoName = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss") + "_" + info.Map;
+                            await RconHelper.SendCmd(rcon, "tv_record " + demoName);
                             match = new Match(15);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
                             MatchPlayers = new List<Player>();
-                            MatchPlayers = OnlinePlayers;
+                            MatchPlayers.AddRange(OnlinePlayers);
+                            foreach (var player in MatchPlayers)
+                            {
+                                await OnPlayerConnectAuth.AuthPlayer(player.SteamId, player.Name);
+                            }
                         }
                         else
                         {
@@ -366,7 +429,7 @@ namespace kTVCSS
                         {
                             await RconHelper.SendMessage(rcon, "RECOVERED LIVE");
                             MatchPlayers = new List<Player>();
-                            MatchPlayers = OnlinePlayers;
+                            MatchPlayers.AddRange(OnlinePlayers);
                             match = new Match(15);
                             match.MatchId = recoveredMatchID;
                             match = await MatchEvents.GetLiveMatchResults(server.ID, match);
@@ -376,6 +439,10 @@ namespace kTVCSS
                                 match.FirstHalf = false;
                             }
                             await RconHelper.SendMessage(rcon, $"Счет матча: {tName} [{match.AScore}-{match.BScore}] {ctName}");
+                            foreach (var player in MatchPlayers)
+                            {
+                                await OnPlayerConnectAuth.AuthPlayer(player.SteamId, player.Name);
+                            }
                         }
                         else
                         {
@@ -411,6 +478,7 @@ namespace kTVCSS
                         {
                             if (match.AScore == 0 && match.BScore == 0)
                             {
+                                await RconHelper.SendCmd(rcon, "tv_stoprecord");
                                 await MatchEvents.ResetMatch(match.MatchId);
                                 await RconHelper.SendMessage(rcon, "Матч сброшен!");
                                 match = null;
@@ -428,12 +496,15 @@ namespace kTVCSS
                                 winner = ctName;
                                 looser = tName;
                             }
-                            await RconHelper.SendMessage(rcon, "Матч сыгран!");
-                            await RconHelper.SendMessage(rcon, $"Поздравляем команду {winner} с победой!");
-                            await RconHelper.SendMessage(rcon, $"{looser}, в следующий раз вам повезет.");
-                            await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
                             SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                             var tags = MatchEvents.GetTeamNames(MatchPlayers);
+
+                            await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                            await RconHelper.SendMessage(rcon, "Матч сыгран!");
+                            await RconHelper.SendMessage(rcon, $"Поздравляем команду {tags[winner]} с победой!");
+                            await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз вам повезет.");
+                            await RconHelper.SendMessage(rcon, "Спасибо за игру, надеюсь, увидимся скоро!");
+                            
                             await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winner, match);
                             isCanBeginMatch = true;
                             match.IsMatch = false;
@@ -447,12 +518,9 @@ namespace kTVCSS
                     {
                         var result = await OnPlayerConnectAuth.AuthPlayer(connection.Player.SteamId, connection.Player.Name);
                         OnlinePlayers.Add(connection.Player);
-                        if (match is not null)
+                        if (match is not null && match.IsMatch)
                         {
-                            if (match.IsMatch)
-                            {
-                                MatchPlayers.Add(connection.Player);
-                            }
+                            if (!MatchPlayers.Where(x => x.SteamId == connection.Player.SteamId).Any()) MatchPlayers.Add(connection.Player);
                         }
                         Logger.Print($"{connection.Player.Name} ({connection.Player.SteamId}) has been connected to {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                     }
@@ -469,6 +537,24 @@ namespace kTVCSS
                 });
 
                 await Task.Delay(-1);
+            }
+
+            private async void PrintAlertMessages(RCON rcon)
+            {
+                await RconHelper.SendMessage(rcon, "Доступные команды: !ko3, !lo3, !bo1, !nl, !cm, !recover");
+            }
+
+            private void Alerter(object _server)
+            {
+                Thread.Sleep(30000);
+                while (true)
+                {
+                    if (match is not null && !match.IsMatch)
+                    {
+                        PrintAlertMessages(rcon);
+                    }
+                    Thread.Sleep(60000);
+                }
             }
         }
 

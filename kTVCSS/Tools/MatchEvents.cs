@@ -19,13 +19,9 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter serverParam = new SqlParameter
-                {
-                    ParameterName = "@SERVERID",
-                    Value = serverId
-                };
-                
-                query.Parameters.Add(serverParam);
+
+                query.Parameters.AddWithValue("@SERVERID", serverId);
+
                 var result = await query.ExecuteScalarAsync();
                 await connection.CloseAsync();
                 return int.Parse(result.ToString());
@@ -41,19 +37,10 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter serverParam = new SqlParameter
-                {
-                    ParameterName = "@SERVERID",
-                    Value = serverId
-                };
-                SqlParameter mapParam = new SqlParameter
-                {
-                    ParameterName = "@MAP",
-                    Value = mapName
-                };
 
-                query.Parameters.Add(serverParam);
-                query.Parameters.Add(mapParam);
+                query.Parameters.AddWithValue("@SERVERID", serverId);
+                query.Parameters.AddWithValue("@MAP", mapName);
+
                 var result = await query.ExecuteScalarAsync();
                 await connection.CloseAsync();
                 return int.Parse(result.ToString());
@@ -69,31 +56,12 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter serverParam = new SqlParameter
-                {
-                    ParameterName = "@SERVERID",
-                    Value = serverId
-                };
-                SqlParameter aParam = new SqlParameter
-                {
-                    ParameterName = "@ASCORE",
-                    Value = AScore
-                };
-                SqlParameter bParam = new SqlParameter
-                {
-                    ParameterName = "@BSCORE",
-                    Value = BScore
-                };
-                SqlParameter mParam = new SqlParameter
-                {
-                    ParameterName = "@ID",
-                    Value = matchId
-                };
 
-                query.Parameters.Add(serverParam);
-                query.Parameters.Add(aParam);
-                query.Parameters.Add(bParam);
-                query.Parameters.Add(mParam);
+                query.Parameters.AddWithValue("@SERVERID", serverId);
+                query.Parameters.AddWithValue("@ASCORE", AScore);
+                query.Parameters.AddWithValue("@BSCORE", BScore);
+                query.Parameters.AddWithValue("@ID", matchId);
+
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
@@ -127,43 +95,14 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter serverParam = new SqlParameter
-                {
-                    ParameterName = "@SERVERID",
-                    Value = serverId
-                };
-                SqlParameter aParam = new SqlParameter
-                {
-                    ParameterName = "@ASCORE",
-                    Value = AScore
-                };
-                SqlParameter bParam = new SqlParameter
-                {
-                    ParameterName = "@BSCORE",
-                    Value = BScore
-                };
-                SqlParameter asParam = new SqlParameter
-                {
-                    ParameterName = "@ANAME",
-                    Value = AName
-                };
-                SqlParameter bsParam = new SqlParameter
-                {
-                    ParameterName = "@BNAME",
-                    Value = BName
-                };
-                SqlParameter mapParam = new SqlParameter
-                {
-                    ParameterName = "@MAP",
-                    Value = Map
-                };
 
-                query.Parameters.Add(serverParam);
-                query.Parameters.Add(aParam);
-                query.Parameters.Add(bParam);
-                query.Parameters.Add(asParam);
-                query.Parameters.Add(bsParam);
-                query.Parameters.Add(mapParam);
+                query.Parameters.AddWithValue("@SERVERID", serverId);
+                query.Parameters.AddWithValue("@ASCORE", AScore);
+                query.Parameters.AddWithValue("@BSCORE", BScore);
+                query.Parameters.AddWithValue("@ANAME", AName);
+                query.Parameters.AddWithValue("@BNAME", BName);
+                query.Parameters.AddWithValue("@MAP", Map);
+
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
 
@@ -212,7 +151,7 @@ namespace kTVCSS.Tools
             {
                 if (terTags.Count(x => x == possibleTag) >= 3)
                 {
-                    tags["T"] = possibleTag;
+                    tags["TERRORIST"] = possibleTag;
                     break;
                 }
             }
@@ -243,9 +182,27 @@ namespace kTVCSS.Tools
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
             {
                 await connection.OpenAsync();
-                SqlCommand query = new SqlCommand($"INSERT INTO [kTVCSS].[dbo].[MatchesResults] (ID, TEAMNAME, NAME, STEAMID, KILLS, DEATHS, HEADSHOTS, SERVERID)" +
-                    $" VALUES ({matchId}, '{teamName}', '{playerName}', '{steamId}', {kills}, {deaths}, {headshots}, {serverId})", connection);
-                await query.ExecuteNonQueryAsync();
+                try
+                {
+                    SqlCommand query = new SqlCommand("[dbo].[InsertMatchResult]", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    query.Parameters.AddWithValue("@MATCHID", matchId);
+                    query.Parameters.AddWithValue("@TEAMNAME", teamName);
+                    query.Parameters.AddWithValue("@PLAYERNAME", playerName);
+                    query.Parameters.AddWithValue("@STEAMID", steamId);
+                    query.Parameters.AddWithValue("@KILLS", kills);
+                    query.Parameters.AddWithValue("@DEATHS", deaths);
+                    query.Parameters.AddWithValue("@HEADSHOTS", headshots);
+                    query.Parameters.AddWithValue("@SERVERID", serverId);
+                    await query.ExecuteNonQueryAsync();
+                    await connection.CloseAsync();
+                }
+                catch (Exception ex)
+                {
+                    Program.Logger.Print(ex.Message, LogLevel.Error);
+                }
                 await connection.CloseAsync();
             }
         }
@@ -259,20 +216,8 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter killParam = new SqlParameter
-                {
-                    ParameterName = "@KILLS",
-                    Value = killsCount
-                };
-                SqlParameter steamParam = new SqlParameter
-                {
-                    ParameterName = "@STEAMID",
-                    Value = steamId
-                };
-                
-
-                query.Parameters.Add(killParam);
-                query.Parameters.Add(steamParam);
+                query.Parameters.AddWithValue("@KILLS", killsCount);
+                query.Parameters.AddWithValue("@STEAMID", steamId);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
@@ -287,18 +232,8 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter idParam = new SqlParameter
-                {
-                    ParameterName = "@STEAMID",
-                    Value = steamId
-                };
-                SqlParameter wParam = new SqlParameter
-                {
-                    ParameterName = "@WEAPON",
-                    Value = weaponName
-                };
-                query.Parameters.Add(idParam);
-                query.Parameters.Add(wParam);
+                query.Parameters.AddWithValue("@STEAMID", steamId);
+                query.Parameters.AddWithValue("@WEAPON", weaponName);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
@@ -313,12 +248,7 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter idParam = new SqlParameter
-                {
-                    ParameterName = "@MATCHID",
-                    Value = matchId
-                };
-                query.Parameters.Add(idParam);
+                query.Parameters.AddWithValue("@MATCHID", matchId);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
@@ -333,14 +263,7 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter steamParam = new SqlParameter
-                {
-                    ParameterName = "@STEAMID",
-                    Value = steamId
-                };
-
-
-                query.Parameters.Add(steamParam);
+                query.Parameters.AddWithValue("@STEAMID", steamId);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
@@ -355,18 +278,8 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter steamParam = new SqlParameter
-                {
-                    ParameterName = "@STEAMID",
-                    Value = steamId
-                };
-                SqlParameter winParam = new SqlParameter
-                {
-                    ParameterName = "@WIN",
-                    Value = win
-                };
-                query.Parameters.Add(steamParam);
-                query.Parameters.Add(winParam);
+                query.Parameters.AddWithValue("@STEAMID", steamId);
+                query.Parameters.AddWithValue("@WIN", win);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }

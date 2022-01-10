@@ -18,52 +18,14 @@ namespace kTVCSS.Tools
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
-                SqlParameter nameParam = new SqlParameter
-                {
-                    ParameterName = "@KILLERNAME",
-                    Value = killerName
-                };
-                SqlParameter namedParam = new SqlParameter
-                {
-                    ParameterName = "@KILLEDNAME",
-                    Value = killedName
-                };
-                SqlParameter killerSteamParam = new SqlParameter
-                {
-                    ParameterName = "@KILLERSTEAM",
-                    Value = killerSteamID
-                };
-                SqlParameter killedSteamParam = new SqlParameter
-                {
-                    ParameterName = "@KILLEDSTEAM",
-                    Value = killedSteamID
-                };
-               
-                SqlParameter killedHeadshotParam = new SqlParameter
-                {
-                    ParameterName = "@KILLERHS",
-                    Value = killerHeadshot
-                };
+                query.Parameters.AddWithValue("@KILLERNAME", killerName);
+                query.Parameters.AddWithValue("@KILLEDNAME", killedName);
+                query.Parameters.AddWithValue("@KILLERSTEAM", killerSteamID);
+                query.Parameters.AddWithValue("@KILLEDSTEAM", killedSteamID);
+                query.Parameters.AddWithValue("@KILLERHS", killerHeadshot);
+                query.Parameters.AddWithValue("@SERVERID", serverId);
+                query.Parameters.AddWithValue("@ID", matchId);
 
-                SqlParameter serverParam = new SqlParameter
-                {
-                    ParameterName = "@SERVERID",
-                    Value = serverId
-                };
-
-                SqlParameter matchParam = new SqlParameter
-                {
-                    ParameterName = "@ID",
-                    Value = matchId
-                };
-
-                query.Parameters.Add(nameParam);
-                query.Parameters.Add(namedParam);
-                query.Parameters.Add(killerSteamParam);
-                query.Parameters.Add(killedSteamParam);
-                query.Parameters.Add(killedHeadshotParam);
-                query.Parameters.Add(serverParam);
-                query.Parameters.Add(matchParam);
                 await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
