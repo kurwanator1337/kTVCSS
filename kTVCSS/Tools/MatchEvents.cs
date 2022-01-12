@@ -207,6 +207,32 @@ namespace kTVCSS.Tools
             }
         }
 
+        public async static Task InsertMatchLog(int matchId, string message, string mapName, int serverId)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                try
+                {
+                    SqlCommand query = new SqlCommand("[dbo].[InsertMatchLogRecord]", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    query.Parameters.AddWithValue("@MATCHID", matchId);
+                    query.Parameters.AddWithValue("@MESSAGE", message);
+                    query.Parameters.AddWithValue("@MAP", mapName);
+                    query.Parameters.AddWithValue("@SERVERID", serverId);
+                    await query.ExecuteNonQueryAsync();
+                    await connection.CloseAsync();
+                }
+                catch (Exception ex)
+                {
+                    Program.Logger.Print(ex.Message, LogLevel.Error);
+                }
+                await connection.CloseAsync();
+            }
+        }
+
         public async static Task SetHighlight(string steamId, int killsCount)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))

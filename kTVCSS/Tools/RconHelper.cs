@@ -11,12 +11,40 @@ namespace kTVCSS.Tools
     {
         public static async Task SendMessage(RCON rcon, string message)
         {
-            await rcon.SendCommandAsync("say " + message);
+            try
+            {
+                await rcon.SendCommandAsync("say " + message);
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(ex.Message, LogLevel.Error);
+                await RconReconnect(rcon);
+            }
         }
 
         public static async Task SendCmd(RCON rcon, string cmd)
         {
-            await rcon.SendCommandAsync(cmd);
+            try
+            {
+                await rcon.SendCommandAsync(cmd);
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(ex.Message, LogLevel.Error);
+                await RconReconnect(rcon);
+            }
+        }
+
+        public static async Task RconReconnect(RCON rcon)
+        {
+            try
+            {
+                await rcon.ConnectAsync();
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(ex.Message, LogLevel.Error);
+            }
         }
     }
 }
