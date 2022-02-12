@@ -19,12 +19,12 @@ namespace kTVCSS
             }
         }
 
-        public void Print(string message, LogLevel logLevel)
+        public void Print(int serverID, string message, LogLevel logLevel)
         {
-            Console.WriteLine($"{DateTime.Now} [{logLevel}] - {message}");
+            Console.WriteLine($"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}");
             using (streamWriter = new StreamWriter("kTVCSS.log", true, Encoding.UTF8))
             {
-                streamWriter.WriteLine($"{DateTime.Now} [{logLevel}] - {message}");
+                streamWriter.WriteLine($"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}");
             }
         }
     }

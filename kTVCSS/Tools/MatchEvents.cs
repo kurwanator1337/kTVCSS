@@ -1,4 +1,5 @@
 ﻿using CoreRCON.Parsers.Standard;
+using kTVCSS.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -201,7 +202,7 @@ namespace kTVCSS.Tools
                 }
                 catch (Exception ex)
                 {
-                    Program.Logger.Print(ex.Message, LogLevel.Error);
+                    Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
                 }
                 await connection.CloseAsync();
             }
@@ -227,7 +228,7 @@ namespace kTVCSS.Tools
                 }
                 catch (Exception ex)
                 {
-                    Program.Logger.Print(ex.Message, LogLevel.Error);
+                    Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
                 }
                 await connection.CloseAsync();
             }

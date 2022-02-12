@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace kTVCSS.Settings
+namespace kTVCSS.Models
 {
     public class Config
     {

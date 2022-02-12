@@ -17,7 +17,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, ex.Message, LogLevel.Error);
                 await RconReconnect(rcon);
             }
         }
@@ -30,7 +30,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, ex.Message, LogLevel.Error);
                 await RconReconnect(rcon);
             }
         }
@@ -43,7 +43,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, ex.Message, LogLevel.Error);
             }
         }
     }
