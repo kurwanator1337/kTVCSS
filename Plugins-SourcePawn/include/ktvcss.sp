@@ -1,6 +1,6 @@
 #define PLUGIN_NAME           "kTVCSS adds"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.0"
+#define PLUGIN_VERSION        "1.1"
 
 #include <sourcemod>
 #include <sdktools>
