@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Reference Include="CoreRCON">
-      <HintPath>bin\Release\net5.0\Release\net5.0\CoreRCON.dll</HintPath>
+      <HintPath>..\..\..\Users\kurwanator\source\repos\kTVCSS\kTVCSS\bin\Debug\net5.0\net5.0\CoreRCON.dll</HintPath>
     </Reference>
   </ItemGroup>
 

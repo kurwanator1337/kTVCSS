@@ -10,16 +10,32 @@ namespace kTVCSS.Models
     {
         public Match(int mr)
         {
-            MaxRounds = mr;
-            IsMatch = true;
-            FirstHalf = true;
-            AScore = 0;
-            BScore = 0;
-            RoundID = 0;
-            OpenFragSteamID = string.Empty;
-            IsOvertime = false;
-            AScoreOvertime = 0;
-            BScoreOvertime = 0;
+            if (mr == 0)
+            {
+                MaxRounds = mr;
+                IsMatch = false;
+                FirstHalf = true;
+                AScore = 0;
+                BScore = 0;
+                RoundID = 0;
+                OpenFragSteamID = string.Empty;
+                IsOvertime = false;
+                AScoreOvertime = 0;
+                BScoreOvertime = 0;
+            }
+            else
+            {
+                MaxRounds = mr;
+                IsMatch = true;
+                FirstHalf = true;
+                AScore = 0;
+                BScore = 0;
+                RoundID = 0;
+                OpenFragSteamID = string.Empty;
+                IsOvertime = false;
+                AScoreOvertime = 0;
+                BScoreOvertime = 0;
+            }
         }
 
         public int MaxRounds { get; set; }
