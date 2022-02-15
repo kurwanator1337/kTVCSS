@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Data.SqlClient;
 using System.IO;
+using System.Diagnostics;
 
 namespace kTVCSS
 {
@@ -49,8 +50,8 @@ namespace kTVCSS
             private List<string> mapQueue = new List<string>();
             private string currentMapName = string.Empty;
             public int serverID = 0;
-            //private bool g_restart = false; // warmod replacement
-            public const int MinPlayersToStart = 1;
+            public const int MinPlayersToStart = 8;
+            public const int MinPlayersToStop = 6;
 
             public async Task StartNode(Server server)
             {
@@ -137,29 +138,6 @@ namespace kTVCSS
                         match.PlayerKills.Clear();
                         match.OpenFragSteamID = string.Empty;
 
-                        //if (match.FirstHalf && g_restart)
-                        //{
-                        //    await RconHelper.SendCmd(rcon, "sm_save_reset_score");
-                        //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                        //    g_restart = false;
-                        //}
-                        //else if (!match.FirstHalf && !knifeRound && g_restart)
-                        //{
-                        //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                        //    g_restart = false;
-                        //}
-                        //else if (knifeRound && g_restart)
-                        //{
-                        //    await RconHelper.SendCmd(rcon, "sm_save_reset_score");
-                        //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                        //    g_restart = false;
-                        //}
-                        //else if (g_restart)
-                        //{
-                        //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                        //    g_restart = false;
-                        //}
-
                         if (isResetFreezeTime)
                         {
                             await RconHelper.SendCmd(rcon, "zb_lo3");
@@ -176,24 +154,7 @@ namespace kTVCSS
 
                 log.Listen<RestartRound>(result =>
                 {
-                    //if (match.FirstHalf)
-                    //{
-                    //    await RconHelper.SendCmd(rcon, "sm_save_reset_score");
-                    //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                    //}
-                    //else if (!match.FirstHalf && !knifeRound)
-                    //{
-                    //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                    //}
-                    //else if (knifeRound)
-                    //{
-                    //    await RconHelper.SendCmd(rcon, "sm_save_reset_score");
-                    //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                    //}
-                    //else
-                    //{
-                    //    await RconHelper.SendCmd(rcon, "sm_save_reset_cash");
-                    //}
+                    
                 });
 
                 log.Listen<RoundEndScore>(async result =>
@@ -217,6 +178,39 @@ namespace kTVCSS
                         var tags = MatchEvents.GetTeamNames(MatchPlayers);
 
                         await MatchEvents.InsertMatchLog(match.MatchId, $"<Round End> {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}", info.Map, server.ID);
+
+                        match.RoundID++;
+
+                        foreach (var player in match.PlayerKills)
+                        {
+                            if (player.Value >= 3)
+                            {
+                                await MatchEvents.SetHighlight(player.Key, player.Value);
+                                switch (player.Value)
+                                {
+                                    case 3:
+                                        {
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!");
+                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", info.Map, server.ID);
+                                            break;
+                                        }
+                                    case 4:
+                                        {
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!");
+                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", info.Map, server.ID);
+                                            break;
+                                        }
+                                    case 5:
+                                        {
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!");
+                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID);
+                                            break;
+                                        }
+                                }
+                            }
+                        }
+                        await MatchEvents.SetOpenFrag(match.OpenFragSteamID);
+                        await MatchEvents.UpdateMatchScore(match.AScore, match.BScore, server.ID, match.MatchId);
 
                         await RconHelper.SendMessage(rcon, $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
                         if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
@@ -271,52 +265,42 @@ namespace kTVCSS
                             {
                                 if (match.AScore + match.BScore == match.MaxRounds * 2 || match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds * 2)
                                 {
-                                    match.AScoreOvertime = 0;
-                                    match.BScoreOvertime = 0;
-                                    match.IsOvertime = true;
-                                    await RconHelper.SendMessage(rcon, "Overtime!!!");
-                                    await RconHelper.SendCmd(rcon, "mp_freezetime 60");
-                                    Thread.Sleep(2000);
-                                    await RconHelper.SendMessage(rcon, "One minute timeout!");
-                                    isResetFreezeTime = true;
-                                    match.MaxRounds = 3;
+                                    if (!match.FirstHalf && !match.IsOvertime)
+                                    {
+                                        if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
+                                        {
+                                            await OnEndMatch(tags, result.WinningTeam, info, server);
+
+                                            if (mapQueue.Count > 0 && isBestOfThree)
+                                            {
+                                                await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 1 minute!");
+                                                Thread.Sleep(60000);
+                                                await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
+                                                mapQueue.Remove(mapQueue.FirstOrDefault());
+                                            }
+                                            else if (mapQueue.Count == 0)
+                                            {
+                                                isBestOfThree = false;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        match.AScoreOvertime = 0;
+                                        match.BScoreOvertime = 0;
+                                        match.IsOvertime = true;
+                                        await RconHelper.SendMessage(rcon, "Overtime!!!");
+                                        await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                        Thread.Sleep(2000);
+                                        await RconHelper.SendMessage(rcon, "One minute timeout!");
+                                        isResetFreezeTime = true;
+                                        match.MaxRounds = 3;
+                                    }    
                                 }
                             }
                         }
 
-                        match.RoundID++;
-
-                        foreach (var player in match.PlayerKills)
-                        {
-                            if (player.Value >= 3)
-                            {
-                                await MatchEvents.SetHighlight(player.Key, player.Value);
-                                switch (player.Value)
-                                {
-                                    case 3:
-                                        {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!");
-                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", info.Map, server.ID);
-                                            break;
-                                        }
-                                    case 4:
-                                        {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!");
-                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", info.Map, server.ID);
-                                            break;
-                                        }
-                                    case 5:
-                                        {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!");
-                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID);
-                                            break;
-                                        }
-                                }
-                            }
-                        }
-                        await MatchEvents.SetOpenFrag(match.OpenFragSteamID);
-                        await MatchEvents.UpdateMatchScore(match.AScore, match.BScore, server.ID, match.MatchId);
-                        if (!match.FirstHalf)
+                        if (!match.FirstHalf && !match.IsOvertime && match.IsMatch)
                         {
                             if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
                             {
@@ -429,7 +413,8 @@ namespace kTVCSS
 
                         if (isBestOfOneStarted)
                         {
-                            await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to ban");
+                            if (mapPool.Count() != 1)
+                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to ban");
                         }
 
                         if (isBestOfThree)
@@ -473,11 +458,11 @@ namespace kTVCSS
                             mapList += $"{map.Key} - {map.Value.Trim()}\\n";
                         }
 
-                        await RconHelper.SendCmd(rcon, "sm_msay " + mapList);
-
                         var tempPlayers = result.Split('\n');
                         if (tempPlayers.Count() < 3) return;
                         isBestOfThree = true;
+
+                        await RconHelper.SendCmd(rcon, "sm_msay " + mapList);
 
                         terPlayerSelector = tempPlayers.First(x => x.Contains("\t2")).Split('\t')[0];
                         ctPlayerSelector = tempPlayers.First(x => x.Contains("\t3")).Split('\t')[0];
@@ -525,11 +510,11 @@ namespace kTVCSS
                             mapList += $"{map.Key} - {map.Value.Trim()}\\n";
                         }
 
-                        await RconHelper.SendCmd(rcon, "sm_msay " + mapList);
-
                         var tempPlayers = result.Split('\n');
                         if (tempPlayers.Count() < 3) return;
                         isBestOfOneStarted = true;
+
+                        await RconHelper.SendCmd(rcon, "sm_msay " + mapList);
 
                         terPlayerSelector = tempPlayers.First(x => x.Contains("\t2")).Split('\t')[0];
                         ctPlayerSelector = tempPlayers.First(x => x.Contains("\t3")).Split('\t')[0];
@@ -544,6 +529,12 @@ namespace kTVCSS
                         {
                             currentMapSelector = ctPlayerSelector;
                         }
+
+                        Thread boThread = new Thread(CheckIsDeadMapVote)
+                        {
+                            IsBackground = true
+                        };
+                        boThread.Start();
 
                         await RconHelper.SendMessage(rcon, $"The first one - {currentMapSelector}");
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
@@ -726,12 +717,12 @@ namespace kTVCSS
                 log.Listen<ChangeSides>(async result =>
                 {
                     await RconHelper.SendCmd(rcon, "sm_swap @all");
-                    await RconHelper.SendMessage(rcon, "Type !lo3 for start a match!");
+                    await RconHelper.SendMessage(rcon, "Type !lo3 to start a match!");
                 });
 
                 log.Listen<NoChangeSides>(async result =>
                 {
-                    await RconHelper.SendMessage(rcon, "Type !lo3 for start a match!");
+                    await RconHelper.SendMessage(rcon, "Type !lo3 to start a match!");
                 });
 
                 log.Listen<NameChange>(async result =>
@@ -829,6 +820,7 @@ namespace kTVCSS
                 }
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
+                await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
                 await RconHelper.SendMessage(rcon, "The match is over!");
                 await RconHelper.SendMessage(rcon, $"Congratulations to the team {tags[winningTeam]}!");
@@ -854,6 +846,7 @@ namespace kTVCSS
                 }
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
+                await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
                 await RconHelper.SendMessage(rcon, "The match is over!");
                 await RconHelper.SendMessage(rcon, $"Congratulations to the team {tags[winningTeam]}!");
@@ -876,6 +869,16 @@ namespace kTVCSS
                 await RconHelper.SendCmd(rcon, $"say Type !gethelp for getting all cmds available for you");
             }
 
+            private async void CheckIsDeadMapVote()
+            {
+                Thread.Sleep(120 * 1000);
+                if (isBestOfOneStarted)
+                {
+                    isBestOfOneStarted = !isBestOfOneStarted;
+                    await RconHelper.SendMessage(rcon, "The vote for map ban/pick is reset");
+                }
+            }
+
             private async void Alerter(object _server)
             {
                 Server server = (Server)_server;
@@ -888,7 +891,7 @@ namespace kTVCSS
                     }
                     else
                     {
-                        if (OnlinePlayers.Count < 5)
+                        if (OnlinePlayers.Count < MinPlayersToStop)
                         {
                             if (match.AScore == 0 && match.BScore == 0)
                             {
@@ -937,19 +940,42 @@ namespace kTVCSS
 
         static void Main(string[] args)
         {
-            Console.Title = "kTVCSS PLAYER STATISTICS PROCESSOR MATCH CONTROLLER AND MORE";
+            Console.Title = "kTVCSS NODE LAUNCHER";
             Console.ForegroundColor = ConsoleColor.Green;
-
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
-            ForbiddenWords.AddRange(File.ReadAllLines("wordsfilter.txt", System.Text.Encoding.UTF8));
-            Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
-            Logger.Print(0, "Attempt to load servers from database", LogLevel.Info);
-            Loader.LoadServers();
-            Logger.Print(0, "Loaded " + Servers.Count + " servers", LogLevel.Info);
-            foreach (var server in Servers)
+
+            #if DEBUG
+
+            args = new string[1];
+            args[0] = "0";
+
+            #endif
+
+            if (args.Length != 0)
             {
+                Loader.LoadServers();
+
+                ForbiddenWords.AddRange(File.ReadAllLines("wordsfilter.txt", System.Text.Encoding.UTF8));
+                Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
+
+                Console.Title = "kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].Port;
+
                 Node node = new Node();
-                Task.Run(async () => await node.StartNode(server)).GetAwaiter().GetResult();
+                Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
+            }
+            else
+            {
+                Logger.Print(0, "Attempt to load servers from database", LogLevel.Info);
+                Loader.LoadServers();
+                Logger.Print(0, "Loaded " + Servers.Count + " servers", LogLevel.Info);
+                foreach (var server in Servers)
+                {
+                    Process node = new Process();
+                    node.StartInfo.UseShellExecute = true;
+                    node.StartInfo.FileName = "kTVCSS.exe";
+                    node.StartInfo.Arguments = (server.ID - 1).ToString();
+                    node.Start();
+                }
             }
         }
     }
