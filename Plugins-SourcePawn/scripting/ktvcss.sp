@@ -1,6 +1,6 @@
 #define PLUGIN_NAME           "kTVCSS adds"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.1"
+#define PLUGIN_VERSION        "1.2"
 
 #include <sourcemod>
 #include <sdktools>
@@ -22,6 +22,7 @@ public Plugin:myinfo =
 int voteCount = 0;
 new g_votetype = 0;
 ConVar:isMatch = null;
+Handle:Pause_Max = null;
 
 // Starts on plugin start
 public void OnPluginStart()
@@ -40,6 +41,11 @@ public void OnPluginStart()
 	isMatch = CreateConVar("isMatch", "0");
 	//Голосование за сторону
 	RegAdminCmd("ChangeVote", ChangeVote, ADMFLAG_ROOT);
+	//Пауза в 300 сек
+	Pause_Max = FindConVar("mp_freezetime");
+	SetConVarBounds(Pause_Max, ConVarBound_Upper, true, 300.0);
+	//Создание новых команд
+	RegAdminCmd("sys_say", SYS_Say, ADMFLAG_ROOT);
 }
 
 // Создаем меню cm
@@ -50,9 +56,9 @@ public Action:CancelMatch(client, args)
         return
     }
     Menu menu = new Menu(Handle_VoteMenu);
-    menu.SetTitle("Cancel match?");
-    menu.AddItem("Да", "Yes");
-    menu.AddItem("Нет", "No");
+    menu.SetTitle("Отменить матч?");
+    menu.AddItem("Да", "Да");
+    menu.AddItem("Нет", "Нет");
     menu.ExitButton = false;
     menu.DisplayVoteToAll(20);
     g_votetype = 1;
@@ -66,9 +72,9 @@ public Action:NotLive(client, args)
         return
     }
     Menu menu = new Menu(Handle_VoteMenu);
-    menu.SetTitle("Cancel half?");
-    menu.AddItem("Да", "Yes");
-    menu.AddItem("Нет", "No");
+    menu.SetTitle("Отменить половину?");
+    menu.AddItem("Да", "Да");
+    menu.AddItem("Нет", "Нет");
     menu.ExitButton = false;
     menu.DisplayVoteToAll(20);
     g_votetype = 2;
@@ -111,7 +117,7 @@ public int Handle_VoteMenu(Menu menu, MenuAction action, int param1, int param2)
 		}
 		else
 		{
-        	CPrintToChatAll("{fullred}The vote failed");
+        	CPrintToChatAll("{fullred}Голосование провалилось");
         	//PrintToChatAll("%i", voteCount);
         	voteCount = 0;
         }
@@ -178,7 +184,7 @@ public Action:ChooseTeam(client, args)
 	
 	if (GetConVarBool(isMatch) && GetClientTeam(client) > 1)
 	{
-		CPrintToChat(client, "{fullred}Side switching blocked!");
+		CPrintToChat(client, "{fullred}Смена сторон заблокирована!");
 		return Plugin_Stop;
 	}
 	return Plugin_Continue;
@@ -194,9 +200,9 @@ public Action:ChangeVote(int client, int args)
     	return;
    	}
 	Menu change = new Menu(Handle_ChangeVote);
-	change.SetTitle("Change sides?");
-	change.AddItem("Да", "Yes");
-	change.AddItem("Нет", "No");
+	change.SetTitle("Сменить сторону?");
+	change.AddItem("Да", "Да");
+	change.AddItem("Нет", "Нет");
 	change.ExitButton = false;
 	char tempbuff[2];
 	GetCmdArg(1, tempbuff, sizeof(tempbuff))
@@ -233,4 +239,27 @@ public int Handle_ChangeVote(Menu change, MenuAction action, int param1, int par
 		}
 	}
 	CloseHandle(change);
+}
+
+//sys_say {green} Текст		 https://www.doctormckay.com/morecolors.php
+public Action SYS_Say(int client, int args)
+{
+    if (client == 0)
+    {
+        char l_buffer[1024];
+        GetCmdArgString(l_buffer, sizeof(l_buffer));
+        ReplaceString(l_buffer, sizeof(l_buffer), "{ ", "{", true);
+        ReplaceString(l_buffer, sizeof(l_buffer), " }", "}", true);
+        char l_MSG[1024];
+    	Format(l_MSG, sizeof(l_MSG), "{fullred}[kTVCSS] %s", l_buffer);
+    	//CFormatColor(l_MSG, sizeof(l_MSG), 0);
+    	
+    	CPrintToChatAll("%s", l_MSG);
+    }
+    else if (IsClientInGame(client) && !IsFakeClient(client))
+    {
+        PrintToConsole(client, "[kTVCSS] Эту команду может использовать только сервер!");
+    }
+    
+    return Plugin_Handled;
 }
