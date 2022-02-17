@@ -56,9 +56,9 @@ public Action:CancelMatch(client, args)
         return
     }
     Menu menu = new Menu(Handle_VoteMenu);
-    menu.SetTitle("Отменить матч?");
-    menu.AddItem("Да", "Да");
-    menu.AddItem("Нет", "Нет");
+    menu.SetTitle("Cancel match?");
+    menu.AddItem("Да", "Yes");
+    menu.AddItem("Нет", "No");
     menu.ExitButton = false;
     menu.DisplayVoteToAll(20);
     g_votetype = 1;
@@ -72,9 +72,9 @@ public Action:NotLive(client, args)
         return
     }
     Menu menu = new Menu(Handle_VoteMenu);
-    menu.SetTitle("Отменить половину?");
-    menu.AddItem("Да", "Да");
-    menu.AddItem("Нет", "Нет");
+    menu.SetTitle("Cancel half?");
+    menu.AddItem("Да", "Yes");
+    menu.AddItem("Нет", "No");
     menu.ExitButton = false;
     menu.DisplayVoteToAll(20);
     g_votetype = 2;
@@ -117,7 +117,7 @@ public int Handle_VoteMenu(Menu menu, MenuAction action, int param1, int param2)
 		}
 		else
 		{
-        	CPrintToChatAll("{fullred}Голосование провалилось");
+        	CPrintToChatAll("{fullred}The vote failed");
         	//PrintToChatAll("%i", voteCount);
         	voteCount = 0;
         }
@@ -184,7 +184,7 @@ public Action:ChooseTeam(client, args)
 	
 	if (GetConVarBool(isMatch) && GetClientTeam(client) > 1)
 	{
-		CPrintToChat(client, "{fullred}Смена сторон заблокирована!");
+		CPrintToChat(client, "{fullred}Side switching blocked!");
 		return Plugin_Stop;
 	}
 	return Plugin_Continue;
@@ -200,9 +200,9 @@ public Action:ChangeVote(int client, int args)
     	return;
    	}
 	Menu change = new Menu(Handle_ChangeVote);
-	change.SetTitle("Сменить сторону?");
-	change.AddItem("Да", "Да");
-	change.AddItem("Нет", "Нет");
+	change.SetTitle("Change sides?");
+	change.AddItem("Да", "Yes");
+	change.AddItem("Нет", "No");
 	change.ExitButton = false;
 	char tempbuff[2];
 	GetCmdArg(1, tempbuff, sizeof(tempbuff))
@@ -258,7 +258,7 @@ public Action SYS_Say(int client, int args)
     }
     else if (IsClientInGame(client) && !IsFakeClient(client))
     {
-        PrintToConsole(client, "[kTVCSS] Эту команду может использовать только сервер!");
+        PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
     }
     
     return Plugin_Handled;
