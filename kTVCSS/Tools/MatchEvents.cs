@@ -121,9 +121,11 @@ namespace kTVCSS.Tools
 
         public static Dictionary<string, string> GetTeamNames(List<Player> players)
         {
-            Dictionary<string, string> tags = new Dictionary<string, string>();
-            tags.Add("TERRORIST", "Team Alpha");
-            tags.Add("CT", "Team Bravo");
+            Dictionary<string, string> tags = new Dictionary<string, string>
+            {
+                { "TERRORIST", "Team Alpha" },
+                { "CT", "Team Bravo" }
+            };
             List<string> ctTags = new List<string>();
             List<string> terTags = new List<string>();
 
@@ -141,7 +143,7 @@ namespace kTVCSS.Tools
 
             foreach (var possibleTag in ctTags)
             {
-                if (ctTags.Count(x => x == possibleTag) >= 3)
+                if (ctTags.Count(x => x == possibleTag) >= 2)
                 {
                     tags["CT"] = possibleTag;
                     break;
@@ -150,7 +152,7 @@ namespace kTVCSS.Tools
 
             foreach (var possibleTag in terTags)
             {
-                if (terTags.Count(x => x == possibleTag) >= 3)
+                if (terTags.Count(x => x == possibleTag) >= 2)
                 {
                     tags["TERRORIST"] = possibleTag;
                     break;

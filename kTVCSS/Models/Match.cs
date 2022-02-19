@@ -22,6 +22,9 @@ namespace kTVCSS.Models
                 IsOvertime = false;
                 AScoreOvertime = 0;
                 BScoreOvertime = 0;
+                TacticalPauses = 0;
+                TechnicalPauses = 0;
+                Pause = false;
             }
             else
             {
@@ -35,6 +38,9 @@ namespace kTVCSS.Models
                 IsOvertime = false;
                 AScoreOvertime = 0;
                 BScoreOvertime = 0;
+                TacticalPauses = 4;
+                TechnicalPauses = 2;
+                Pause = false;
             }
         }
 
@@ -50,5 +56,8 @@ namespace kTVCSS.Models
         public int AScoreOvertime { get; set; }
         public int BScoreOvertime { get; set; }
         public Dictionary<string, int> PlayerKills = new Dictionary<string, int>();
+        public int TechnicalPauses { get; set; }
+        public int TacticalPauses { get; set; }
+        public bool Pause { get; set; }
     }
 }
