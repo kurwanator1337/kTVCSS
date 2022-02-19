@@ -873,6 +873,7 @@ namespace kTVCSS
                     using (MySqlConnection connection = new MySqlConnection(ConfigTools.Config.SourceBansConnectionString))
                     {
                         connection.Open();
+                        // чекнуть запрос на корректность
                         string cmd = $"INSERT INTO `sourcebans`.`sb_bans` (`authid`, `created`, `ends`, `length`, `reason`, `sid`, `type`) VALUES ('{steamid}', UNIX_TIMESTAMP(SYSDATE()), UNIX_TIMESTAMP(SYSDATE()) + 43200, 43200, 'Left during a live match', '9', '2')";
                         var query = new MySqlCommand(cmd, connection);
                         query.ExecuteNonQuery();
