@@ -51,8 +51,8 @@ namespace kTVCSS
             private List<string> mapQueue = new List<string>();
             private string currentMapName = string.Empty;
             public int serverID = 0;
-            public const int MinPlayersToStart = 0; // 8
-            public const int MinPlayersToStop = 0; // 6
+            public const int MinPlayersToStart = 8; // 8
+            public const int MinPlayersToStop = 6; // 6
 
             public async Task StartNode(Server server)
             {
@@ -850,16 +850,19 @@ namespace kTVCSS
                 {
                     if (connection.Player.SteamId != "STEAM_ID_PENDING" && connection.Player.SteamId != "BOT")
                     {
-                        OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
-                        Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                         if (match.IsMatch)
                         {
                             Thread banThread = new Thread(BanOnLeftTheMatch)
                             {
                                 IsBackground = true
                             };
-                            banThread.Start(connection.Player.SteamId);
+                            banThread.Start(connection.Player);
                         }
+                        else
+                        {
+                            OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
+                        }
+                        Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                     }
                 });
 
@@ -873,8 +876,7 @@ namespace kTVCSS
                     using (MySqlConnection connection = new MySqlConnection(ConfigTools.Config.SourceBansConnectionString))
                     {
                         connection.Open();
-                        // чекнуть запрос на корректность
-                        string cmd = $"INSERT INTO `sourcebans`.`sb_bans` (`authid`, `created`, `ends`, `length`, `reason`, `sid`, `type`) VALUES ('{steamid}', UNIX_TIMESTAMP(SYSDATE()), UNIX_TIMESTAMP(SYSDATE()) + 43200, 43200, 'Left during a live match', '9', '2')";
+                        string cmd = $"INSERT INTO `sourcebans`.`sb_bans` (`authid`, `created`, `ends`, `length` ,`reason`) VALUES ('{steamid}', UNIX_TIMESTAMP(SYSDATE()), UNIX_TIMESTAMP(SYSDATE()) + 43200, 43200, 'Left the match');";
                         var query = new MySqlCommand(cmd, connection);
                         query.ExecuteNonQuery();
                     }
@@ -885,15 +887,18 @@ namespace kTVCSS
                 }
             }
 
-            private async void BanOnLeftTheMatch(object steamID)
+            private async void BanOnLeftTheMatch(object _player)
             {
-                Thread.Sleep(1 * 60 * 1000);
-                if (OnlinePlayers.Where(x => x.SteamId == steamID.ToString()).Count() == 0)
+                Player player = (Player)_player;
+                int previousPlayersCount = OnlinePlayers.Count;
+                OnlinePlayers.RemoveAll(x => x.SteamId == player.SteamId);
+                Thread.Sleep(3 * 60 * 1000);
+                if (!OnlinePlayers.Where(x => x.SteamId == player.SteamId).Any())
                 {
-                    if (match.IsMatch)
+                    if (match.IsMatch && previousPlayersCount != OnlinePlayers.Count)
                     {
-                        await RconHelper.SendMessage(rcon, $"{steamID.ToString()} was banned for left the match!");
-                        InsertBan(steamID.ToString());
+                        await RconHelper.SendMessage(rcon, $"{player.Name} was banned for left the match!");
+                        InsertBan(player.SteamId);
                     }
                 }
             }
