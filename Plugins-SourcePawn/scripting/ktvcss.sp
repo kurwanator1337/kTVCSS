@@ -46,6 +46,13 @@ public void OnPluginStart()
 	SetConVarBounds(Pause_Max, ConVarBound_Upper, true, 300.0);
 	//Создание новых команд
 	RegAdminCmd("sys_say", SYS_Say, ADMFLAG_ROOT);
+	//Фиксация состояния матча
+	RegAdminCmd("save_match", Save_Match, ADMFLAG_ROOT);
+	//Восстановление матча
+	RegAdminCmd("match_recover", match_recover, ADMFLAG_ROOT);
+	RegAdminCmd("score_set", score_set, ADMFLAG_ROOT);
+	HookEvent("bomb_defused", def_score);
+	HookEvent("bomb_exploded", expl_score);
 }
 
 // Создаем меню cm
@@ -262,4 +269,199 @@ public Action SYS_Say(int client, int args)
     }
     
     return Plugin_Handled;
+}
+
+//Сохранение состояние матча
+public Action Save_Match(int client, int args)
+{
+    if (client == 0)
+    {
+    	for (new i = 1; i <= MaxClients; i++)
+		{
+			if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) > 1) 
+			{
+				char StId[64];
+				GetClientAuthId(i, AuthId_Steam2, StId, sizeof(StId));
+				ReplaceString(StId, sizeof(StId), ":", "|", true);
+				char ent_pri_classname[64] = "-1";
+				if (GetPlayerWeaponSlot(i, CS_SLOT_PRIMARY) != -1) 
+				{
+					GetEntityClassname(GetPlayerWeaponSlot(i, CS_SLOT_PRIMARY), ent_pri_classname, sizeof(ent_pri_classname));
+				}
+				char ent_sec_classname[64] = "-1";
+				if (GetPlayerWeaponSlot(i, CS_SLOT_SECONDARY) != -1) 
+				{
+					GetEntityClassname(GetPlayerWeaponSlot(i, CS_SLOT_SECONDARY), ent_sec_classname, sizeof(ent_sec_classname));
+				}
+				LogToGame("[KBACKUP] {%s};{%i};{%s};{%s};{%i, %i, %i};{%i, %i};{%i};{%i, %i}", //[KBACKUP] {STEAM};{Money};{Pri};{Sec};{He, Fl, Sm};{Helm, Arm};{Def};{Kill, Death}
+				StId, //1
+				GetEntProp(i, Prop_Send, "m_iAccount"), //2
+				ent_pri_classname,//3
+				ent_sec_classname, //4
+				GetEntProp(i, Prop_Send, "m_iAmmo", _, 11), //5
+				GetEntProp(i, Prop_Send, "m_iAmmo", _, 12), //5
+				GetEntProp(i, Prop_Send, "m_iAmmo", _, 13), //5
+				GetEntProp(i, Prop_Send, "m_bHasHelmet"), //6
+				GetEntProp(i, Prop_Send, "m_ArmorValue"), //6
+				GetEntProp(i, Prop_Send, "m_bHasDefuser"), //7
+				GetClientFrags(i), //8
+				GetClientDeaths(i) //8
+				);
+			}
+		}
+		LogToGame("KTV_CT %i KTV_T %i", GetTeamScore(CS_TEAM_CT), GetTeamScore(CS_TEAM_T));
+	}
+    else if (IsClientInGame(client) && !IsFakeClient(client))
+    {
+        PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
+    }
+    return Plugin_Handled;
+}
+
+//Восстановление состояния матча
+
+public Action match_recover(int client, int args)
+{
+    if (client == 0)
+    {
+    	char Arg_Auth[64];
+    	char Arg_Money[64];
+    	char Arg_Primary[64];
+    	char Arg_Secondary[64];
+    	char Arg_HE[64];
+    	char Arg_Flash[64];
+    	char Arg_Smoke[64];
+    	char Arg_Helmet[64];
+    	char Arg_Armor[64];
+    	char Arg_Defuse[64];
+    	char Arg_Frags[64];
+    	char Arg_Deaths[64];
+    	
+    	GetCmdArg(1, Arg_Auth, sizeof(Arg_Auth));
+    	GetCmdArg(2, Arg_Money, sizeof(Arg_Money));
+    	GetCmdArg(3, Arg_Primary, sizeof(Arg_Primary));
+    	GetCmdArg(4, Arg_Secondary, sizeof(Arg_Secondary));
+    	GetCmdArg(5, Arg_HE, sizeof(Arg_HE));
+    	GetCmdArg(6, Arg_Flash, sizeof(Arg_Flash));
+    	GetCmdArg(7, Arg_Smoke, sizeof(Arg_Smoke));
+    	GetCmdArg(8, Arg_Helmet, sizeof(Arg_Helmet));
+    	GetCmdArg(9, Arg_Armor, sizeof(Arg_Armor));
+    	GetCmdArg(10, Arg_Defuse, sizeof(Arg_Defuse));
+    	GetCmdArg(11, Arg_Frags, sizeof(Arg_Frags));
+    	GetCmdArg(12, Arg_Deaths, sizeof(Arg_Deaths));
+    	
+    	int i_client = -1;
+    	ReplaceString(Arg_Auth, sizeof(Arg_Auth), "|", ":", true);
+    	for (new k_client = 1; k_client < MAXPLAYERS; k_client++)
+    	{
+			if (IsClientInGame(k_client) && !IsFakeClient(k_client) && GetClientTeam(k_client) > 1)
+			{
+				char StId[64];
+				GetClientAuthId(k_client, AuthId_Steam2, StId, sizeof(StId));
+    			if (StrEqual(StId, Arg_Auth, false))
+    			{
+    				i_client = k_client;
+    				break;
+    			}
+			}
+    	}
+    	
+		if (IsClientInGame(i_client) && !IsFakeClient(i_client) && GetClientTeam(i_client) > 1) 
+		{
+			//LogToGame("[KBACKUP] {%s};{%i};{%i};{%i};{%i, %i, %i};{%i, %i};{%i};{%i, %i}",
+			
+			if (GetPlayerWeaponSlot(i_client, CS_SLOT_PRIMARY) != -1)
+			{
+				RemovePlayerItem(i_client, GetPlayerWeaponSlot(i_client, CS_SLOT_PRIMARY));
+			}
+			
+			if (GetPlayerWeaponSlot(i_client, CS_SLOT_SECONDARY) != -1)
+			{
+				RemovePlayerItem(i_client, GetPlayerWeaponSlot(i_client, CS_SLOT_SECONDARY));
+			}
+			
+			SetEntProp(i_client, Prop_Send, "m_iAccount", StringToInt(Arg_Money)); //2
+			
+			if (StringToInt(Arg_Primary) != -1) //3
+			{
+				GivePlayerItem(i_client, Arg_Primary); 
+			}
+			if (StringToInt(Arg_Secondary) != -1) //4
+			{
+				GivePlayerItem(i_client, Arg_Secondary); 
+			}
+			if (StringToInt(Arg_HE) != 0) //5
+			{
+				GivePlayerItem(i_client, "weapon_hegrenade"); 
+			}
+			if (StringToInt(Arg_Flash) != 0) //5
+			{
+				if (StringToInt(Arg_Flash) > 1)
+				{
+					GivePlayerItem(i_client, "weapon_flashbang");
+					GivePlayerItem(i_client, "weapon_flashbang");
+				}
+				else 
+					GivePlayerItem(i_client, "weapon_flashbang");
+			}
+			if (StringToInt(Arg_Smoke) != 0) //5
+			{
+				GivePlayerItem(i_client, "weapon_smokegrenade"); 
+			}
+			if (StringToInt(Arg_Armor) != 0) //6
+			{
+				if (StringToInt(Arg_Helmet) != 0) 
+				{
+					GivePlayerItem(i_client, "item_assaultsuit"); 
+				}
+				else
+					GivePlayerItem(i_client, "item_kevlar");
+					
+				SetEntProp(i_client, Prop_Send, "m_ArmorValue", StringToInt(Arg_Armor));
+			}
+			if (StringToInt(Arg_Defuse) != 0) //7
+			{
+				GivePlayerItem(i_client, "item_defuser"); 
+			}
+			SetEntProp(i_client, Prop_Data, "m_iFrags", StringToInt(Arg_Frags)); //8
+			SetEntProp(i_client, Prop_Data, "m_iDeaths", StringToInt(Arg_Deaths)); //8
+		}
+	}
+    else if (IsClientInGame(client) && !IsFakeClient(client))
+    {
+        PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
+    }
+    return Plugin_Handled;
+}
+
+public Action score_set (int client, int args) 
+{
+	if (client == 0)
+    {
+    	char CT_Score[64];
+    	char T_Score[64];
+    	
+    	GetCmdArg(1, CT_Score, sizeof(CT_Score));
+    	GetCmdArg(2, T_Score, sizeof(T_Score));
+
+    	SetTeamScore(3, StringToInt(CT_Score));
+    	SetTeamScore(2, StringToInt(T_Score));
+	}
+    else if (IsClientInGame(client) && !IsFakeClient(client))
+    {
+        PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
+    }
+    return Plugin_Handled;
+}
+
+public void def_score(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	SetEntProp(client, Prop_Data, "m_iFrags", GetEntProp(client, Prop_Data, "m_iFrags") - 3);
+}
+
+public void expl_score(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	SetEntProp(client, Prop_Data, "m_iFrags", GetEntProp(client, Prop_Data, "m_iFrags") - 3);
 }
