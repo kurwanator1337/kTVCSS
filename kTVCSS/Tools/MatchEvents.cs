@@ -68,6 +68,24 @@ namespace kTVCSS.Tools
             }
         }
 
+        public static async Task InsertDemoName(int matchId, string demoName)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[InsertDemoName]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+
+                query.Parameters.AddWithValue("@MATCHID", matchId);
+                query.Parameters.AddWithValue("@DEMONAME", demoName);
+
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+            }
+        }
+
         public static async Task<Match> GetLiveMatchResults(int serverId, Match match)
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
@@ -232,6 +250,31 @@ namespace kTVCSS.Tools
                 {
                     Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
                 }
+                await connection.CloseAsync();
+            }
+        }
+
+        public async static Task SetMatchHighlight(string steamId, int killsCount, int matchID, bool isOpenFrag)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[OnMatchHighlight]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                query.Parameters.AddWithValue("@KILLS", killsCount);
+                query.Parameters.AddWithValue("@STEAMID", steamId);
+                query.Parameters.AddWithValue("@MATCHID", matchID);
+                if (isOpenFrag)
+                {
+                    query.Parameters.AddWithValue("@OPENFRAG", 1);
+                }
+                else
+                {
+                    query.Parameters.AddWithValue("@OPENFRAG", 0);
+                }
+                await query.ExecuteNonQueryAsync();
                 await connection.CloseAsync();
             }
         }

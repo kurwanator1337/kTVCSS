@@ -1,14 +1,20 @@
 USE [kTVCSS]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[SetPlayerMatchResult]    Script Date: 22.02.2022 1:26:47 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
 CREATE PROCEDURE [dbo].[SetPlayerMatchResult]
+	-- Add the parameters for the stored procedure here
 	@STEAMID nvarchar(30),
 	@WIN tinyint
 AS
@@ -56,8 +62,8 @@ BEGIN
 		SELECT @PLAYERKILLS = KILLS, @PLAYERWINS = MATCHESWINS, @PLAYERHS = HSR, @PLAYERKD = KDR FROM [dbo].[Players] WHERE STEAMID = @STEAMID
 		SELECT @PLAYEROF = OPENFRAGS, @PLAYERTRIPPLES = TRIPPLES, @PLAYERQUADROS = QUADROS, @PLAYERRAMPAGES = RAMPAGES FROM [dbo].[PlayersHighlights] WHERE STEAMID = @STEAMID
 
-		UPDATE [dbo].[Players] SET MMR = (100 * @PLAYERWINS) + (2 * @PLAYERKILLS) + (4 * @PLAYERHS) + 
-		(@PLAYEROF) + (25 * @PLAYERTRIPPLES) + (50 * @PLAYERQUADROS) + (100 * @PLAYERRAMPAGES) + (300 * @PLAYERKD),
+		UPDATE [dbo].[Players] SET MMR = (100 * @PLAYERWINS) + (2 * @PLAYERKILLS) + (2 * @PLAYERHS) + 
+		(@PLAYEROF) + (10 * @PLAYERTRIPPLES) + (25 * @PLAYERQUADROS) + (50 * @PLAYERRAMPAGES) + (300 * @PLAYERKD),
 		ISCALIBRATION = 0 WHERE STEAMID = @STEAMID
 	END
 
