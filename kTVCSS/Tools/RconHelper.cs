@@ -1,4 +1,5 @@
 ﻿using CoreRCON;
+using kTVCSS.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        public static async Task LiveOnThree(RCON rcon)
+        public static async Task LiveOnThree(RCON rcon, Match match)
         {
             try
             {
@@ -52,6 +53,11 @@ namespace kTVCSS.Tools
                 await rcon.SendCommandAsync("mp_restartgame 3;sys_say {white}Restart 3");
                 Thread.Sleep(4000);
                 await rcon.SendCommandAsync("sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!;sys_say {white}MATCH IS LIVE!!!");
+                if (match.IsNeedSetTeamScores)
+                {
+                    await rcon.SendCommandAsync($"score_set {match.BScore} {match.AScore}");
+                    match.IsNeedSetTeamScores = !match.IsNeedSetTeamScores;
+                }
             }
             catch (Exception ex)
             {

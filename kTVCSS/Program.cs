@@ -149,7 +149,8 @@ namespace kTVCSS
 
                         if (isResetFreezeTime)
                         {
-                            await RconHelper.LiveOnThree(rcon);
+                            match.IsNeedSetTeamScores = true;
+                            await RconHelper.LiveOnThree(rcon, match);
                             isResetFreezeTime = !isResetFreezeTime;
                             if (match.IsOvertime)
                             {
@@ -356,6 +357,7 @@ namespace kTVCSS
                         await RconHelper.SendCmd(rcon, $"ChangeVote {side}");
                         knifeRound = false;
                     }
+                    await rcon.SendCommandAsync($"score_set {match.BScore} {match.AScore}");
                 });
 
                 log.Listen<ChatMessage>(async chat =>
@@ -665,7 +667,7 @@ namespace kTVCSS
                             currentMapName = info.Map;
                             demoName = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss") + "_" + info.Map;
                             await RconHelper.SendCmd(rcon, "tv_record " + demoName);
-                            await RconHelper.LiveOnThree(rcon);
+                            await RconHelper.LiveOnThree(rcon, match);
                             match = new Match(15);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
                             MatchPlayers = new List<Player>();

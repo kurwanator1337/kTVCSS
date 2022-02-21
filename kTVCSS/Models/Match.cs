@@ -25,6 +25,7 @@ namespace kTVCSS.Models
                 TacticalPauses = 0;
                 TechnicalPauses = 0;
                 Pause = false;
+                IsNeedSetTeamScores = false;
             }
             else
             {
@@ -41,6 +42,7 @@ namespace kTVCSS.Models
                 TacticalPauses = 4;
                 TechnicalPauses = 2;
                 Pause = false;
+                IsNeedSetTeamScores = false;
             }
         }
 
@@ -59,5 +61,6 @@ namespace kTVCSS.Models
         public int TechnicalPauses { get; set; }
         public int TacticalPauses { get; set; }
         public bool Pause { get; set; }
+        public bool IsNeedSetTeamScores { get; set; }
     }
 }
