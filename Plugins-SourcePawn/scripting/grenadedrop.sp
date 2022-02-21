@@ -35,6 +35,7 @@ public void proverka(Event event, const char[] name, bool dontBroadcast)
 	{
 		clientMass[client] = true;
 		CreateTimer(1.5, blocktimer, client);
+		
 	}
 }
 
