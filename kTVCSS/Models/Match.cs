@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreRCON.Parsers.Standard;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,5 +63,6 @@ namespace kTVCSS.Models
         public int TacticalPauses { get; set; }
         public bool Pause { get; set; }
         public bool IsNeedSetTeamScores { get; set; }
+        public List<MatchBackup> Backups = new List<MatchBackup>();
     }
 }

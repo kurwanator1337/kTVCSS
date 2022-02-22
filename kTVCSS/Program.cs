@@ -105,6 +105,11 @@ namespace kTVCSS
                         if (kill.Headshot)
                             hs = 1;
 
+                        if (kill.Killer.Team == kill.Killed.Team)
+                        {
+                            return;
+                        }
+
                         if (!match.PlayerKills.ContainsKey(kill.Killer.SteamId))
                         {
                             match.PlayerKills.Add(kill.Killer.SteamId, 1);
@@ -144,6 +149,8 @@ namespace kTVCSS
                 {
                     if (match.IsMatch)
                     {
+                        await RconHelper.SendCmd(rcon, "save_match");
+
                         match.PlayerKills.Clear();
                         match.OpenFragSteamID = string.Empty;
 
@@ -168,15 +175,26 @@ namespace kTVCSS
                     }
                 });
 
-                log.Listen<RestartRound>(result =>
+                log.Listen<RestartRound>(async result =>
                 {
-                    
+                    if (match.IsMatch)
+                    {
+                        foreach (MatchBackup data in match.Backups)
+                        {
+                            if (OnlinePlayers.Where(x => x.SteamId == data.SteamID).Any())
+                            {
+                                await RconHelper.SendCmd(rcon, $"player_score_set {data.SteamID.Replace(":", "|")} {data.Frags} {data.Deaths}");
+                            }
+                        }
+                    }
                 });
 
                 log.Listen<RoundEndScore>(async result =>
                 {
                     if (match.IsMatch)
                     {
+                        await RconHelper.SendCmd(rcon, "save_match");
+
                         if (result.WinningTeam == tName)
                         {
                             match.AScore += 1;
@@ -449,7 +467,7 @@ namespace kTVCSS
                         {
                             if (mapPool.Count() != 1)
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_csay {currentMapSelector} TURN TO BAN!");
+                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
                                 await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to ban");
                             }
                         }
@@ -458,12 +476,12 @@ namespace kTVCSS
                         {
                             if (mapPool.Count() == 6 || mapPool.Count() == 7)
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_csay {currentMapSelector} TURN TO PICK!");
+                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to pick!");
                                 await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to pick");
                             }
                             else
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_csay {currentMapSelector} TURN TO BAN!");
+                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
                                 await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to ban");
                             }
                         }
@@ -567,7 +585,7 @@ namespace kTVCSS
                             currentMapSelector = ctPlayerSelector;
                         }
 
-                        await RconHelper.SendCmd(rcon, $"sm_csay {currentMapSelector} TURN TO BAN!");
+                        await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
                         await RconHelper.SendMessage(rcon, $"The first one - {currentMapSelector}");
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
@@ -626,7 +644,7 @@ namespace kTVCSS
                         };
                         boThread.Start();
 
-                        await RconHelper.SendCmd(rcon, $"sm_csay {currentMapSelector} TURN TO BAN!");
+                        await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
                         await RconHelper.SendMessage(rcon, $"The first one - {currentMapSelector}");
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
@@ -913,6 +931,23 @@ namespace kTVCSS
                             OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
                         }
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
+                    }
+                });
+
+                log.Listen<MatchBackup>(async data =>
+                {
+                    if (match.IsMatch)
+                    {
+                        if (!match.Backups.Where(x => x.SteamID == data.SteamID).Any())
+                        {
+                            match.Backups.Add(data);
+                        }
+                        else
+                        {
+                            match.Backups.RemoveAll(x => x.SteamID == data.SteamID);
+                            match.Backups.Add(data);
+                        }
+                        await MatchEvents.InsertMatchBackupRecord(match, data);
                     }
                 });
 

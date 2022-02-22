@@ -356,5 +356,32 @@ namespace kTVCSS.Tools
                 await connection.CloseAsync();
             }
         }
+
+        public async static Task InsertMatchBackupRecord(Match match, MatchBackup backup)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            {
+                await connection.OpenAsync();
+                SqlCommand query = new SqlCommand("[dbo].[InsertMatchBackupRecord]", connection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                query.Parameters.AddWithValue("@ID", match.MatchId);
+                query.Parameters.AddWithValue("@STEAMID", backup.SteamID);
+                query.Parameters.AddWithValue("@MONEY", backup.Money);
+                query.Parameters.AddWithValue("@PW", backup.PrimaryWeapon);
+                query.Parameters.AddWithValue("@SW", backup.SecondaryWeapon);
+                query.Parameters.AddWithValue("@HE", backup.FragGrenades);
+                query.Parameters.AddWithValue("@FLASHBANGS", backup.Flashbangs);
+                query.Parameters.AddWithValue("@SMOKEGRENADES", backup.SmokeGrenades);
+                query.Parameters.AddWithValue("@HELM", backup.Helm);
+                query.Parameters.AddWithValue("@ARMOR", backup.Armor);
+                query.Parameters.AddWithValue("@DEFUSEKIT", backup.DefuseKit);
+                query.Parameters.AddWithValue("@FRAGS", backup.Frags);
+                query.Parameters.AddWithValue("@DEATHS", backup.Deaths);
+                await query.ExecuteNonQueryAsync();
+                await connection.CloseAsync();
+            }
+        }
     }
 }
