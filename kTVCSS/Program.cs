@@ -338,7 +338,7 @@ namespace kTVCSS
                                             isResetFreezeTime = true;
                                             match.MaxRounds = 3;
                                         }
-                                    }   
+                                    }
                                 }
                             }
                         }
@@ -411,7 +411,7 @@ namespace kTVCSS
                                 if (mapPool.Count() != 1)
                                 {
                                     mapPool.Remove(mapNum);
-                                }  
+                                }
                             }
                         }
 
@@ -537,7 +537,7 @@ namespace kTVCSS
                         }
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfThree && !isBestOfOneStarted && !match.IsMatch)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !knifeRound)
                     {
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                         {
@@ -590,7 +590,7 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !knifeRound)
                     {
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                         {
@@ -649,7 +649,7 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!ko3") && isCanBeginMatch)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!ko3") && isCanBeginMatch && !knifeRound)
                     {
                         if (OnlinePlayers.Count < MinPlayersToStart)
                         {
@@ -658,9 +658,9 @@ namespace kTVCSS
                         }
                         if (!match.IsMatch)
                         {
+                            knifeRound = true;
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_knives_start.cfg");
                             await RconHelper.Knives(rcon);
-                            knifeRound = true;
                         }
                         else
                         {
@@ -671,7 +671,7 @@ namespace kTVCSS
                         }
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch && !knifeRound)
                     {
                         if (OnlinePlayers.Count < MinPlayersToStart)
                         {
@@ -1137,12 +1137,12 @@ namespace kTVCSS
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
 
-            #if DEBUG
+#if DEBUG
 
             args = new string[1];
             args[0] = "0";
 
-            #endif
+#endif
 
             if (args.Length != 0)
             {
