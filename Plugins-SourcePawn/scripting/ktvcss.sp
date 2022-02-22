@@ -1,6 +1,6 @@
 #define PLUGIN_NAME           "kTVCSS adds"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.2"
+#define PLUGIN_VERSION        "1.3"
 
 #include <sourcemod>
 #include <sdktools>
@@ -23,7 +23,7 @@ int voteCount = 0;
 new g_votetype = 0;
 ConVar:isMatch = null;
 Handle:Pause_Max = null;
-
+int grenadecount[MAXPLAYERS][3];
 // Starts on plugin start
 public void OnPluginStart()
 {
@@ -51,8 +51,12 @@ public void OnPluginStart()
 	//Восстановление матча
 	RegAdminCmd("match_recover", match_recover, ADMFLAG_ROOT);
 	RegAdminCmd("score_set", score_set, ADMFLAG_ROOT);
+	RegAdminCmd("player_score_set", player_score_set, ADMFLAG_ROOT);
+	//Фикс очков с бомбы и дефа
 	HookEvent("bomb_defused", def_score);
 	HookEvent("bomb_exploded", expl_score);
+	//Запрет покупки гранат
+	HookEvent("round_start", grenadecounter_null);
 }
 
 // Создаем меню cm
@@ -274,9 +278,9 @@ public Action SYS_Say(int client, int args)
 //Сохранение состояние матча
 public Action Save_Match(int client, int args)
 {
-    if (client == 0)
-    {
-    	for (new i = 1; i <= MaxClients; i++)
+	if (client == 0)
+	{
+		for (new i = 1; i <= MaxClients; i++)
 		{
 			if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) > 1) 
 			{
@@ -311,62 +315,62 @@ public Action Save_Match(int client, int args)
 		}
 		LogToGame("KTV_CT %i KTV_T %i", GetTeamScore(CS_TEAM_CT), GetTeamScore(CS_TEAM_T));
 	}
-    else if (IsClientInGame(client) && !IsFakeClient(client))
-    {
-        PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
-    }
-    return Plugin_Handled;
+	else if (IsClientInGame(client) && !IsFakeClient(client))
+	{
+		PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
+	}
+	return Plugin_Handled;
 }
 
 //Восстановление состояния матча
 
 public Action match_recover(int client, int args)
 {
-    if (client == 0)
-    {
-    	char Arg_Auth[64];
-    	char Arg_Money[64];
-    	char Arg_Primary[64];
-    	char Arg_Secondary[64];
-    	char Arg_HE[64];
-    	char Arg_Flash[64];
-    	char Arg_Smoke[64];
-    	char Arg_Helmet[64];
-    	char Arg_Armor[64];
-    	char Arg_Defuse[64];
-    	char Arg_Frags[64];
-    	char Arg_Deaths[64];
-    	
-    	GetCmdArg(1, Arg_Auth, sizeof(Arg_Auth));
-    	GetCmdArg(2, Arg_Money, sizeof(Arg_Money));
-    	GetCmdArg(3, Arg_Primary, sizeof(Arg_Primary));
-    	GetCmdArg(4, Arg_Secondary, sizeof(Arg_Secondary));
-    	GetCmdArg(5, Arg_HE, sizeof(Arg_HE));
-    	GetCmdArg(6, Arg_Flash, sizeof(Arg_Flash));
-    	GetCmdArg(7, Arg_Smoke, sizeof(Arg_Smoke));
-    	GetCmdArg(8, Arg_Helmet, sizeof(Arg_Helmet));
-    	GetCmdArg(9, Arg_Armor, sizeof(Arg_Armor));
-    	GetCmdArg(10, Arg_Defuse, sizeof(Arg_Defuse));
-    	GetCmdArg(11, Arg_Frags, sizeof(Arg_Frags));
-    	GetCmdArg(12, Arg_Deaths, sizeof(Arg_Deaths));
-    	
-    	int i_client = -1;
-    	ReplaceString(Arg_Auth, sizeof(Arg_Auth), "|", ":", true);
-    	for (new k_client = 1; k_client < MAXPLAYERS; k_client++)
-    	{
+	if (client == 0)
+	{
+		char Arg_Auth[64];
+		char Arg_Money[64];
+		char Arg_Primary[64];
+		char Arg_Secondary[64];
+		char Arg_HE[64];
+		char Arg_Flash[64];
+		char Arg_Smoke[64];
+		char Arg_Helmet[64];
+		char Arg_Armor[64];
+		char Arg_Defuse[64];
+		char Arg_Frags[64];
+		char Arg_Deaths[64];
+		
+		GetCmdArg(1, Arg_Auth, sizeof(Arg_Auth));
+		GetCmdArg(2, Arg_Money, sizeof(Arg_Money));
+		GetCmdArg(3, Arg_Primary, sizeof(Arg_Primary));
+		GetCmdArg(4, Arg_Secondary, sizeof(Arg_Secondary));
+		GetCmdArg(5, Arg_HE, sizeof(Arg_HE));
+		GetCmdArg(6, Arg_Flash, sizeof(Arg_Flash));
+		GetCmdArg(7, Arg_Smoke, sizeof(Arg_Smoke));
+		GetCmdArg(8, Arg_Helmet, sizeof(Arg_Helmet));
+		GetCmdArg(9, Arg_Armor, sizeof(Arg_Armor));
+		GetCmdArg(10, Arg_Defuse, sizeof(Arg_Defuse));
+		GetCmdArg(11, Arg_Frags, sizeof(Arg_Frags));
+		GetCmdArg(12, Arg_Deaths, sizeof(Arg_Deaths));
+		
+		int i_client = -1;
+		ReplaceString(Arg_Auth, sizeof(Arg_Auth), "|", ":", true);
+		for (new k_client = 1; k_client < MAXPLAYERS; k_client++)
+		{
 			if (IsClientInGame(k_client) && !IsFakeClient(k_client) && GetClientTeam(k_client) > 1)
 			{
 				char StId[64];
 				GetClientAuthId(k_client, AuthId_Steam2, StId, sizeof(StId));
-    			if (StrEqual(StId, Arg_Auth, false))
-    			{
-    				i_client = k_client;
-    				break;
-    			}
+				if (StrEqual(StId, Arg_Auth, false))
+				{
+					i_client = k_client;
+					break;
+				}
 			}
-    	}
-    	
-		if (IsClientInGame(i_client) && !IsFakeClient(i_client) && GetClientTeam(i_client) > 1) 
+		}
+		
+		if (IsClientInGame(i_client) && !IsFakeClient(i_client) && GetClientTeam(i_client) > 1)
 		{
 			//LogToGame("[KBACKUP] {%s};{%i};{%i};{%i};{%i, %i, %i};{%i, %i};{%i};{%i, %i}",
 			
@@ -427,7 +431,47 @@ public Action match_recover(int client, int args)
 			SetEntProp(i_client, Prop_Data, "m_iDeaths", StringToInt(Arg_Deaths)); //8
 		}
 	}
-    else if (IsClientInGame(client) && !IsFakeClient(client))
+	else if (IsClientInGame(client) && !IsFakeClient(client))
+	{
+		PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
+	}
+	return Plugin_Handled;
+}
+
+public Action player_score_set(int client, int args)
+{
+    if (client == 0)
+    {
+    	char Arg_Auth[64];
+    	char Arg_Frags[64];
+    	char Arg_Deaths[64];
+    	
+    	GetCmdArg(1, Arg_Auth, sizeof(Arg_Auth));
+    	GetCmdArg(2, Arg_Frags, sizeof(Arg_Frags));
+    	GetCmdArg(3, Arg_Deaths, sizeof(Arg_Deaths));
+    	
+    	int i_client = -1;
+    	ReplaceString(Arg_Auth, sizeof(Arg_Auth), "|", ":", true);
+    	for (new k_client = 1; k_client < MAXPLAYERS; k_client++)
+    	{
+			if (IsClientInGame(k_client) && !IsFakeClient(k_client) && GetClientTeam(k_client) > 1)
+			{
+				char StId[64];
+				GetClientAuthId(k_client, AuthId_Steam2, StId, sizeof(StId));
+				if (StrEqual(StId, Arg_Auth, false))
+    			{
+    				i_client = k_client;
+    				break;
+    			}
+			}
+    	}
+    	if (IsClientInGame(i_client) && !IsFakeClient(i_client) && GetClientTeam(i_client) > 1) 
+		{
+			SetEntProp(i_client, Prop_Data, "m_iFrags", StringToInt(Arg_Frags)); //8
+			SetEntProp(i_client, Prop_Data, "m_iDeaths", StringToInt(Arg_Deaths)); //8
+		}
+	}
+	else if (IsClientInGame(client) && !IsFakeClient(client))
     {
         PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
     }
@@ -447,13 +491,14 @@ public Action score_set (int client, int args)
     	SetTeamScore(3, StringToInt(CT_Score));
     	SetTeamScore(2, StringToInt(T_Score));
 	}
-    else if (IsClientInGame(client) && !IsFakeClient(client))
-    {
-        PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
-    }
-    return Plugin_Handled;
+	else if (IsClientInGame(client) && !IsFakeClient(client))
+	{
+		PrintToConsole(client, "[kTVCSS] This command can only be used by the server!");
+	}
+	return Plugin_Handled;
 }
 
+//Фикс очков с бомбы и дефа
 public void def_score(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -464,4 +509,73 @@ public void expl_score(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	SetEntProp(client, Prop_Data, "m_iFrags", GetEntProp(client, Prop_Data, "m_iFrags") - 3);
+}
+
+public void grenadecounter_null(Event hEvent, const char[] sEvName, bool bDontBroadcast) 
+{
+	for (new i = 1; i < MAXPLAYERS; i++) 
+	{
+		if (IsClientInGame(i) && !IsFakeClient(i))
+		{
+			grenadecount[i][0] = GetEntProp(i, Prop_Send, "m_iAmmo", _, 11);
+			grenadecount[i][1] = GetEntProp(i, Prop_Send, "m_iAmmo", _, 12);
+			grenadecount[i][2] = GetEntProp(i, Prop_Send, "m_iAmmo", _, 13);
+		}
+	}
+}
+
+public Action CS_OnBuyCommand(int client, const char[] weapon)
+{
+	if (!GetConVarBool(isMatch) || (client == 0))
+	{
+		return Plugin_Continue;
+	}
+
+	if (StrEqual(weapon, "nvgs", false))
+	{
+		CPrintToChat(client, "{fullred}[kTVCSS] {white}Nightvision Blocked!");
+		return Plugin_Handled;
+	}
+	
+	if (GetConVarBool(isMatch))
+	{
+		new String:the_weapon[32];
+		Format(the_weapon, sizeof(the_weapon), "%s", weapon);
+		ReplaceString(the_weapon, sizeof(the_weapon), "weapon_", "");
+		ReplaceString(the_weapon, sizeof(the_weapon), "item_", "");
+		if (IsClientInGame(client) && !IsFakeClient(client)) 
+		{
+			if (StrEqual(the_weapon, "hegrenade", false)) 
+			{
+				if (grenadecount[client][0] < 1)
+				{
+					grenadecount[client][0]++;
+					return Plugin_Continue;
+				}
+				else 
+					return Plugin_Handled;
+			}
+			else if (StrEqual(the_weapon, "flashbang", false)) 
+			{
+				if (grenadecount[client][1] < 2)
+				{
+					grenadecount[client][1]++;
+					return Plugin_Continue;
+				}
+				else 
+					return Plugin_Handled;
+			}
+			else if (StrEqual(the_weapon, "smokegrenade", false)) 
+			{
+				if (grenadecount[client][2] < 1)
+				{
+					grenadecount[client][2]++;
+					return Plugin_Continue;
+				}
+				else 
+					return Plugin_Handled;
+			}
+		}
+	}
+	return Plugin_Continue;
 }
