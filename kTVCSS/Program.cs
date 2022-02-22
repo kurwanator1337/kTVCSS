@@ -537,7 +537,7 @@ namespace kTVCSS
                         }
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfThree)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfThree && !isBestOfOneStarted && !match.IsMatch)
                     {
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                         {
@@ -590,7 +590,7 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch)
                     {
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                         {
@@ -680,6 +680,7 @@ namespace kTVCSS
                         }
                         if (!match.IsMatch)
                         {
+                            isCanBeginMatch = false;
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_start.cfg");
                             SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                             currentMapName = info.Map;
