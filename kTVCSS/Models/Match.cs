@@ -11,41 +11,39 @@ namespace kTVCSS.Models
     {
         public Match(int mr)
         {
+            MaxRounds = mr;
+            FirstHalf = true;
+            AScore = 0;
+            BScore = 0;
+            RoundID = 0;
+            OpenFragSteamID = string.Empty;
+            IsOvertime = false;
+            AScoreOvertime = 0;
+            BScoreOvertime = 0;
+            Pause = false;
+            IsNeedSetTeamScores = false;
+            MinPlayersToStart = 8; // 8
+            MinPlayersToStop = 6; // 6
+
             if (mr == 0)
             {
-                MaxRounds = mr;
                 IsMatch = false;
-                FirstHalf = true;
-                AScore = 0;
-                BScore = 0;
-                RoundID = 0;
-                OpenFragSteamID = string.Empty;
-                IsOvertime = false;
-                AScoreOvertime = 0;
-                BScoreOvertime = 0;
                 TacticalPauses = 0;
                 TechnicalPauses = 0;
-                Pause = false;
-                IsNeedSetTeamScores = false;
             }
             else
             {
-                MaxRounds = mr;
                 IsMatch = true;
-                FirstHalf = true;
-                AScore = 0;
-                BScore = 0;
-                RoundID = 0;
-                OpenFragSteamID = string.Empty;
-                IsOvertime = false;
-                AScoreOvertime = 0;
-                BScoreOvertime = 0;
                 TacticalPauses = 4;
                 TechnicalPauses = 2;
-                Pause = false;
-                IsNeedSetTeamScores = false;
             }
         }
+
+        public Dictionary<string, int> PlayerKills = new Dictionary<string, int>();
+        public List<MatchBackup> Backups = new List<MatchBackup>();
+
+        public int MinPlayersToStart { get; set; }
+        public int MinPlayersToStop { get; set; }
 
         public int MaxRounds { get; set; }
         public int AScore { get; set; }
@@ -58,11 +56,10 @@ namespace kTVCSS.Models
         public bool IsOvertime { get; set; }
         public int AScoreOvertime { get; set; }
         public int BScoreOvertime { get; set; }
-        public Dictionary<string, int> PlayerKills = new Dictionary<string, int>();
         public int TechnicalPauses { get; set; }
         public int TacticalPauses { get; set; }
         public bool Pause { get; set; }
         public bool IsNeedSetTeamScores { get; set; }
-        public List<MatchBackup> Backups = new List<MatchBackup>();
+        public bool KnifeRound { get; set; }
     }
 }

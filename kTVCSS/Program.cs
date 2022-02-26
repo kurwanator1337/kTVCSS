@@ -32,38 +32,31 @@ namespace kTVCSS
             }
 
             private static Thread alertThread = null;
-            public static List<Player> OnlinePlayers = new List<Player>();
-            public List<Player> MatchPlayers = null;
-            private bool isCanBeginMatch = true;
-            private string tName = "TERRORIST";
-            private string ctName = "CT";
+            private RCON rcon = null;
             private Match match = new Match(0);
+            private List<string> mapQueue = new List<string>();
+            private Dictionary<int, string> mapPool = new Dictionary<int, string>();
+
+            public List<Player> MatchPlayers = null;
+            public static List<Player> OnlinePlayers = new List<Player>();
+            public int serverID = 0;
+
+            private bool isCanBeginMatch = true;
             private bool isResetFreezeTime = false;
             private bool isBestOfOneStarted = false;
             private bool isBestOfThree = false;
             private string currentMapSelector = string.Empty;
             private string terPlayerSelector = string.Empty;
             private string ctPlayerSelector = string.Empty;
-            private Dictionary<int, string> mapPool = new Dictionary<int, string>();
-            private bool knifeRound = false;
-            private RCON rcon = null;
+            private string tName = "TERRORIST";
+            private string ctName = "CT";
             private string demoName = string.Empty;
-            private List<string> mapQueue = new List<string>();
             private string currentMapName = string.Empty;
-            public int serverID = 0;
-            public int MinPlayersToStart = 8; // 8
-            public int MinPlayersToStop = 6; // 6
-
+            
             public async Task StartNode(Server server)
             {
                 Logger.LoggerID = server.ID;
 
-#if DEBUG
-
-                MinPlayersToStart = 0;
-                MinPlayersToStop = 0;
-
-#endif
                 serverID = server.ID;
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(server.Host), server.GamePort);
                 rcon = new RCON(endpoint, server.RconPassword);
@@ -156,13 +149,13 @@ namespace kTVCSS
 
                         if (isResetFreezeTime)
                         {
-                            match.IsNeedSetTeamScores = true;
-                            await RconHelper.LiveOnThree(rcon, match);
-                            isResetFreezeTime = !isResetFreezeTime;
                             if (match.IsOvertime)
                             {
                                 await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
                             }
+                            match.IsNeedSetTeamScores = true;
+                            await RconHelper.LiveOnThree(rcon, match);
+                            isResetFreezeTime = !isResetFreezeTime;
                         }
 
                         if (match.Pause)
@@ -172,6 +165,11 @@ namespace kTVCSS
                         }
 
                         await MatchEvents.InsertMatchLog(match.MatchId, $"<Round Start>", info.Map, server.ID);
+                        
+                        if (match.AScore == 0 && match.BScore == 0)
+                        {
+                            await RconHelper.SendMessage(rcon, "Leaving the match will result in a ban.");
+                        }
                     }
                 });
 
@@ -338,7 +336,7 @@ namespace kTVCSS
                                             isResetFreezeTime = true;
                                             match.MaxRounds = 3;
                                         }
-                                    }
+                                    }   
                                 }
                             }
                         }
@@ -363,7 +361,7 @@ namespace kTVCSS
                             }
                         }
                     }
-                    if (knifeRound)
+                    if (match.KnifeRound)
                     {
                         int side = 0;
                         if (result.WinningTeam == tName)
@@ -373,7 +371,7 @@ namespace kTVCSS
                         else side = 3;
                         await RconHelper.SendCmd(rcon, "exec ktvcss/on_knives_end.cfg");
                         await RconHelper.SendCmd(rcon, $"ChangeVote {side}");
-                        knifeRound = false;
+                        match.KnifeRound = false;
                     }
                     await rcon.SendCommandAsync($"score_set {match.BScore} {match.AScore}");
                 });
@@ -411,7 +409,7 @@ namespace kTVCSS
                                 if (mapPool.Count() != 1)
                                 {
                                     mapPool.Remove(mapNum);
-                                }
+                                }  
                             }
                         }
 
@@ -537,7 +535,7 @@ namespace kTVCSS
                         }
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !knifeRound)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !match.KnifeRound)
                     {
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                         {
@@ -590,7 +588,7 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !knifeRound)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !match.KnifeRound)
                     {
                         using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                         {
@@ -649,16 +647,16 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!ko3") && isCanBeginMatch && !knifeRound)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!ko3") && isCanBeginMatch && !match.KnifeRound)
                     {
-                        if (OnlinePlayers.Count < MinPlayersToStart)
+                        if (OnlinePlayers.Count < match.MinPlayersToStart)
                         {
                             await RconHelper.SendCmd(rcon, "sm_msay The match can not be started until the players count less than 8");
                             return;
                         }
                         if (!match.IsMatch)
                         {
-                            knifeRound = true;
+                            match.KnifeRound = true;
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_knives_start.cfg");
                             await RconHelper.Knives(rcon);
                         }
@@ -671,9 +669,9 @@ namespace kTVCSS
                         }
                     }
 
-                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch && !knifeRound)
+                    if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch && !match.KnifeRound)
                     {
-                        if (OnlinePlayers.Count < MinPlayersToStart)
+                        if (OnlinePlayers.Count < match.MinPlayersToStart)
                         {
                             await RconHelper.SendCmd(rcon, "sm_msay The match can not be started until the players count less than 8");
                             return;
@@ -874,7 +872,7 @@ namespace kTVCSS
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                             await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                             isCanBeginMatch = true;
-                            match.IsMatch = false;
+                            match = new Match(0);
                             return;
                         }
                         string winner = string.Empty;
@@ -907,11 +905,11 @@ namespace kTVCSS
                             isBestOfThree = false;
                         }
                     }
-                    if (knifeRound)
+                    if (match.KnifeRound)
                     {
                         await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                         await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
-                        knifeRound = !knifeRound;
+                        match.KnifeRound = !match.KnifeRound;
                     }
                 });
 
@@ -981,7 +979,7 @@ namespace kTVCSS
                 Thread.Sleep(3 * 60 * 1000);
                 if (!OnlinePlayers.Where(x => x.SteamId == player.SteamId).Any())
                 {
-                    if (match.IsMatch && previousPlayersCount != OnlinePlayers.Count)
+                    if (match.IsMatch && previousPlayersCount < OnlinePlayers.Count)
                     {
                         await RconHelper.SendMessage(rcon, $"{player.Name} was banned for left the match!");
                         InsertBan(player.SteamId);
@@ -1010,8 +1008,7 @@ namespace kTVCSS
                 await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
                 isCanBeginMatch = true;
-                match.IsMatch = false;
-                match.FirstHalf = false;
+                match = new Match(0);
                 Thread.Sleep(3000);
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
@@ -1039,8 +1036,7 @@ namespace kTVCSS
                 await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
                 isCanBeginMatch = true;
-                match.IsMatch = false;
-                match.FirstHalf = false;
+                match = new Match(0);
                 Thread.Sleep(3000);
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
@@ -1050,8 +1046,10 @@ namespace kTVCSS
             private void Rcon_OnDisconnected()
             {
                 Logger.Print(serverID, "RCON connection is closed", LogLevel.Warn);
-                isCanBeginMatch = true;
-                match.IsMatch = false;
+                if (!match.IsMatch)
+                {
+                    isCanBeginMatch = true;
+                }
             }
 
             private async void PrintAlertMessages(RCON rcon)
@@ -1082,7 +1080,7 @@ namespace kTVCSS
                     }
                     else
                     {
-                        if (OnlinePlayers.Count < MinPlayersToStop)
+                        if (OnlinePlayers.Count < match.MinPlayersToStop)
                         {
                             if (match.AScore == 0 && match.BScore == 0)
                             {
@@ -1092,7 +1090,7 @@ namespace kTVCSS
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                                 isCanBeginMatch = true;
-                                match.IsMatch = false;
+                                match = new Match(0);
                             }
                             else
                             {
@@ -1137,12 +1135,12 @@ namespace kTVCSS
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
 
-#if DEBUG
+            #if DEBUG
 
             args = new string[1];
             args[0] = "0";
 
-#endif
+            #endif
 
             if (args.Length != 0)
             {
