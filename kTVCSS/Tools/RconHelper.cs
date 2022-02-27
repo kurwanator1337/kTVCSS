@@ -1,4 +1,5 @@
 ﻿using CoreRCON;
+using CoreRCON.Parsers.Standard;
 using kTVCSS.Models;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        public static async Task LiveOnThree(RCON rcon, Match match)
+        public static async Task LiveOnThree(RCON rcon, Match match, List<Player> OnlinePlayers)
         {
             try
             {
@@ -57,6 +58,16 @@ namespace kTVCSS.Tools
                 {
                     await rcon.SendCommandAsync($"score_set {match.BScore} {match.AScore}");
                     match.IsNeedSetTeamScores = !match.IsNeedSetTeamScores;
+                }
+                if (!match.FirstHalf)
+                {
+                    foreach (MatchBackup data in match.Backups)
+                    {
+                        if (OnlinePlayers.Where(x => x.SteamId == data.SteamID).Any())
+                        {
+                            await SendCmd(rcon, $"player_score_set {data.SteamID.Replace(":", "|")} {data.Frags} {data.Deaths}");
+                        }
+                    }
                 }
             }
             catch (Exception ex)

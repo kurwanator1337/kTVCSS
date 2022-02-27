@@ -39,7 +39,7 @@ namespace kTVCSS
 
             public List<Player> MatchPlayers = null;
             public static List<Player> OnlinePlayers = new List<Player>();
-            public int serverID = 0;
+            public static int ServerID = 0;
 
             private bool isCanBeginMatch = true;
             private bool isResetFreezeTime = false;
@@ -57,7 +57,7 @@ namespace kTVCSS
             {
                 Logger.LoggerID = server.ID;
 
-                serverID = server.ID;
+                ServerID = server.ID;
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(server.Host), server.GamePort);
                 rcon = new RCON(endpoint, server.RconPassword);
                 rcon.OnDisconnected += Rcon_OnDisconnected;
@@ -154,7 +154,7 @@ namespace kTVCSS
                                 await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
                             }
                             match.IsNeedSetTeamScores = true;
-                            await RconHelper.LiveOnThree(rcon, match);
+                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
                             isResetFreezeTime = !isResetFreezeTime;
                         }
 
@@ -173,19 +173,10 @@ namespace kTVCSS
                     }
                 });
 
-                log.Listen<RestartRound>(async result =>
-                {
-                    if (match.IsMatch)
-                    {
-                        foreach (MatchBackup data in match.Backups)
-                        {
-                            if (OnlinePlayers.Where(x => x.SteamId == data.SteamID).Any())
-                            {
-                                await RconHelper.SendCmd(rcon, $"player_score_set {data.SteamID.Replace(":", "|")} {data.Frags} {data.Deaths}");
-                            }
-                        }
-                    }
-                });
+                //log.Listen<RestartRound>(async result =>
+                //{
+                    
+                //});
 
                 log.Listen<RoundEndScore>(async result =>
                 {
@@ -537,21 +528,28 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo3") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !match.KnifeRound)
                     {
-                        using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
+                        try
                         {
-                            connection.Open();
-                            mapPool = new Dictionary<int, string>();
-                            SqlCommand query = new SqlCommand($"SELECT MAP FROM [dbo].[MapPool]", connection);
-                            using (var reader = query.ExecuteReader())
+                            using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                             {
-                                int i = 1;
-                                while (reader.Read())
+                                connection.Open();
+                                mapPool = new Dictionary<int, string>();
+                                SqlCommand query = new SqlCommand($"SELECT MAP FROM [dbo].[MapPool]", connection);
+                                using (var reader = query.ExecuteReader())
                                 {
-                                    mapPool.Add(i, reader[0].ToString());
-                                    i++;
+                                    int i = 1;
+                                    while (reader.Read())
+                                    {
+                                        mapPool.Add(i, reader[0].ToString());
+                                        i++;
+                                    }
                                 }
+                                connection.Close();
                             }
-                            connection.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
                         }
 
                         var result = await rcon.SendCommandAsync("sm_usrlst");
@@ -590,21 +588,28 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !match.KnifeRound)
                     {
-                        using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
+                        try
                         {
-                            connection.Open();
-                            mapPool = new Dictionary<int, string>();
-                            SqlCommand query = new SqlCommand($"SELECT MAP FROM [dbo].[MapPool]", connection);
-                            using (var reader = query.ExecuteReader())
+                            using (SqlConnection connection = new SqlConnection(ConfigTools.Config.SQLConnectionString))
                             {
-                                int i = 1;
-                                while (reader.Read())
+                                connection.Open();
+                                mapPool = new Dictionary<int, string>();
+                                SqlCommand query = new SqlCommand($"SELECT MAP FROM [dbo].[MapPool]", connection);
+                                using (var reader = query.ExecuteReader())
                                 {
-                                    mapPool.Add(i, reader[0].ToString());
-                                    i++;
+                                    int i = 1;
+                                    while (reader.Read())
+                                    {
+                                        mapPool.Add(i, reader[0].ToString());
+                                        i++;
+                                    }
                                 }
+                                connection.Close();
                             }
-                            connection.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
                         }
 
                         var result = await rcon.SendCommandAsync("sm_usrlst");
@@ -684,7 +689,7 @@ namespace kTVCSS
                             currentMapName = info.Map;
                             demoName = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss") + "_" + info.Map;
                             await RconHelper.SendCmd(rcon, "tv_record " + demoName);
-                            await RconHelper.LiveOnThree(rcon, match);
+                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
                             match = new Match(15);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
                             MatchPlayers = new List<Player>();
@@ -867,7 +872,7 @@ namespace kTVCSS
                         if (match.AScore == 0 && match.BScore == 0)
                         {
                             await RconHelper.SendCmd(rcon, "tv_stoprecord");
-                            await MatchEvents.ResetMatch(match.MatchId);
+                            await MatchEvents.ResetMatch(match.MatchId, server.ID);
                             await RconHelper.SendMessage(rcon, "The match is canceled!");
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                             await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
@@ -967,7 +972,7 @@ namespace kTVCSS
                 }
                 catch (Exception ex)
                 {
-                    Logger.Print(serverID, ex.Message, LogLevel.Error);
+                    Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
                 }
             }
 
@@ -1045,7 +1050,7 @@ namespace kTVCSS
 
             private void Rcon_OnDisconnected()
             {
-                Logger.Print(serverID, "RCON connection is closed", LogLevel.Warn);
+                Logger.Print(ServerID, "RCON connection is closed", LogLevel.Warn);
                 if (!match.IsMatch)
                 {
                     isCanBeginMatch = true;
@@ -1056,6 +1061,7 @@ namespace kTVCSS
             {
                 await RconHelper.SendMessage(rcon, "Basic commands: !ko3 !lo3 !bo1 !bo3 !me !cm !pause !pause5 !check");
                 await RconHelper.SendMessage(rcon, "Type !gethelp for getting all cmds available for you");
+                await RconHelper.SendMessage(rcon, "Note: everyone can begin a match or a knife round, along with bo1 and bo3 votes");
             }
 
             private async void CheckIsDeadMapVote()
@@ -1085,7 +1091,7 @@ namespace kTVCSS
                             if (match.AScore == 0 && match.BScore == 0)
                             {
                                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
-                                await MatchEvents.ResetMatch(match.MatchId);
+                                await MatchEvents.ResetMatch(match.MatchId, server.ID);
                                 await RconHelper.SendMessage(rcon, "The match is canceled!");
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
