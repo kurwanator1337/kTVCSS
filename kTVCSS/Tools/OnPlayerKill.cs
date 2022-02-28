@@ -11,23 +11,30 @@ namespace kTVCSS.Tools
     {
         public static async Task SetValues(string killerName, string killedName, string killerSteamID, string killedSteamID, int killerHeadshot, int serverId, int matchId)
         {
-            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            try
             {
-                await connection.OpenAsync();
-                SqlCommand query = new SqlCommand("[dbo].[OnPlayerKill]", connection)
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
-                    CommandType = System.Data.CommandType.StoredProcedure
-                };
-                query.Parameters.AddWithValue("@KILLERNAME", killerName);
-                query.Parameters.AddWithValue("@KILLEDNAME", killedName);
-                query.Parameters.AddWithValue("@KILLERSTEAM", killerSteamID);
-                query.Parameters.AddWithValue("@KILLEDSTEAM", killedSteamID);
-                query.Parameters.AddWithValue("@KILLERHS", killerHeadshot);
-                query.Parameters.AddWithValue("@SERVERID", serverId);
-                query.Parameters.AddWithValue("@ID", matchId);
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand("[dbo].[OnPlayerKill]", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    query.Parameters.AddWithValue("@KILLERNAME", killerName);
+                    query.Parameters.AddWithValue("@KILLEDNAME", killedName);
+                    query.Parameters.AddWithValue("@KILLERSTEAM", killerSteamID);
+                    query.Parameters.AddWithValue("@KILLEDSTEAM", killedSteamID);
+                    query.Parameters.AddWithValue("@KILLERHS", killerHeadshot);
+                    query.Parameters.AddWithValue("@SERVERID", serverId);
+                    query.Parameters.AddWithValue("@ID", matchId);
 
-                await query.ExecuteNonQueryAsync();
-                await connection.CloseAsync();
+                    await query.ExecuteNonQueryAsync();
+                    await connection.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
     }

@@ -81,7 +81,7 @@ namespace kTVCSS
                 checkList.RemoveAll(x => x.Duration == -1);
                 SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                 Logger.Print(server.ID, $"Created connection to {info.Name}", LogLevel.Trace);
-                await RconHelper.SendMessage(rcon, "Connection to kTVCSS host is established!");
+                await RconHelper.SendMessage(rcon, "Соединение до центрального сервера kTVCSS установлено!");
                 alertThread.Start(server);
 
                 var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
@@ -149,10 +149,6 @@ namespace kTVCSS
 
                         if (isResetFreezeTime)
                         {
-                            if (match.IsOvertime)
-                            {
-                                await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
-                            }
                             match.IsNeedSetTeamScores = true;
                             await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
                             isResetFreezeTime = !isResetFreezeTime;
@@ -168,7 +164,7 @@ namespace kTVCSS
                         
                         if (match.AScore == 0 && match.BScore == 0)
                         {
-                            await RconHelper.SendMessage(rcon, "Leaving the match will result in a ban.");
+                            //await RconHelper.SendMessage(rcon, "Выход с матча приведет к блокировке");
                         }
                     }
                 });
@@ -222,19 +218,19 @@ namespace kTVCSS
                                 {
                                     case 3:
                                         {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!");
+                                            //await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!");
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", info.Map, server.ID);
                                             break;
                                         }
                                     case 4:
                                         {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!");
+                                            //await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!");
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", info.Map, server.ID);
                                             break;
                                         }
                                     case 5:
                                         {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!");
+                                            //await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!");
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID);
                                             break;
                                         }
@@ -247,11 +243,11 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
                         if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
                         {
-                            await RconHelper.SendMessage(rcon, "Half time!");
+                            await RconHelper.SendMessage(rcon, "Тайм-аут!");
                             await RconHelper.SendCmd(rcon, "mp_freezetime 60");
                             Thread.Sleep(2000);
                             await RconHelper.SendCmd(rcon, "sm_swap @all");
-                            await RconHelper.SendMessage(rcon, "One minute timeout!");
+                            await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
                             isResetFreezeTime = true;
                             match.FirstHalf = false;
                             var _aScore = match.AScore;
@@ -283,7 +279,7 @@ namespace kTVCSS
 
                                 if (mapQueue.Count > 0 && isBestOfThree)
                                 {
-                                    await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 1 minute!");
+                                    await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!");
                                     Thread.Sleep(60000);
                                     await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                     mapQueue.Remove(mapQueue.FirstOrDefault());
@@ -305,7 +301,7 @@ namespace kTVCSS
 
                                             if (mapQueue.Count > 0 && isBestOfThree)
                                             {
-                                                await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 1 minute!");
+                                                await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!"); 
                                                 Thread.Sleep(60000);
                                                 await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                                 mapQueue.Remove(mapQueue.FirstOrDefault());
@@ -320,10 +316,10 @@ namespace kTVCSS
                                             match.AScoreOvertime = 0;
                                             match.BScoreOvertime = 0;
                                             match.IsOvertime = true;
-                                            await RconHelper.SendMessage(rcon, "Overtime!!!");
+                                            await RconHelper.SendMessage(rcon, "Овертайм!!!");
                                             await RconHelper.SendCmd(rcon, "mp_freezetime 60");
                                             Thread.Sleep(2000);
-                                            await RconHelper.SendMessage(rcon, "One minute timeout!");
+                                            await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
                                             isResetFreezeTime = true;
                                             match.MaxRounds = 3;
                                         }
@@ -340,7 +336,7 @@ namespace kTVCSS
 
                                 if (mapQueue.Count > 0 && isBestOfThree)
                                 {
-                                    await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 1 minute!");
+                                    await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!");
                                     Thread.Sleep(60000);
                                     await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                     mapQueue.Remove(mapQueue.FirstOrDefault());
@@ -374,12 +370,12 @@ namespace kTVCSS
                     {
                         if (mapPool.Count() == 1)
                         {
-                            await RconHelper.SendMessage(rcon, $"There are no maps to pick or ban!");
+                            await RconHelper.SendMessage(rcon, $"Нет карт, которые можно было бы выбрать или запретить!");
                             return;
                         }
                         if (!mapPool.ContainsKey(mapNum))
                         {
-                            await RconHelper.SendMessage(rcon, $"You've been selected the map that already is used!");
+                            await RconHelper.SendMessage(rcon, $"Вы выбрали карту, которая уже была забанена или выбрана!");
                             return;
                         }
 
@@ -426,8 +422,8 @@ namespace kTVCSS
                         {
                             if (isBestOfOneStarted)
                             {
-                                await RconHelper.SendMessage(rcon, $"Selected map: {mapPool.FirstOrDefault().Value.Trim()}");
-                                await RconHelper.SendMessage(rcon, $"Autochanging to {mapPool.FirstOrDefault().Value.Trim()} in 5 seconds");
+                                await RconHelper.SendMessage(rcon, $"Выбрана карта: {mapPool.FirstOrDefault().Value.Trim()}");
+                                await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapPool.FirstOrDefault().Value.Trim()} через 5 секунд!");
                                 Thread.Sleep(5000);
                                 await RconHelper.SendCmd(rcon, $"changelevel {mapPool.FirstOrDefault().Value}");
                                 currentMapSelector = string.Empty;
@@ -439,8 +435,8 @@ namespace kTVCSS
                             if (isBestOfThree)
                             {
                                 mapQueue.Add(mapPool.FirstOrDefault().Value.Trim());
-                                await RconHelper.SendMessage(rcon, $"The last map is: {mapPool.FirstOrDefault().Value.Trim()}");
-                                await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 5 seconds");
+                                await RconHelper.SendMessage(rcon, $"Решающей картой будет: {mapPool.FirstOrDefault().Value.Trim()}");
+                                await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через 5 секунд!");
                                 Thread.Sleep(5000);
                                 await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                 mapQueue.Remove(mapQueue.FirstOrDefault());
@@ -456,8 +452,8 @@ namespace kTVCSS
                         {
                             if (mapPool.Count() != 1)
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
-                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to ban");
+                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector}, Ваша очередь банить карту!");
+                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, пожалуйста, напишите номер карты, чтобы забанить ее!");
                             }
                         }
 
@@ -465,13 +461,13 @@ namespace kTVCSS
                         {
                             if (mapPool.Count() == 6 || mapPool.Count() == 7)
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to pick!");
-                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to pick");
+                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector}, Ваша очередь пикать карту!");
+                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, пожалуйста, напишите номер карты, чтобы пикнуть ее!");
                             }
                             else
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
-                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, please choose the number of the map to ban");
+                                await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector}, Ваша очередь банить карту!");
+                                await RconHelper.SendMessage(rcon, $"{currentMapSelector}, пожалуйста, напишите номер карты, чтобы забанить ее!");
                             }
                         }
                     }
@@ -498,15 +494,15 @@ namespace kTVCSS
                     {
                         if (match.TacticalPauses != 0)
                         {
-                            await RconHelper.SendMessage(rcon, "The next round will be paused for 1 minute!");
+                            await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена минутная пауза!");
                             await RconHelper.SendCmd(rcon, "mp_freezetime 60");
                             match.TacticalPauses--;
                             match.Pause = true;
-                            await RconHelper.SendMessage(rcon, $"You have {match.TacticalPauses} tactical pauses left!");
+                            await RconHelper.SendMessage(rcon, $"У Вас осталось {match.TacticalPauses} тактических перерывов!");
                         }
                         else
                         {
-                            await RconHelper.SendMessage(rcon, "You can no longer pause the game!");
+                            await RconHelper.SendMessage(rcon, "Вы больше не можете брать тактический перерыв!");
                         }
                     }
 
@@ -514,15 +510,15 @@ namespace kTVCSS
                     {
                         if (match.TechnicalPauses != 0)
                         {
-                            await RconHelper.SendMessage(rcon, "The next round will be paused for 5 minutes!");
+                            await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена пятиминутная пауза!");
                             await RconHelper.SendCmd(rcon, "mp_freezetime 300");
                             match.TechnicalPauses--;
                             match.Pause = true;
-                            await RconHelper.SendMessage(rcon, $"You have {match.TechnicalPauses} technical pauses left!");
+                            await RconHelper.SendMessage(rcon, $"У Вас осталось {match.TechnicalPauses} технических перерывов!");
                         }
                         else
                         {
-                            await RconHelper.SendMessage(rcon, "You can no longer pause the game!");
+                            await RconHelper.SendMessage(rcon, "Вы больше не можете брать технический перерыв!");
                         }
                     }
 
@@ -581,9 +577,9 @@ namespace kTVCSS
                             currentMapSelector = ctPlayerSelector;
                         }
 
-                        await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
-                        await RconHelper.SendMessage(rcon, $"The first one - {currentMapSelector}");
-                        await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
+                        await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector}, Ваша очередь банить карту!");
+                        await RconHelper.SendMessage(rcon, $"Первым начинает - {currentMapSelector}");
+                        await RconHelper.SendMessage(rcon, $"Пожалуйста, напишите номер карты, чтобы ее забанить:");
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!bo1") && !isBestOfOneStarted && !isBestOfThree && !match.IsMatch && isCanBeginMatch && !match.KnifeRound)
@@ -647,16 +643,16 @@ namespace kTVCSS
                         };
                         boThread.Start();
 
-                        await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector} turn to ban!");
-                        await RconHelper.SendMessage(rcon, $"The first one - {currentMapSelector}");
-                        await RconHelper.SendMessage(rcon, $"Please choose the number of the map to ban:");
+                        await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector}, Ваша очередь банить карту!");
+                        await RconHelper.SendMessage(rcon, $"Первым начинает - {currentMapSelector}");
+                        await RconHelper.SendMessage(rcon, $"Пожалуйста, напишите номер карты, чтобы ее забанить:");
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!ko3") && isCanBeginMatch && !match.KnifeRound)
                     {
                         if (OnlinePlayers.Count < match.MinPlayersToStart)
                         {
-                            await RconHelper.SendCmd(rcon, "sm_msay The match can not be started until the players count less than 8");
+                            await RconHelper.SendCmd(rcon, "sm_msay Матч не может быть запущен, пока игроков менее восьми");
                             return;
                         }
                         if (!match.IsMatch)
@@ -669,7 +665,7 @@ namespace kTVCSS
                         {
                             if (match.IsMatch)
                             {
-                                await RconHelper.SendMessage(rcon, "The match is already started!");
+                                await RconHelper.SendMessage(rcon, "Матч уже запущен!");
                             }
                         }
                     }
@@ -678,7 +674,7 @@ namespace kTVCSS
                     {
                         if (OnlinePlayers.Count < match.MinPlayersToStart)
                         {
-                            await RconHelper.SendCmd(rcon, "sm_msay The match can not be started until the players count less than 8");
+                            await RconHelper.SendCmd(rcon, "sm_msay Матч не может быть запущен, пока игроков менее восьми");
                             return;
                         }
                         if (!match.IsMatch)
@@ -701,7 +697,7 @@ namespace kTVCSS
                         }
                         else
                         {
-                            await RconHelper.SendMessage(rcon, "The match is already started!");
+                            await RconHelper.SendMessage(rcon, "Матч уже запущен!");
                         }
                     }
 
@@ -730,7 +726,7 @@ namespace kTVCSS
                         }
                         else
                         {
-                            await RconHelper.SendMessage(rcon, "There are no matches found for recovery!");
+                            await RconHelper.SendMessage(rcon, "Не найдено матчей для восстановления!");
                         }
                     }
 
@@ -743,20 +739,21 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!gethelp") && !match.IsMatch)
                     {
-                        await RconHelper.SendMessage(rcon, "!ko3 - starts a knife round");
-                        await RconHelper.SendMessage(rcon, "!lo3 - starts a new match");
-                        await RconHelper.SendMessage(rcon, "!bo1 - executes a vote for playing bo1 match");
-                        await RconHelper.SendMessage(rcon, "!bo3 - executes a vote for playing bo3 match");
-                        await RconHelper.SendMessage(rcon, "!nl - stops a current match half");
-                        await RconHelper.SendMessage(rcon, "!score - prints a match score");
-                        await RconHelper.SendMessage(rcon, "!cm - force ends a current match");
-                        await RconHelper.SendMessage(rcon, "!me - print your stats");
-                        await RconHelper.SendMessage(rcon, "!recover - recovers a match due to server crash or etc. Dont use it now");
+                        await RconHelper.SendMessage(rcon, "!ko3 - запустить ножевой раунд");
+                        await RconHelper.SendMessage(rcon, "!lo3 - запустить матч");
+                        await RconHelper.SendMessage(rcon, "!bo1 - запустить голосование для bo1 матча");
+                        await RconHelper.SendMessage(rcon, "!bo3 - запустить голосование для bo3 матча");
+                        await RconHelper.SendMessage(rcon, "!score - выводит счет матча");
+                        await RconHelper.SendMessage(rcon, "!cm - принудительно остановить матч");
+                        await RconHelper.SendMessage(rcon, "!me - вывод Вашей статистики");
+                        await RconHelper.SendMessage(rcon, "!pause - взять минутный перерыв (4 раза за матч)");
+                        await RconHelper.SendMessage(rcon, "!pause5 - взять пятиминутный перерыв (2 раза за матч)");
+                        await RconHelper.SendMessage(rcon, "!recover - восстанавливает матч после краша сервера (пока отключено)");
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message == "!check")
                     {
-                        await RconHelper.SendCmd(rcon, "sm_vote \"Are you ready ?\"");
+                        await RconHelper.SendCmd(rcon, "sm_vote \"Вы готовы?\"");
                     }
 
                     string[] chatWords = chat.Message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -764,7 +761,7 @@ namespace kTVCSS
                     {
                         if (ForbiddenWords.Contains(word.ToLower()))
                         {
-                            await RconHelper.SendCmd(rcon, $"sm_gag \"{chat.Player.Name}\" 10 You are muted due to using forbidden words ({word})");
+                            await RconHelper.SendCmd(rcon, $"sm_gag \"{chat.Player.Name}\" 10 Вы были заглушены за использование запрещенных слов ({word})");
                             break;
                         }
                     }
@@ -803,7 +800,7 @@ namespace kTVCSS
                         {
                             if (connection.Player.Name.ToLower().Contains(word))
                             {
-                                await RconHelper.SendCmd(rcon, $"sm_kick #{connection.Player.ClientId} Your nickname contains forbidden word ({word})");
+                                await RconHelper.SendCmd(rcon, $"sm_kick #{connection.Player.ClientId} Ваш ник содержит запрещенные слова ({word})");
                                 break;
                             }
                         }
@@ -815,12 +812,12 @@ namespace kTVCSS
                 log.Listen<ChangeSides>(async result =>
                 {
                     await RconHelper.SendCmd(rcon, "sm_swap @all");
-                    await RconHelper.SendMessage(rcon, "Type !lo3 to start a match!");
+                    await RconHelper.SendMessage(rcon, "Напишите !lo3 для запуска матча!");
                 });
 
                 log.Listen<NoChangeSides>(async result =>
                 {
-                    await RconHelper.SendMessage(rcon, "Type !lo3 to start a match!");
+                    await RconHelper.SendMessage(rcon, "Напишите !lo3 для запуска матча!");
                 });
 
                 log.Listen<NameChange>(async result =>
@@ -829,7 +826,7 @@ namespace kTVCSS
                     {
                         if (result.NewName.ToLower().Contains(word))
                         {
-                            await RconHelper.SendCmd(rcon, $"sm_kick #{result.Player.ClientId} Your nickname contains forbidden word ({word})");
+                            await RconHelper.SendCmd(rcon, $"sm_kick #{result.Player.ClientId} Ваш ник содержит запрещенные слова ({word})");
                             break;
                         }
                     }
@@ -847,33 +844,33 @@ namespace kTVCSS
                     }
                 });
 
-                log.Listen<NotLive>(async result =>
-                {
-                    await RconHelper.SendMessage(rcon, "!nl is temporarily disabled");
-                    return;
-                    if (!match.IsMatch) return;
+                //log.Listen<NotLive>(async result =>
+                //{
+                //    await RconHelper.SendMessage(rcon, "!nl is temporarily disabled");
+                //    return;
+                //    if (!match.IsMatch) return;
 
-                    if (match.AScore + match.BScore == match.MaxRounds || (match.AScore == 0 && match.BScore == 0))
-                    {
-                        match.IsMatch = false;
-                        await RconHelper.SendMessage(rcon, "The current match half is reseted!");
-                        await RconHelper.SendCmd(rcon, "mp_restartgame 1");
-                    }
-                    else
-                    {
-                        await RconHelper.SendMessage(rcon, "You're not allowed to reset match half!");
-                    }
-                });
+                //    if (match.AScore + match.BScore == match.MaxRounds || (match.AScore == 0 && match.BScore == 0))
+                //    {
+                //        match.IsMatch = false;
+                //        await RconHelper.SendMessage(rcon, "The current match half is reseted!");
+                //        await RconHelper.SendCmd(rcon, "mp_restartgame 1");
+                //    }
+                //    else
+                //    {
+                //        await RconHelper.SendMessage(rcon, "You're not allowed to reset match half!");
+                //    }
+                //});
 
                 log.Listen<CancelMatch>(async result =>
                 {
                     if (match.IsMatch)
                     {
-                        if (match.AScore == 0 && match.BScore == 0)
+                        if (match.AScore == 0 && match.BScore == 0 || (match.AScore + match.BScore < 8))
                         {
                             await RconHelper.SendCmd(rcon, "tv_stoprecord");
                             await MatchEvents.ResetMatch(match.MatchId, server.ID);
-                            await RconHelper.SendMessage(rcon, "The match is canceled!");
+                            await RconHelper.SendMessage(rcon, "Матч был отменен!");
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                             await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                             isCanBeginMatch = true;
@@ -900,7 +897,7 @@ namespace kTVCSS
 
                         if (mapQueue.Count > 0 && isBestOfThree)
                         {
-                            await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 1 minute!");
+                            await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через минуту!");
                             Thread.Sleep(60000);
                             await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                             mapQueue.Remove(mapQueue.FirstOrDefault());
@@ -922,18 +919,19 @@ namespace kTVCSS
                 {
                     if (connection.Player.SteamId != "STEAM_ID_PENDING" && connection.Player.SteamId != "BOT")
                     {
-                        if (match.IsMatch)
-                        {
-                            Thread banThread = new Thread(BanOnLeftTheMatch)
-                            {
-                                IsBackground = true
-                            };
-                            banThread.Start(connection.Player);
-                        }
-                        else
-                        {
-                            OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
-                        }
+                        OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
+                        //if (match.IsMatch)
+                        //{
+                        //    Thread banThread = new Thread(BanOnLeftTheMatch)
+                        //    {
+                        //        IsBackground = true
+                        //    };
+                        //    banThread.Start(connection.Player);
+                        //}
+                        //else
+                        //{
+                        //    OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
+                        //}
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                     }
                 });
@@ -979,14 +977,15 @@ namespace kTVCSS
             private async void BanOnLeftTheMatch(object _player)
             {
                 Player player = (Player)_player;
+                await RconHelper.SendMessage(rcon, $"У игрока {player.Name} есть 3 минуты, чтобы не получить бан за выход с матча!");
                 int previousPlayersCount = OnlinePlayers.Count;
                 OnlinePlayers.RemoveAll(x => x.SteamId == player.SteamId);
                 Thread.Sleep(3 * 60 * 1000);
                 if (!OnlinePlayers.Where(x => x.SteamId == player.SteamId).Any())
                 {
-                    if (match.IsMatch && previousPlayersCount < OnlinePlayers.Count)
+                    if (match.IsMatch && !(previousPlayersCount < OnlinePlayers.Count))
                     {
-                        await RconHelper.SendMessage(rcon, $"{player.Name} was banned for left the match!");
+                        await RconHelper.SendMessage(rcon, $"{player.Name} был заблокирован за выход с матча!");
                         InsertBan(player.SteamId);
                     }
                 }
@@ -1005,10 +1004,9 @@ namespace kTVCSS
                     looser = tName;
                 }
 
-                await RconHelper.SendMessage(rcon, "The match is over!");
-                await RconHelper.SendMessage(rcon, $"Congratulations to the team {tags[winningTeam]}!");
-                await RconHelper.SendMessage(rcon, $"{tags[looser]}, good luck next time.");
-                await RconHelper.SendMessage(rcon, "Thanks to everyone, cya!");
+                await RconHelper.SendMessage(rcon, "Матч завершен!");
+                await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!");
+                await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.");
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", info.Map, server.ID);
                 await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
@@ -1033,10 +1031,9 @@ namespace kTVCSS
                     looser = tName;
                 }
 
-                await RconHelper.SendMessage(rcon, "The match is over!");
-                await RconHelper.SendMessage(rcon, $"Congratulations to the team {tags[winningTeam]}!");
-                await RconHelper.SendMessage(rcon, $"{tags[looser]}, good luck next time.");
-                await RconHelper.SendMessage(rcon, "Thanks to everyone, cya!");
+                await RconHelper.SendMessage(rcon, "Матч завершен!");
+                await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!");
+                await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.");
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", mapName, server.ID);
                 await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
@@ -1059,9 +1056,9 @@ namespace kTVCSS
 
             private async void PrintAlertMessages(RCON rcon)
             {
-                await RconHelper.SendMessage(rcon, "Basic commands: !ko3 !lo3 !bo1 !bo3 !me !cm !pause !pause5 !check");
-                await RconHelper.SendMessage(rcon, "Type !gethelp for getting all cmds available for you");
-                await RconHelper.SendMessage(rcon, "Note: everyone can begin a match or a knife round, along with bo1 and bo3 votes");
+                await RconHelper.SendMessage(rcon, "Базовые команды: !ko3 !lo3 !bo1 !bo3 !me !cm !pause !pause5 !check");
+                await RconHelper.SendMessage(rcon, "Напишите !gethelp для получения описания всех команд");
+                await RconHelper.SendMessage(rcon, "Примечание: запуск матча может быть осуществлен без админских прав");
             }
 
             private async void CheckIsDeadMapVote()
@@ -1070,7 +1067,7 @@ namespace kTVCSS
                 if (isBestOfOneStarted)
                 {
                     isBestOfOneStarted = !isBestOfOneStarted;
-                    await RconHelper.SendMessage(rcon, "The vote for map ban/pick is reset");
+                    await RconHelper.SendMessage(rcon, "Голосование bo1/bo3 было аннулировано!");
                 }
             }
 
@@ -1088,11 +1085,11 @@ namespace kTVCSS
                     {
                         if (OnlinePlayers.Count < match.MinPlayersToStop)
                         {
-                            if (match.AScore == 0 && match.BScore == 0)
+                            if (match.AScore == 0 && match.BScore == 0 || (match.AScore + match.BScore < 8))
                             {
                                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
                                 await MatchEvents.ResetMatch(match.MatchId, server.ID);
-                                await RconHelper.SendMessage(rcon, "The match is canceled!");
+                                await RconHelper.SendMessage(rcon, "Матч отменен!");
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                                 isCanBeginMatch = true;
@@ -1119,7 +1116,7 @@ namespace kTVCSS
 
                             if (mapQueue.Count > 0 && isBestOfThree)
                             {
-                                await RconHelper.SendMessage(rcon, $"Autochanging to {mapQueue.FirstOrDefault().Trim()} in 1 minute!");
+                                await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через минуту!");
                                 Thread.Sleep(60000);
                                 await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                 mapQueue.Remove(mapQueue.FirstOrDefault());

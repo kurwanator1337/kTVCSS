@@ -69,6 +69,10 @@ namespace kTVCSS.Tools
                         }
                     }
                 }
+                if (match.IsOvertime)
+                {
+                    await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
+                }
             }
             catch (Exception ex)
             {

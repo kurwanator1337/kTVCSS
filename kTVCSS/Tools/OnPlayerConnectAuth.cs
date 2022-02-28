@@ -11,35 +11,43 @@ namespace kTVCSS.Tools
     {
         public static async Task<bool> AuthPlayer(string SteamID, string Name)
         {
-            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+            try
             {
-                await connection.OpenAsync();
-                SqlCommand query = new SqlCommand("[dbo].[OnPlayerConnectAuth]", connection)
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
-                    CommandType = System.Data.CommandType.StoredProcedure
-                };
-                SqlParameter nameParam = new SqlParameter
-                {
-                    ParameterName = "@NAME",
-                    Value = Name
-                };
-                SqlParameter steamParam = new SqlParameter
-                {
-                    ParameterName = "@STEAMID",
-                    Value = SteamID
-                };
-                query.Parameters.Add(nameParam);
-                query.Parameters.Add(steamParam);
-                var result = await query.ExecuteScalarAsync();
-                await connection.CloseAsync();
-                if (int.Parse(result.ToString()) == 0)
-                {
-                    return false;
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand("[dbo].[OnPlayerConnectAuth]", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    SqlParameter nameParam = new SqlParameter
+                    {
+                        ParameterName = "@NAME",
+                        Value = Name
+                    };
+                    SqlParameter steamParam = new SqlParameter
+                    {
+                        ParameterName = "@STEAMID",
+                        Value = SteamID
+                    };
+                    query.Parameters.Add(nameParam);
+                    query.Parameters.Add(steamParam);
+                    var result = await query.ExecuteScalarAsync();
+                    await connection.CloseAsync();
+                    if (int.Parse(result.ToString()) == 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
-                else
-                {
-                    return true;
-                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                return true;
             }
         }
     }

@@ -7,3 +7,5 @@
 /kTVCSS/obj
 /Plugins-SourcePawn/include/clientmod.inc
 /Plugins-SourcePawn/include/clientmod
+/Plugins-SourcePawn/scripting/clientmod
+/Plugins-SourcePawn/scripting/clientmod.inc

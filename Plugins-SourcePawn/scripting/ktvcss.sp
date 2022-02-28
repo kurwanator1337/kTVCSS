@@ -1,6 +1,6 @@
-#define PLUGIN_NAME           "kTVCSS adds"
+#define PLUGIN_NAME           "kTVCSS HELPER"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.3"
+#define PLUGIN_VERSION        "1.3.1"
 
 #include <sourcemod>
 #include <sdktools>
@@ -67,9 +67,9 @@ public Action:CancelMatch(client, args)
         return
     }
     Menu menu = new Menu(Handle_VoteMenu);
-    menu.SetTitle("Cancel match?");
-    menu.AddItem("Да", "Yes");
-    menu.AddItem("Нет", "No");
+    menu.SetTitle("Отменить матч?");
+    menu.AddItem("Да", "Да");
+    menu.AddItem("Нет", "Нет");
     menu.ExitButton = false;
     menu.DisplayVoteToAll(20);
     g_votetype = 1;
@@ -78,17 +78,17 @@ public Action:CancelMatch(client, args)
 // Создаем меню nl
 public Action:NotLive(client, args)
 {
-    if (IsVoteInProgress())
-    {
-        return
-    }
-    Menu menu = new Menu(Handle_VoteMenu);
-    menu.SetTitle("Cancel half?");
-    menu.AddItem("Да", "Yes");
-    menu.AddItem("Нет", "No");
-    menu.ExitButton = false;
-    menu.DisplayVoteToAll(20);
-    g_votetype = 2;
+    // if (IsVoteInProgress())
+    // {
+    //     return
+    // }
+    // Menu menu = new Menu(Handle_VoteMenu);
+    // menu.SetTitle("Cancel half?");
+    // menu.AddItem("Да", "Да");
+    // menu.AddItem("Нет", "Нет");
+    // menu.ExitButton = false;
+    // menu.DisplayVoteToAll(20);
+    // g_votetype = 2;
 }
 
 // Создаем handle для голосования
@@ -128,7 +128,7 @@ public int Handle_VoteMenu(Menu menu, MenuAction action, int param1, int param2)
 		}
 		else
 		{
-        	CPrintToChatAll("{fullred}The vote failed");
+        	CPrintToChatAll("{blue}Голосование провалилось!");
         	//PrintToChatAll("%i", voteCount);
         	voteCount = 0;
         }
@@ -163,7 +163,7 @@ public void Event_CashToChat(Event hEvent, const char[] sEvName, bool bDontBroad
 				{
 					if (GetClientTeam(i) == GetClientTeam(j))
 					{
-						CPrintToChat(i, "{fullred}%N ===> $%i", j, GetEntProp(j, Prop_Send, "m_iAccount"));
+						CPrintToChat(i, "{blue}%N ===> $%i", j, GetEntProp(j, Prop_Send, "m_iAccount"));
 					}
 				}
 			}
@@ -195,7 +195,7 @@ public Action:ChooseTeam(client, args)
 	
 	if (GetConVarBool(isMatch) && GetClientTeam(client) > 1)
 	{
-		CPrintToChat(client, "{fullred}Side switching blocked!");
+		CPrintToChat(client, "{blue}Смена сторон заблокирована!");
 		return Plugin_Stop;
 	}
 	return Plugin_Continue;
@@ -211,9 +211,9 @@ public Action:ChangeVote(int client, int args)
     	return;
    	}
 	Menu change = new Menu(Handle_ChangeVote);
-	change.SetTitle("Change sides?");
-	change.AddItem("Да", "Yes");
-	change.AddItem("Нет", "No");
+	change.SetTitle("Сменить стороны?");
+	change.AddItem("Да", "Да");
+	change.AddItem("Нет", "Нет");
 	change.ExitButton = false;
 	char tempbuff[2];
 	GetCmdArg(1, tempbuff, sizeof(tempbuff))
@@ -262,7 +262,7 @@ public Action SYS_Say(int client, int args)
         ReplaceString(l_buffer, sizeof(l_buffer), "{ ", "{", true);
         ReplaceString(l_buffer, sizeof(l_buffer), " }", "}", true);
         char l_MSG[1024];
-    	Format(l_MSG, sizeof(l_MSG), "{fullred}[kTVCSS] %s", l_buffer);
+    	Format(l_MSG, sizeof(l_MSG), "{blue}[kTVCSS] %s", l_buffer);
     	//CFormatColor(l_MSG, sizeof(l_MSG), 0);
     	
     	CPrintToChatAll("%s", l_MSG);
@@ -533,7 +533,7 @@ public Action CS_OnBuyCommand(int client, const char[] weapon)
 
 	if (StrEqual(weapon, "nvgs", false))
 	{
-		CPrintToChat(client, "{fullred}[kTVCSS] {white}Nightvision Blocked!");
+		CPrintToChat(client, "{blue}[kTVCSS] {white}Nightvision Blocked!");
 		return Plugin_Handled;
 	}
 	
