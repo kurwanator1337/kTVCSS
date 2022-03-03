@@ -1,6 +1,6 @@
 #define PLUGIN_NAME           "kTVCSS HELPER"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.3.1"
+#define PLUGIN_VERSION        "1.3.2"
 
 #include <sourcemod>
 #include <sdktools>
@@ -24,6 +24,8 @@ new g_votetype = 0;
 ConVar:isMatch = null;
 Handle:Pause_Max = null;
 int grenadecount[MAXPLAYERS][3];
+//Handle:Dt_cam[MAXPLAYERS] = INVALID_HANDLE;
+
 // Starts on plugin start
 public void OnPluginStart()
 {
@@ -34,7 +36,7 @@ public void OnPluginStart()
 	HookEvent("round_start", Event_CashToChat);
 	// Отмена половины и матча
 	RegConsoleCmd("sm_cm", CancelMatch);
-	RegConsoleCmd("sm_nl", NotLive);
+	//RegConsoleCmd("sm_nl", NotLive);
 	//Смена сторон
 	RegConsoleCmd("jointeam", ChooseTeam);
 	RegConsoleCmd("spectate", ChooseTeam);
@@ -57,6 +59,8 @@ public void OnPluginStart()
 	HookEvent("bomb_exploded", expl_score);
 	//Запрет покупки гранат
 	HookEvent("round_start", grenadecounter_null);
+	//HookEvent("round_start", Dtcam_null_all);
+	//HookEvent("player_death", Spec_switch);
 }
 
 // Создаем меню cm
@@ -76,20 +80,20 @@ public Action:CancelMatch(client, args)
 }
 
 // Создаем меню nl
-public Action:NotLive(client, args)
+/*public Action:NotLive(client, args)
 {
-    // if (IsVoteInProgress())
-    // {
-    //     return
-    // }
-    // Menu menu = new Menu(Handle_VoteMenu);
-    // menu.SetTitle("Cancel half?");
-    // menu.AddItem("Да", "Да");
-    // menu.AddItem("Нет", "Нет");
-    // menu.ExitButton = false;
-    // menu.DisplayVoteToAll(20);
-    // g_votetype = 2;
-}
+    if (IsVoteInProgress())
+    {
+        return
+    }
+    Menu menu = new Menu(Handle_VoteMenu);
+    menu.SetTitle("Cancel half?");
+    menu.AddItem("Да", "Да");
+    menu.AddItem("Нет", "Нет");
+    menu.ExitButton = false;
+    menu.DisplayVoteToAll(20);
+    g_votetype = 2;
+} */
 
 // Создаем handle для голосования
 public int Handle_VoteMenu(Menu menu, MenuAction action, int param1, int param2)
@@ -356,7 +360,7 @@ public Action match_recover(int client, int args)
 		
 		int i_client = -1;
 		ReplaceString(Arg_Auth, sizeof(Arg_Auth), "|", ":", true);
-		for (new k_client = 1; k_client < MAXPLAYERS; k_client++)
+		for (new k_client = 1; k_client <= MaxClients; k_client++)
 		{
 			if (IsClientInGame(k_client) && !IsFakeClient(k_client) && GetClientTeam(k_client) > 1)
 			{
@@ -452,7 +456,7 @@ public Action player_score_set(int client, int args)
     	
     	int i_client = -1;
     	ReplaceString(Arg_Auth, sizeof(Arg_Auth), "|", ":", true);
-    	for (new k_client = 1; k_client < MAXPLAYERS; k_client++)
+    	for (new k_client = 1; k_client <= MaxClients; k_client++)
     	{
 			if (IsClientInGame(k_client) && !IsFakeClient(k_client) && GetClientTeam(k_client) > 1)
 			{
@@ -513,7 +517,7 @@ public void expl_score(Event event, const char[] name, bool dontBroadcast)
 
 public void grenadecounter_null(Event hEvent, const char[] sEvName, bool bDontBroadcast) 
 {
-	for (new i = 1; i < MAXPLAYERS; i++) 
+	for (new i = 1; i < MaxClients; i++) 
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i))
 		{
@@ -579,3 +583,8 @@ public Action CS_OnBuyCommand(int client, const char[] weapon)
 	}
 	return Plugin_Continue;
 }
+
+/*public Action:Spec_switch(client, args)
+{
+	CreateTimer(1.4, Timer Spec_next);
+}*/
