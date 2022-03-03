@@ -1,0 +1,16 @@
+"Phrases"
+{
+	"Title"
+	{
+		"en"		"ClientMod players:"
+		"ru"		"Игроки с ClientMod:"
+	}
+	
+	"ClientMod"
+	{
+		"#format"	"{1:s},{2:N}"
+		"en"		"v{1} | {2}"
+		"ru"		"v{1} | {2}"
+	}
+	
+}

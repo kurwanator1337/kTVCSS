@@ -1,0 +1,38 @@
+"Phrases"
+{
+	"Admins_Online"
+	{
+		"#format"	"{1:s}"
+		"en"		"{GREEN}[Admins] {GRAY}Admins online are{DEFAULT}: {RED}{1}{DEFAULT}."
+		"ru"		"{GREEN}[Admins] {GRAY}Администраторы онлайн{DEFAULT}: {RED}{1}{DEFAULT}."
+	}
+	
+	"Admins_Online_Menu"
+	{
+		"en"		"Admins online:"
+		"ru"		"Администраторы на сервере:"
+	}
+	
+	"No_Admins"
+	{
+		"en"		"{GREEN}[Admins] {RED}There is currently no administration{DEFAULT}."
+		"ru"		"{GREEN}[Admins] {RED}На данный момент, на сервере нет администрации{DEFAULT}."
+	}
+	
+	"Tags"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{DEFAULT}[{1}{DEFAULT}] {RED}{2}"
+	}
+	
+	"Tags_Menu"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"[{1}] {2}"
+	}
+	
+	"Seperation" 	// Разделение
+	{
+		"en"		" {DEFAULT},{RED} "
+	}
+}

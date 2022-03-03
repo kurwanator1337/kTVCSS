@@ -1,0 +1,38 @@
+"Phrases"
+{
+	"Swap"
+	{
+		"#format"		"{1:c},{2:c},{3:s},{4:c},{5:c},{6:s},{7:c}"
+		"en"			"{1}[SM] Player {2}{3}{4} will be moved to team {5}{6}{7}"
+	}
+	"Swap Cancel"
+	{
+		"#format"		"{1:c},{2:c},{3:s},{4:c},{5:c},{6:s},{7:c}"
+		"en"			"{1}[SM] Player {2}{3}{4} will no longer be moved to team {5}{6}{7}"
+	}
+	"Swap Now"
+	{
+		"en"			"Change team"
+	}
+	"Swap Round"
+	{
+		"en"			"Change team later"
+	}
+	"No target"
+	{
+		"#format"		"{1:c},{2:c},{3:s},{4:c}"
+		"en"			"{1}[SM] Target {2}{3}{4} not found"
+	}
+	"Bad targets"
+	{
+		"en"			"[SM] Players must be in opposite teams"
+	}
+	"Exchange Now"
+	{
+		"en"			"Exchange players"
+	}
+	"Exchange Round"
+	{
+		"en"			"Exchange players later"
+	}
+}

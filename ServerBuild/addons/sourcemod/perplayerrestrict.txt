@@ -1,0 +1,24 @@
+"PerPlayer"
+{
+	"awp"
+	{
+		"default"		"-1"
+		"10"			"1"
+		"18"			"2"
+	}
+	"usp"
+	{
+		"default"		"-1"
+		"18"			"0"
+	}
+	"flashbang"
+	{
+		"default"		"-1"
+		"20"			"10"
+	}
+	"defuser"
+	{
+		"default"		"-1"
+		"20"			"100"
+	}
+}

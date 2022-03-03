@@ -932,7 +932,7 @@ namespace kTVCSS
                         //{
                         //    OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
                         //}
-                        Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
+                        Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
                     }
                 });
 
