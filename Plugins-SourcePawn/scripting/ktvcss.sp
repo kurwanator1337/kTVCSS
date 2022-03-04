@@ -24,7 +24,6 @@ new g_votetype = 0;
 ConVar:isMatch = null;
 Handle:Pause_Max = null;
 int grenadecount[MAXPLAYERS][3];
-//Handle:Dt_cam[MAXPLAYERS] = INVALID_HANDLE;
 
 // Starts on plugin start
 public void OnPluginStart()
@@ -60,7 +59,7 @@ public void OnPluginStart()
 	//Запрет покупки гранат
 	HookEvent("round_start", grenadecounter_null);
 	//HookEvent("round_start", Dtcam_null_all);
-	//HookEvent("player_death", Spec_switch);
+	HookEvent("player_death", Spec_switch);
 }
 
 // Создаем меню cm
@@ -584,7 +583,36 @@ public Action CS_OnBuyCommand(int client, const char[] weapon)
 	return Plugin_Continue;
 }
 
-/*public Action:Spec_switch(client, args)
+public Action:Spec_switch(Event hEvent, const char[] sEvName, bool bDontBroadcast)
 {
-	CreateTimer(1.4, Timer Spec_next);
-}*/
+	int client = GetClientOfUserId(GetEventInt(hEvent, "userid"));
+	if (GetConVarInt(isMatch) == 1) 
+	{
+		CreateTimer(1.4,  SpecTimer, client);
+	}
+}
+
+public Action:SpecTimer(Handle:timer, any:client)
+{
+	new client_team = GetClientTeam(client);
+	new target = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
+	//new last_target = GetLastTarget(client_team);
+	new new_target = -1;
+	for (new i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && GetClientTeam(i) == client_team && IsPlayerAlive(i))
+		{
+			new_target = i;
+			if (new_target > target/* || target == last_target*/)
+			{
+				break;
+			}
+		}
+	}
+	if (new_target != -1)
+	{
+		SetEntProp(client, Prop_Send, "m_iObserverMode", 4);
+		SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", new_target);
+		FakeClientCommand(client, "spec_mode 1");
+	}
+}
