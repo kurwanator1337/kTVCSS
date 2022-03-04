@@ -9,3 +9,8 @@
 /Plugins-SourcePawn/include/clientmod
 /Plugins-SourcePawn/scripting/clientmod
 /Plugins-SourcePawn/scripting/clientmod.inc
+/Plugins/include/clientmod
+/Plugins/include
+/Plugins/plugins
+/Plugins/scripting/clientmod
+/Plugins/scripting/clientmod.inc
