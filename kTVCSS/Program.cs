@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Diagnostics;
 using MySqlConnector;
+using kTVCSS.VKInteraction;
 
 namespace kTVCSS
 {
@@ -1011,8 +1012,22 @@ namespace kTVCSS
                 await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
                 isCanBeginMatch = true;
+
+                Match bMatch = match;
+
+                MatchResultInfo matchResultInfo = new MatchResultInfo
+                {
+                    Match = bMatch,
+                    MapName = info.Map,
+                    TeamNames = tags,
+                    WinnerName = winningTeam,
+                    MVPlayer = Matches.GetMatchMVP(bMatch.MatchId).Result,
+                    PlayerResults = Matches.GetPlayerResults(bMatch.MatchId).Result 
+                };
+
                 match = new Match(0);
                 Thread.Sleep(3000);
+                
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
