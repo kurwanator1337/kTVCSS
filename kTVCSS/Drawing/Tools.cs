@@ -26,5 +26,56 @@ namespace kTVCSS.Drawing
                 gr.DrawString(text, font, color, rect, stringFormat);
             }
         }
+
+        public static Image GetRankImage(string rankName)
+        {
+            switch (rankName)
+            {
+                case "LEVEL-I":
+                    {
+                        return Image.FromFile(@"Pictures\lvl1.png");
+                    }
+                case "LEVEL-II":
+                    {
+                        return Image.FromFile(@"Pictures\lvl2.png");
+                    }
+                case "LEVEL-III":
+                    {
+                        return Image.FromFile(@"Pictures\lvl3.png");
+                    }
+                case "LEVEL-IV":
+                    {
+                        return Image.FromFile(@"Pictures\lvl4.png");
+                    }
+                case "LEVEL-V":
+                    {
+                        return Image.FromFile(@"Pictures\lvl5.png");
+                    }
+                case "LEVEL-VI":
+                    {
+                        return Image.FromFile(@"Pictures\lvl6.png");
+                    }
+                case "LEVEL-VII":
+                    {
+                        return Image.FromFile(@"Pictures\lvl7.png");
+                    }
+                case "LEVEL-VIII":
+                    {
+                        return Image.FromFile(@"Pictures\lvl8.png");
+                    }
+                case "LEVEL-IX":
+                    {
+                        return Image.FromFile(@"Pictures\lvl9.png");
+                    }
+                case "LEVEL-X":
+                    {
+                        return Image.FromFile(@"Pictures\lvl10.png");
+                    }
+                default:
+                    {
+                        return Image.FromFile(@"Pictures\lvl0.png");
+                    }
+            }
+        }
     }
 }

@@ -25,6 +25,11 @@ namespace kTVCSS.Models
             MinPlayersToStart = 8; // 8
             MinPlayersToStop = 6; // 6
 
+#if DEBUG
+            MinPlayersToStart = 0; // 8
+            MinPlayersToStop = 0; // 6
+#endif
+
             if (mr == 0)
             {
                 IsMatch = false;

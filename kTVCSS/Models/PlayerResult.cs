@@ -12,5 +12,6 @@ namespace kTVCSS.Models
         public double Kills { get; set; }
         public double Deaths { get; set; }
         public double KDR { get; set; }
+        public string TeamName { get; set; }
     }
 }

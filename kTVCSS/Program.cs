@@ -14,7 +14,6 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Diagnostics;
 using MySqlConnector;
-using kTVCSS.VKInteraction;
 
 namespace kTVCSS
 {
@@ -144,6 +143,10 @@ namespace kTVCSS
                     if (match.IsMatch)
                     {
                         await RconHelper.SendCmd(rcon, "save_match");
+
+                        SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                        var tags = MatchEvents.GetTeamNames(MatchPlayers);
+                        await RconHelper.SendCmd(rcon, $"sm_hsay {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
 
                         match.PlayerKills.Clear();
                         match.OpenFragSteamID = string.Empty;
@@ -918,7 +921,7 @@ namespace kTVCSS
 
                 log.Listen<PlayerDisconnected>(async connection =>
                 {
-                    if (connection.Player.SteamId != "STEAM_ID_PENDING" && connection.Player.SteamId != "BOT")
+                    if (connection.Player.SteamId != "BOT")
                     {
                         OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
                         //if (match.IsMatch)
@@ -1009,21 +1012,23 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!");
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.");
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", info.Map, server.ID);
-                await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
+                MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
+                
                 isCanBeginMatch = true;
-
                 Match bMatch = match;
+
+                // Добавить условие, если микс, то не публикуем
 
                 MatchResultInfo matchResultInfo = new MatchResultInfo
                 {
-                    Match = bMatch,
                     MapName = info.Map,
-                    TeamNames = tags,
-                    WinnerName = winningTeam,
-                    MVPlayer = Matches.GetMatchMVP(bMatch.MatchId).Result,
-                    PlayerResults = Matches.GetPlayerResults(bMatch.MatchId).Result 
+                    MatchScore = VKInteraction.Matches.GetMatchResult(bMatch.MatchId).Result,
+                    MVPlayer = VKInteraction.Matches.GetMatchMVP(bMatch.MatchId).Result,
+                    PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
+
+                VKInteraction.Matches.PublishResult(matchResultInfo);
 
                 match = new Match(0);
                 Thread.Sleep(3000);
@@ -1035,6 +1040,8 @@ namespace kTVCSS
 
             private async Task OnEndMatch(Dictionary<string, string> tags, string winningTeam, string mapName, Server server)
             {
+                if (!match.IsMatch) return;
+
                 string looser = string.Empty;
 
                 if (winningTeam == tName)
@@ -1050,11 +1057,27 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!");
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.");
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", mapName, server.ID);
-                await MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
                 await MatchEvents.InsertDemoName(match.MatchId, demoName);
+                MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
+                
                 isCanBeginMatch = true;
+                Match bMatch = match;
+
+                // Добавить условие, если микс, то не публикуем
+
+                MatchResultInfo matchResultInfo = new MatchResultInfo
+                {
+                    MapName = mapName,
+                    MatchScore = VKInteraction.Matches.GetMatchResult(bMatch.MatchId).Result,
+                    MVPlayer = VKInteraction.Matches.GetMatchMVP(bMatch.MatchId).Result,
+                    PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
+                };
+
+                VKInteraction.Matches.PublishResult(matchResultInfo);
+
                 match = new Match(0);
                 Thread.Sleep(3000);
+
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
@@ -1152,6 +1175,8 @@ namespace kTVCSS
             Console.Title = "kTVCSS NODE LAUNCHER";
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
+            Logger.Print(0, $"STATGROUP - {ConfigTools.Config.StatGroupID}", LogLevel.Debug);
+            Logger.Print(0, $"ADMINID - {ConfigTools.Config.AdminVkID}", LogLevel.Debug);
 
             #if DEBUG
 
@@ -1172,20 +1197,20 @@ namespace kTVCSS
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
             }
-            else
-            {
-                Logger.Print(0, "Attempt to load servers from database", LogLevel.Info);
-                Loader.LoadServers();
-                Logger.Print(0, "Loaded " + Servers.Count + " servers", LogLevel.Info);
-                foreach (var server in Servers)
-                {
-                    Process node = new Process();
-                    node.StartInfo.UseShellExecute = true;
-                    node.StartInfo.FileName = "kTVCSS.exe";
-                    node.StartInfo.Arguments = (server.ID - 1).ToString();
-                    node.Start();
-                }
-            }
+            //else
+            //{
+            //    Logger.Print(0, "Attempt to load servers from database", LogLevel.Info);
+            //    Loader.LoadServers();
+            //    Logger.Print(0, "Loaded " + Servers.Count + " servers", LogLevel.Info);
+            //    foreach (var server in Servers)
+            //    {
+            //        Process node = new Process();
+            //        node.StartInfo.UseShellExecute = true;
+            //        node.StartInfo.FileName = "kTVCSS.exe";
+            //        node.StartInfo.Arguments = (server.ID - 1).ToString();
+            //        node.Start();
+            //    }
+            //}
         }
     }
 }

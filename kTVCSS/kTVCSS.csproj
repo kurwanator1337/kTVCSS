@@ -10,15 +10,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="MySqlConnector" Version="2.1.6" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.IO.Pipelines" Version="6.0.0" />
+    <PackageReference Include="VkNet" Version="1.45.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="CoreRCON">
-      <HintPath>..\..\..\..\..\..\kTVCSS\kTVCSS\kTVCSS\bin\Release\net5.0\Release\net5.0\CoreRCON.dll</HintPath>
+      <HintPath>..\..\..\Users\kurwanator\source\repos\kTVCSS\kTVCSS\bin\Debug\net5.0\net5.0\CoreRCON.dll</HintPath>
     </Reference>
   </ItemGroup>
 

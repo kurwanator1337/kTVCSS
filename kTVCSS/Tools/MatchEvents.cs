@@ -143,13 +143,13 @@ namespace kTVCSS.Tools
             }
         }
 
-        public static async Task FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId, List<Player> players, string winnerTeam, Match match)
+        public static void FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId, List<Player> players, string winnerTeam, Match match)
         {
             try
             {
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
-                    await connection.OpenAsync();
+                    connection.Open();
                     SqlCommand query = new SqlCommand("[dbo].[EndMatch]", connection)
                     {
                         CommandType = System.Data.CommandType.StoredProcedure
@@ -162,17 +162,17 @@ namespace kTVCSS.Tools
                     query.Parameters.AddWithValue("@BNAME", BName);
                     query.Parameters.AddWithValue("@MAP", Map);
 
-                    await query.ExecuteNonQueryAsync();
-                    await connection.CloseAsync();
+                    query.ExecuteNonQuery();
+                    connection.Close();
 
                     var teamTags = GetTeamNames(players);
 
                     foreach (Player player in players)
                     {
                         if (player.Team == winnerTeam)
-                            await SetPlayerMatchResult(player.SteamId, 1);
-                        else await SetPlayerMatchResult(player.SteamId, 0);
-                        await UpdateMatchesResults(player.SteamId, match.MatchId, teamTags[player.Team], player.Name, serverId);
+                            SetPlayerMatchResult(player.SteamId, 1);
+                        else SetPlayerMatchResult(player.SteamId, 0);
+                        UpdateMatchesResults(player.SteamId, match.MatchId, teamTags[player.Team], player.Name, serverId);
                     }
                 }
             }
@@ -186,9 +186,10 @@ namespace kTVCSS.Tools
         {
             Dictionary<string, string> tags = new Dictionary<string, string>
             {
-                { "TERRORIST", "Team Alpha" },
-                { "CT", "Team Bravo" }
+                { "TERRORIST", "TERRORIST" },
+                { "CT", "CT" }
             };
+
             try
             {
                 List<string> ctTags = new List<string>();
@@ -205,6 +206,9 @@ namespace kTVCSS.Tools
                 {
                     terTags.Add(player.Name.Split(' ')[0]);
                 }
+
+                tags["CT"] = "Team " + ctTags[0];
+                tags["TERRORIST"] = "Team " + terTags[0];
 
                 foreach (var possibleTag in ctTags)
                 {
@@ -233,7 +237,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        private async static Task UpdateMatchesResults(string steamId, int matchId, string teamName, string playerName, int serverId)
+        private static void UpdateMatchesResults(string steamId, int matchId, string teamName, string playerName, int serverId)
         {
             try
             {
@@ -242,22 +246,22 @@ namespace kTVCSS.Tools
                 string headshots = string.Empty;
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
-                    await connection.OpenAsync();
+                    connection.Open();
                     SqlCommand query = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [kTVCSS].[dbo].[MatchesResultsLive] WHERE ID = {matchId} AND STEAMID = '{steamId}'", connection);
-                    using (var reader = await query.ExecuteReaderAsync())
+                    using (var reader = query.ExecuteReader())
                     {
-                        while (await reader.ReadAsync())
+                        while (reader.Read())
                         {
                             kills = reader[0].ToString();
                             deaths = reader[1].ToString();
                             headshots = reader[2].ToString();
                         }
                     }
-                    await connection.CloseAsync();
+                    connection.Close();
                 }
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
-                    await connection.OpenAsync();
+                    connection.Open();
                     try
                     {
                         SqlCommand query = new SqlCommand("[dbo].[InsertMatchResult]", connection)
@@ -272,14 +276,14 @@ namespace kTVCSS.Tools
                         query.Parameters.AddWithValue("@DEATHS", deaths);
                         query.Parameters.AddWithValue("@HEADSHOTS", headshots);
                         query.Parameters.AddWithValue("@SERVERID", serverId);
-                        await query.ExecuteNonQueryAsync();
-                        await connection.CloseAsync();
+                        query.ExecuteNonQuery();
+                        connection.Close();
                     }
                     catch (Exception ex)
                     {
                         Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
                     }
-                    await connection.CloseAsync();
+                    connection.Close();
                 }
             }
             catch (Exception ex)
@@ -444,21 +448,21 @@ namespace kTVCSS.Tools
             }
         }
 
-        private async static Task SetPlayerMatchResult(string steamId, int win)
+        private static void SetPlayerMatchResult(string steamId, int win)
         {
             try
             {
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
-                    await connection.OpenAsync();
+                    connection.Open();
                     SqlCommand query = new SqlCommand("[dbo].[SetPlayerMatchResult]", connection)
                     {
                         CommandType = System.Data.CommandType.StoredProcedure
                     };
                     query.Parameters.AddWithValue("@STEAMID", steamId);
                     query.Parameters.AddWithValue("@WIN", win);
-                    await query.ExecuteNonQueryAsync();
-                    await connection.CloseAsync();
+                    query.ExecuteNonQuery();
+                    connection.Close();
                 }
             }
             catch (Exception ex)
