@@ -14,3 +14,6 @@
 /Plugins/plugins
 /Plugins/scripting/clientmod
 /Plugins/scripting/clientmod.inc
+/Tests/MatchResultPicture/.vs/MatchResultPicture
+/Tests/MatchResultPicture/MatchResultPicture/bin/Debug
+/Tests/MatchResultPicture/MatchResultPicture/obj/Debug
