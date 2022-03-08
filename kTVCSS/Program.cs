@@ -144,10 +144,6 @@ namespace kTVCSS
                     {
                         await RconHelper.SendCmd(rcon, "save_match");
 
-                        SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
-                        var tags = MatchEvents.GetTeamNames(MatchPlayers);
-                        await RconHelper.SendCmd(rcon, $"sm_hsay {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
-
                         match.PlayerKills.Clear();
                         match.OpenFragSteamID = string.Empty;
 
@@ -247,10 +243,12 @@ namespace kTVCSS
                         await RconHelper.SendMessage(rcon, $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
                         if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
                         {
+                            await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут на одну минуту.\\nМатч продолжится автоматически.");
                             await RconHelper.SendMessage(rcon, "Тайм-аут!");
                             await RconHelper.SendCmd(rcon, "mp_freezetime 60");
                             Thread.Sleep(2000);
                             await RconHelper.SendCmd(rcon, "sm_swap @all");
+                            await RconHelper.SendCmd(rcon, "sv_pausable 1");
                             await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
                             isResetFreezeTime = true;
                             match.FirstHalf = false;
@@ -1008,6 +1006,7 @@ namespace kTVCSS
                     looser = tName;
                 }
 
+                await RconHelper.SendCmd(rcon, $"sm_msay {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nМатч завершен!\\nПоздравляем с победой команду {tags[winningTeam]}!\\n{tags[looser]}, в следующий раз Вам повезет.");
                 await RconHelper.SendMessage(rcon, "Матч завершен!");
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!");
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.");
@@ -1053,6 +1052,7 @@ namespace kTVCSS
                     looser = tName;
                 }
 
+                await RconHelper.SendCmd(rcon, $"sm_msay {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nМатч завершен!\\nПоздравляем с победой команду {tags[winningTeam]}!\\n{tags[looser]}, в следующий раз Вам повезет.");
                 await RconHelper.SendMessage(rcon, "Матч завершен!");
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!");
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.");
@@ -1181,7 +1181,7 @@ namespace kTVCSS
             #if DEBUG
 
             args = new string[1];
-            args[0] = "0";
+            args[0] = "3";
 
             #endif
 
