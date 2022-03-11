@@ -30,6 +30,7 @@ public void OnPluginStart()
 {
 	//Айдишники с командами
 	RegConsoleCmd("sm_usrlst", userlist)
+	RegConsoleCmd("sm_idlist", idlist)
 	//Деньги
 	RegConsoleCmd("sm_cash", cash);
 	HookEvent("round_start", Event_CashToChat);
@@ -74,7 +75,7 @@ public Action:CancelMatch(client, args)
     menu.AddItem("Да", "Да");
     menu.AddItem("Нет", "Нет");
     menu.ExitButton = false;
-    menu.DisplayVoteToAll(20);
+    menu.DisplayVoteToAll(10);
     g_votetype = 1;
 }
 
@@ -224,7 +225,7 @@ public Action:ChangeVote(int client, int args)
 	{
 		if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) == StringToInt(tempbuff))
 		{
-			change.Display(i, 20);
+			change.Display(i, 10);
 			break;
 		}
 	}
@@ -614,5 +615,20 @@ public Action:SpecTimer(Handle:timer, any:client)
 		SetEntProp(client, Prop_Send, "m_iObserverMode", 4);
 		SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", new_target);
 		FakeClientCommand(client, "spec_mode 1");
+	}
+}
+
+// Айдишники со стимами
+
+public Action:idlist(client, args)
+{
+	for (new i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && !IsFakeClient(i))
+		{
+			char StId[64];
+			GetClientAuthId(i, AuthId_Steam2, StId, sizeof(StId));
+			PrintToServer("%i;%s", GetClientUserId(i), StId);
+		}
 	}
 }
