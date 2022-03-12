@@ -170,8 +170,88 @@ namespace kTVCSS.Tools
                     foreach (Player player in players)
                     {
                         if (player.Team == winnerTeam)
-                            SetPlayerMatchResult(player.SteamId, 1);
-                        else SetPlayerMatchResult(player.SteamId, 0);
+                        {
+                            int playerPts = Program.Node.PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
+
+                            var enemies = players.Where(x => x.Team != winnerTeam);
+                            int enemiesSum = 0;
+                            int enemiesCount = 0;
+                            foreach (var item in enemies)
+                            {
+                                try
+                                {
+                                    int pts = Program.Node.PlayersRank.Where(x => x.SteamID == item.SteamId).First().Points;
+                                    enemiesSum += pts;
+                                    if (pts != 0)
+                                    {
+                                        enemiesCount++;
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                    // null?
+                                }
+                            }
+                            if (enemiesCount != 0)
+                            {
+                                double enemiesAvg = double.Parse(enemiesSum.ToString()) / double.Parse(enemiesCount.ToString());
+                                var diff = playerPts - enemiesAvg;
+                                if (diff > 500)
+                                {
+                                    SetPlayerMatchResult(player.SteamId, 1, 10);
+                                }
+                                else
+                                {
+                                    SetPlayerMatchResult(player.SteamId, 1, 25);
+                                }
+                            }
+                            else
+                            {
+                                SetPlayerMatchResult(player.SteamId, 1, 25);
+                            }
+                        }   
+                        else
+                        {
+                            int playerPts = Program.Node.PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
+
+                            var enemies = players.Where(x => x.Team == winnerTeam);
+                            int enemiesSum = 0;
+                            int enemiesCount = 0;
+                            foreach (var item in enemies)
+                            {
+                                try
+                                {
+                                    int pts = Program.Node.PlayersRank.Where(x => x.SteamID == item.SteamId).First().Points;
+                                    enemiesSum += pts;
+                                    if (pts != 0)
+                                    {
+                                        enemiesCount++;
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                    // null?
+                                }
+                            }
+                            if (enemiesCount != 0)
+                            {
+                                double enemiesAvg = double.Parse(enemiesSum.ToString()) / double.Parse(enemiesCount.ToString());
+                                var diff = playerPts - enemiesAvg;
+                                if (diff > 500)
+                                {
+                                    SetPlayerMatchResult(player.SteamId, 0, -25);
+                                }
+                                else
+                                {
+                                    SetPlayerMatchResult(player.SteamId, 0, -10);
+                                }
+                            }
+                            else
+                            {
+                                SetPlayerMatchResult(player.SteamId, 0, -25);
+                            }
+                        }
+
                         UpdateMatchesResults(player.SteamId, match.MatchId, teamTags[player.Team], player.Name, serverId);
                     }
                 }
@@ -448,7 +528,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        private static void SetPlayerMatchResult(string steamId, int win)
+        private static void SetPlayerMatchResult(string steamId, int win, int pts)
         {
             try
             {
@@ -461,6 +541,7 @@ namespace kTVCSS.Tools
                     };
                     query.Parameters.AddWithValue("@STEAMID", steamId);
                     query.Parameters.AddWithValue("@WIN", win);
+                    query.Parameters.AddWithValue("@PTS", pts);
                     query.ExecuteNonQuery();
                     connection.Close();
                 }

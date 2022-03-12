@@ -52,5 +52,36 @@ namespace kTVCSS.Tools
             }
             return null;
         }
+
+        public static async Task<PlayerRank> GetPlayerRank(string steamID)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand($"SELECT MMR FROM [dbo].[Players] WHERE STEAMID = '{steamID}'", connection);
+                    using (var reader = await query.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            PlayerRank playerRank = new PlayerRank();
+                            
+                            int.TryParse(reader[0].ToString(), out int mmr);
+
+                            playerRank.SteamID = steamID;
+                            playerRank.Points = mmr;
+
+                            return playerRank;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+            }
+            return null;
+        }
     }
 }

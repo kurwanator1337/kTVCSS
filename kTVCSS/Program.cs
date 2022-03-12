@@ -38,6 +38,7 @@ namespace kTVCSS
             private Dictionary<int, string> mapPool = new Dictionary<int, string>();
 
             public List<Player> MatchPlayers = null;
+            public static List<PlayerRank> PlayersRank = new List<PlayerRank>();
             public static List<Player> OnlinePlayers = new List<Player>();
             public static int ServerID = 0;
 
@@ -82,6 +83,9 @@ namespace kTVCSS
                 SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                 Logger.Print(server.ID, $"Created connection to {info.Name}", LogLevel.Trace);
                 await RconHelper.SendMessage(rcon, "Соединение до центрального сервера kTVCSS установлено!");
+#if DEBUG
+                await RconHelper.SendMessage(rcon, "PROCESS STARTED IN DEBUG MODE");
+#endif
                 alertThread.Start(server);
 
                 var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
@@ -488,39 +492,53 @@ namespace kTVCSS
                         {
                             await RconHelper.SendMessage(rcon, $"[{info.RankName}] {chat.Player.Name}");
                             await RconHelper.SendMessage(rcon, $"KDR: {Math.Round(info.KDR, 2)}, HSR: {Math.Round(info.HSR, 2)}, AVG: {Math.Round(info.AVG, 2)}, WinRate: {Math.Round(info.WinRate, 2)}%");
-                            await RconHelper.SendMessage(rcon, $"Matches until the end of calibration: {10 - info.MatchesPlayed}");
+                            await RconHelper.SendMessage(rcon, $"Матчей до конца калибровки: {10 - info.MatchesPlayed}");
                         }
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message == "!pause" && match.IsMatch)
                     {
-                        if (match.TacticalPauses != 0)
+                        if (!match.Pause)
                         {
-                            await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена минутная пауза!");
-                            await RconHelper.SendCmd(rcon, "mp_freezetime 60");
-                            match.TacticalPauses--;
-                            match.Pause = true;
-                            await RconHelper.SendMessage(rcon, $"У Вас осталось {match.TacticalPauses} тактических перерывов!");
+                            if (match.TacticalPauses != 0)
+                            {
+                                await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена минутная пауза!");
+                                await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                match.TacticalPauses--;
+                                match.Pause = true;
+                                await RconHelper.SendMessage(rcon, $"У Вас осталось {match.TacticalPauses} тактических перерывов!");
+                            }
+                            else
+                            {
+                                await RconHelper.SendMessage(rcon, "Вы больше не можете брать тактический перерыв!");
+                            }
                         }
                         else
                         {
-                            await RconHelper.SendMessage(rcon, "Вы больше не можете брать тактический перерыв!");
+                            await RconHelper.SendMessage(rcon, "Нельзя требовать паузу во время паузы!");
                         }
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message == "!pause5" && match.IsMatch)
                     {
-                        if (match.TechnicalPauses != 0)
+                        if (!match.Pause)
                         {
-                            await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена пятиминутная пауза!");
-                            await RconHelper.SendCmd(rcon, "mp_freezetime 300");
-                            match.TechnicalPauses--;
-                            match.Pause = true;
-                            await RconHelper.SendMessage(rcon, $"У Вас осталось {match.TechnicalPauses} технических перерывов!");
+                            if (match.TechnicalPauses != 0)
+                            {
+                                await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена пятиминутная пауза!");
+                                await RconHelper.SendCmd(rcon, "mp_freezetime 300");
+                                match.TechnicalPauses--;
+                                match.Pause = true;
+                                await RconHelper.SendMessage(rcon, $"У Вас осталось {match.TechnicalPauses} технических перерывов!");
+                            }
+                            else
+                            {
+                                await RconHelper.SendMessage(rcon, "Вы больше не можете брать технический перерыв!");
+                            }
                         }
                         else
                         {
-                            await RconHelper.SendMessage(rcon, "Вы больше не можете брать технический перерыв!");
+                            await RconHelper.SendMessage(rcon, "Нельзя требовать паузу во время паузы!");
                         }
                     }
 
@@ -775,6 +793,7 @@ namespace kTVCSS
                     {
                         var result = await OnPlayerConnectAuth.AuthPlayer(connection.Player.SteamId, connection.Player.Name);
                         var info = await OnPlayerJoinTheServer.PrintPlayerInfo(connection.Player.SteamId);
+                        var playerRank = await OnPlayerJoinTheServer.GetPlayerRank(connection.Player.SteamId);
 
                         if (info.IsCalibration == 0)
                         {
@@ -786,7 +805,7 @@ namespace kTVCSS
                         {
                             await RconHelper.SendMessage(rcon, $"[{info.RankName}] {connection.Player.Name}");
                             await RconHelper.SendMessage(rcon, $"KDR: {Math.Round(info.KDR, 2)}, HSR: {Math.Round(info.HSR, 2)}, AVG: {Math.Round(info.AVG, 2)}, WinRate: {Math.Round(info.WinRate, 2)}%");
-                            await RconHelper.SendMessage(rcon, $"Matches until the end of calibration: {10 - info.MatchesPlayed}");
+                            await RconHelper.SendMessage(rcon, $"Матчей до конца калибровки: {10 - info.MatchesPlayed}");
                         }
 
                         if (OnlinePlayers.Where(x => x.SteamId == connection.Player.SteamId).Count() == 0)
@@ -796,6 +815,11 @@ namespace kTVCSS
                             {
                                 if (MatchPlayers.Where(x => x.SteamId == connection.Player.SteamId).Count() == 0) MatchPlayers.Add(connection.Player);
                             }
+                        }
+
+                        if (PlayersRank.Where(x => x.SteamID == connection.Player.SteamId).Count() == 0)
+                        {
+                            PlayersRank.Add(playerRank);
                         }
 
                         foreach (string word in ForbiddenWords)
@@ -922,6 +946,10 @@ namespace kTVCSS
                     if (connection.Player.SteamId != "BOT")
                     {
                         OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
+                        if (!match.IsMatch)
+                        {
+                            PlayersRank.RemoveAll(x => x.SteamID == connection.Player.SteamId);
+                        }
                         //if (match.IsMatch)
                         //{
                         //    Thread banThread = new Thread(BanOnLeftTheMatch)
@@ -1027,11 +1055,14 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
-                VKInteraction.Matches.PublishResult(matchResultInfo);
+                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
+                {
+                    VKInteraction.Matches.PublishResult(matchResultInfo);
+                }
 
                 match = new Match(0);
-                Thread.Sleep(3000);
-                
+                Thread.Sleep(5000);
+
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
@@ -1073,10 +1104,13 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
-                VKInteraction.Matches.PublishResult(matchResultInfo);
+                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
+                {
+                    VKInteraction.Matches.PublishResult(matchResultInfo);
+                }
 
                 match = new Match(0);
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
@@ -1181,7 +1215,7 @@ namespace kTVCSS
             #if DEBUG
 
             args = new string[1];
-            args[0] = "3";
+            args[0] = "0";
 
             #endif
 
@@ -1192,7 +1226,7 @@ namespace kTVCSS
                 ForbiddenWords.AddRange(File.ReadAllLines("wordsfilter.txt", System.Text.Encoding.UTF8));
                 Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
 
-                Console.Title = "kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].Port;
+                Console.Title = "kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
