@@ -37,6 +37,31 @@ namespace kTVCSS.Tools
             }
         }
 
+        public static async Task InsertPlayerRatingProgress(string steamID, int mmr)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand("[dbo].[InsertRatingProgress]", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+
+                    query.Parameters.AddWithValue("@STEAMID", steamID);
+                    query.Parameters.AddWithValue("@MMR", mmr);
+
+                    var result = await query.ExecuteNonQueryAsync();
+                    await connection.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+            }
+        }
+
         public static async Task<int> CreateMatch(int serverId, string mapName)
         {
             try

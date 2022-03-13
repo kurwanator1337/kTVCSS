@@ -714,6 +714,10 @@ namespace kTVCSS
                             {
                                 await OnPlayerConnectAuth.AuthPlayer(player.SteamId, player.Name);
                             }
+                            foreach (var player in PlayersRank)
+                            {
+                                await MatchEvents.InsertPlayerRatingProgress(player.SteamID, player.Points);
+                            }
                         }
                         else
                         {
@@ -819,6 +823,11 @@ namespace kTVCSS
 
                         if (PlayersRank.Where(x => x.SteamID == connection.Player.SteamId).Count() == 0)
                         {
+                            PlayersRank.Add(playerRank);
+                        }
+                        else
+                        {
+                            PlayersRank.RemoveAll(x => x.SteamID == connection.Player.SteamId);
                             PlayersRank.Add(playerRank);
                         }
 
