@@ -1,6 +1,6 @@
 #define PLUGIN_NAME           "kTVCSS HELPER"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.3.2"
+#define PLUGIN_VERSION        "1.3.3"
 
 #include <sourcemod>
 #include <sdktools>
@@ -132,7 +132,7 @@ public int Handle_VoteMenu(Menu menu, MenuAction action, int param1, int param2)
 		}
 		else
 		{
-        	CPrintToChatAll("{blue}Голосование провалилось!");
+        	CPrintToChatAll("{fullred}[kTVCSS] Голосование провалилось!");
         	//PrintToChatAll("%i", voteCount);
         	voteCount = 0;
         }
@@ -167,7 +167,7 @@ public void Event_CashToChat(Event hEvent, const char[] sEvName, bool bDontBroad
 				{
 					if (GetClientTeam(i) == GetClientTeam(j))
 					{
-						CPrintToChat(i, "{blue}%N ===> $%i", j, GetEntProp(j, Prop_Send, "m_iAccount"));
+						CPrintToChat(i, "{white}%N ===> $%i", j, GetEntProp(j, Prop_Send, "m_iAccount"));
 					}
 				}
 			}
@@ -199,7 +199,7 @@ public Action:ChooseTeam(client, args)
 	
 	if (GetConVarBool(isMatch) && GetClientTeam(client) > 1)
 	{
-		CPrintToChat(client, "{blue}Смена сторон заблокирована!");
+		CPrintToChat(client, "{fullred}[kTVCSS] Смена сторон заблокирована!");
 		return Plugin_Stop;
 	}
 	return Plugin_Continue;
@@ -233,14 +233,10 @@ public Action:ChangeVote(int client, int args)
 
 
 public int Handle_ChangeVote(Menu change, MenuAction action, int param1, int param2)
-{
-	
+{	
 	if (action == MenuAction_End)
 	{
-		if (change != INVALID_HANDLE)
-		{
-			CloseHandle(change);
-		}
+		CloseHandle(change);
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -253,7 +249,6 @@ public int Handle_ChangeVote(Menu change, MenuAction action, int param1, int par
 			LogToGame("KTV_DONTCHANGE_SIDES");
 		}
 	}
-	CloseHandle(change);
 }
 
 //sys_say {green} Текст		 https://www.doctormckay.com/morecolors.php
@@ -266,7 +261,7 @@ public Action SYS_Say(int client, int args)
         ReplaceString(l_buffer, sizeof(l_buffer), "{ ", "{", true);
         ReplaceString(l_buffer, sizeof(l_buffer), " }", "}", true);
         char l_MSG[1024];
-    	Format(l_MSG, sizeof(l_MSG), "{blue}[kTVCSS] %s", l_buffer);
+    	Format(l_MSG, sizeof(l_MSG), "{royalblue}[kTVCSS] %s", l_buffer);
     	//CFormatColor(l_MSG, sizeof(l_MSG), 0);
     	
     	CPrintToChatAll("%s", l_MSG);
@@ -537,7 +532,7 @@ public Action CS_OnBuyCommand(int client, const char[] weapon)
 
 	if (StrEqual(weapon, "nvgs", false))
 	{
-		CPrintToChat(client, "{blue}[kTVCSS] {white}Nightvision Blocked!");
+		CPrintToChat(client, "{fullred}[kTVCSS] Nightvision Blocked!");
 		return Plugin_Handled;
 	}
 	
@@ -595,26 +590,29 @@ public Action:Spec_switch(Event hEvent, const char[] sEvName, bool bDontBroadcas
 
 public Action:SpecTimer(Handle:timer, any:client)
 {
-	new client_team = GetClientTeam(client);
-	new target = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
-	//new last_target = GetLastTarget(client_team);
-	new new_target = -1;
-	for (new i = 1; i <= MaxClients; i++)
+	if (IsClientInGame(client) && !IsFakeClient(client))
 	{
-		if (IsClientInGame(i) && GetClientTeam(i) == client_team && IsPlayerAlive(i))
+		new client_team = GetClientTeam(client);
+		new target = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
+		//new last_target = GetLastTarget(client_team);
+		new new_target = -1;
+		for (new i = 1; i <= MaxClients; i++)
 		{
-			new_target = i;
-			if (new_target > target/* || target == last_target*/)
+			if (IsClientInGame(i) && GetClientTeam(i) == client_team && IsPlayerAlive(i))
 			{
-				break;
+				new_target = i;
+				if (new_target > target/* || target == last_target*/)
+				{
+					break;
+				}
 			}
 		}
-	}
-	if (new_target != -1)
-	{
-		SetEntProp(client, Prop_Send, "m_iObserverMode", 4);
-		SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", new_target);
-		FakeClientCommand(client, "spec_mode 1");
+		if (new_target != -1)
+		{
+			SetEntProp(client, Prop_Send, "m_iObserverMode", 4);
+			SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", new_target);
+			FakeClientCommand(client, "spec_mode 1");
+		}
 	}
 }
 
