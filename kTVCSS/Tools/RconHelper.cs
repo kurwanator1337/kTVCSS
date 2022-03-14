@@ -47,6 +47,10 @@ namespace kTVCSS.Tools
                 await rcon.SendCommandAsync("sm_csay LIVE on three restarts!!!");
                 await rcon.SendCommandAsync("sys_say {white}LIVE on three restarts!!!;sys_say {white}LIVE on three restarts!!!;sys_say {white}LIVE on three restarts!!!;sys_say {white}LIVE on three restarts!!!;sys_say {white}LIVE on three restarts!!!;sys_say {white}LIVE on three restarts!!!;sys_say {white}LIVE on three restarts!!!");
                 Thread.Sleep(2000);
+                if (match.IsOvertime)
+                {
+                    await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
+                }
                 await rcon.SendCommandAsync("clear;mp_restartgame 1;sys_say {white}Restart 1");
                 Thread.Sleep(2000);
                 await rcon.SendCommandAsync("mp_restartgame 1;sys_say {white}Restart 2");
@@ -68,10 +72,6 @@ namespace kTVCSS.Tools
                             await SendCmd(rcon, $"player_score_set {data.SteamID.Replace(":", "|")} {data.Frags} {data.Deaths}");
                         }
                     }
-                }
-                if (match.IsOvertime)
-                {
-                    await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
                 }
             }
             catch (Exception ex)

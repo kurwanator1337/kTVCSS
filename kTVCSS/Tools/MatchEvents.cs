@@ -232,7 +232,7 @@ namespace kTVCSS.Tools
                             }
                             else
                             {
-                                SetPlayerMatchResult(player.SteamId, 1, 25);
+                                SetPlayerMatchResult(player.SteamId, 1, 15);
                             }
                         }   
                         else
@@ -264,7 +264,7 @@ namespace kTVCSS.Tools
                                 var diff = playerPts - enemiesAvg;
                                 if (diff > 500)
                                 {
-                                    SetPlayerMatchResult(player.SteamId, 0, -25);
+                                    SetPlayerMatchResult(player.SteamId, 0, -50);
                                 }
                                 else
                                 {
@@ -273,7 +273,7 @@ namespace kTVCSS.Tools
                             }
                             else
                             {
-                                SetPlayerMatchResult(player.SteamId, 0, -25);
+                                SetPlayerMatchResult(player.SteamId, 0, -15);
                             }
                         }
 

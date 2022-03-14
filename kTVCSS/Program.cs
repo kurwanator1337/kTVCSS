@@ -243,42 +243,132 @@ namespace kTVCSS
                         }
                         await MatchEvents.SetOpenFrag(match.OpenFragSteamID);
                         await MatchEvents.UpdateMatchScore(match.AScore, match.BScore, server.ID, match.MatchId);
-
                         await RconHelper.SendMessage(rcon, $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}");
-                        if (match.AScore + match.BScore == match.MaxRounds || (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime))
+
+                        #region Обработка результатов матча
+
+                        #region Если не оверы
+                        if (!match.IsOvertime)
                         {
-                            await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут на одну минуту.\\nМатч продолжится автоматически.");
-                            await RconHelper.SendMessage(rcon, "Тайм-аут!");
-                            await RconHelper.SendCmd(rcon, "mp_freezetime 60");
-                            Thread.Sleep(2000);
-                            await RconHelper.SendCmd(rcon, "sm_swap @all");
-                            await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                            await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
-                            isResetFreezeTime = true;
-                            match.FirstHalf = false;
-                            var _aScore = match.AScore;
-                            var _bScore = match.BScore;
-                            var _AOScore = match.AScoreOvertime;
-                            var _BOScore = match.BScoreOvertime;
-                            match.AScore = _bScore;
-                            match.BScore = _aScore;
-                            match.AScoreOvertime = _BOScore;
-                            match.BScoreOvertime = _AOScore;
-                            foreach (Player player in MatchPlayers)
+                            #region Смена сторон после первой половины
+
+                            if (match.AScore + match.BScore == match.MaxRounds)
                             {
-                                if (player.Team == tName)
+                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут на одну минуту.\\nМатч продолжится автоматически.");
+                                await RconHelper.SendMessage(rcon, "Тайм-аут!");
+                                await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                Thread.Sleep(2000);
+                                await RconHelper.SendCmd(rcon, "sm_swap @all");
+                                await RconHelper.SendCmd(rcon, "sv_pausable 1");
+                                await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
+                                isResetFreezeTime = true;
+                                match.FirstHalf = false;
+                                var _aScore = match.AScore;
+                                var _bScore = match.BScore;
+                                var _AOScore = match.AScoreOvertime;
+                                var _BOScore = match.BScoreOvertime;
+                                match.AScore = _bScore;
+                                match.BScore = _aScore;
+                                match.AScoreOvertime = _BOScore;
+                                match.BScoreOvertime = _AOScore;
+                                foreach (Player player in MatchPlayers)
                                 {
-                                    player.Team = ctName;
-                                }
-                                else
-                                {
-                                    player.Team = tName;
+                                    if (player.Team == tName)
+                                    {
+                                        player.Team = ctName;
+                                    }
+                                    else
+                                    {
+                                        player.Team = tName;
+                                    }
                                 }
                             }
-                        }
 
-                        if (match.AScore + match.BScore == match.MaxRounds * 2 || (match.AScoreOvertime + match.BScoreOvertime >= match.MaxRounds + 1 && match.IsOvertime))
+                            #endregion
+
+                            #region Окончание матча или начало оверов
+
+                            if (!match.FirstHalf)
+                            {
+                                if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
+                                {
+                                    await OnEndMatch(tags, result.WinningTeam, info, server);
+
+                                    if (mapQueue.Count > 0 && isBestOfThree)
+                                    {
+                                        await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!");
+                                        Thread.Sleep(60000);
+                                        await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
+                                        mapQueue.Remove(mapQueue.FirstOrDefault());
+                                    }
+                                    else if (mapQueue.Count == 0)
+                                    {
+                                        isBestOfThree = false;
+                                    }
+                                }
+
+                                if (match.AScore + match.BScore == match.MaxRounds * 2)
+                                {
+                                    if (match.IsMatch)
+                                    {
+                                        match.AScoreOvertime = 0;
+                                        match.BScoreOvertime = 0;
+                                        match.IsOvertime = true;
+                                        await RconHelper.SendMessage(rcon, "Овертайм!!!");
+                                        await RconHelper.SendCmd(rcon, "sv_pausable 1");
+                                        await RconHelper.SendCmd(rcon, "mp_freezetime 30");
+                                        Thread.Sleep(2000);
+                                        await RconHelper.SendMessage(rcon, "Полминуты перерыва!");
+                                        isResetFreezeTime = true;
+                                        match.MaxRounds = 3;
+                                    }
+                                }
+                            }
+
+                            #endregion
+                        }
+                        #endregion
+                        #region Оверы
+                        else
                         {
+                            #region Смена сторон в оверах
+
+                            if (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime)
+                            {
+                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут на одну минуту.\\nМатч продолжится автоматически.");
+                                await RconHelper.SendMessage(rcon, "Тайм-аут!");
+                                await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                Thread.Sleep(2000);
+                                await RconHelper.SendCmd(rcon, "sm_swap @all");
+                                await RconHelper.SendCmd(rcon, "sv_pausable 1");
+                                await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
+                                isResetFreezeTime = true;
+                                match.FirstHalf = false;
+                                var _aScore = match.AScore;
+                                var _bScore = match.BScore;
+                                var _AOScore = match.AScoreOvertime;
+                                var _BOScore = match.BScoreOvertime;
+                                match.AScore = _bScore;
+                                match.BScore = _aScore;
+                                match.AScoreOvertime = _BOScore;
+                                match.BScoreOvertime = _AOScore;
+                                foreach (Player player in MatchPlayers)
+                                {
+                                    if (player.Team == tName)
+                                    {
+                                        player.Team = ctName;
+                                    }
+                                    else
+                                    {
+                                        player.Team = tName;
+                                    }
+                                }
+                            }
+
+                            #endregion
+
+                            #region Окончание матча или еще одни оверы
+
                             if ((Math.Abs(match.AScoreOvertime - match.BScoreOvertime) >= 2) && (match.AScoreOvertime == match.MaxRounds + 1 || match.BScoreOvertime == match.MaxRounds + 1))
                             {
                                 await OnEndMatch(tags, result.WinningTeam, info, server);
@@ -295,64 +385,30 @@ namespace kTVCSS
                                     isBestOfThree = false;
                                 }
                             }
-                            else
-                            {
-                                if (match.AScore + match.BScore == match.MaxRounds * 2 || match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds * 2)
-                                {
-                                    if (!match.FirstHalf && !match.IsOvertime)
-                                    {
-                                        if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
-                                        {
-                                            await OnEndMatch(tags, result.WinningTeam, info, server);
 
-                                            if (mapQueue.Count > 0 && isBestOfThree)
-                                            {
-                                                await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!"); 
-                                                Thread.Sleep(60000);
-                                                await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
-                                                mapQueue.Remove(mapQueue.FirstOrDefault());
-                                            }
-                                            else if (mapQueue.Count == 0)
-                                            {
-                                                isBestOfThree = false;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            match.AScoreOvertime = 0;
-                                            match.BScoreOvertime = 0;
-                                            match.IsOvertime = true;
-                                            await RconHelper.SendMessage(rcon, "Овертайм!!!");
-                                            await RconHelper.SendCmd(rcon, "mp_freezetime 60");
-                                            Thread.Sleep(2000);
-                                            await RconHelper.SendMessage(rcon, "Одна минута перерыва!");
-                                            isResetFreezeTime = true;
-                                            match.MaxRounds = 3;
-                                        }
-                                    }   
+                            if (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds * 2)
+                            {
+                                if (match.IsMatch)
+                                {
+                                    match.AScoreOvertime = 0;
+                                    match.BScoreOvertime = 0;
+                                    match.IsOvertime = true;
+                                    await RconHelper.SendMessage(rcon, "Овертайм!!!");
+                                    await RconHelper.SendCmd(rcon, "sv_pausable 1");
+                                    await RconHelper.SendCmd(rcon, "mp_freezetime 30");
+                                    Thread.Sleep(2000);
+                                    await RconHelper.SendMessage(rcon, "Полминуты перерыва!");
+                                    isResetFreezeTime = true;
+                                    match.MaxRounds = 3;
                                 }
                             }
+
+                            #endregion
                         }
 
-                        if (!match.FirstHalf && !match.IsOvertime && match.IsMatch)
-                        {
-                            if ((Math.Abs(match.AScore - match.BScore) >= 2) && (match.AScore == match.MaxRounds + 1 || match.BScore == match.MaxRounds + 1))
-                            {
-                                await OnEndMatch(tags, result.WinningTeam, info, server);
+                        #endregion
 
-                                if (mapQueue.Count > 0 && isBestOfThree)
-                                {
-                                    await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!");
-                                    Thread.Sleep(60000);
-                                    await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
-                                    mapQueue.Remove(mapQueue.FirstOrDefault());
-                                }
-                                else if (mapQueue.Count == 0)
-                                {
-                                    isBestOfThree = false;
-                                }
-                            }
-                        }
+                        #endregion
                     }
                     if (match.KnifeRound)
                     {
