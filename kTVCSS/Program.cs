@@ -1188,6 +1188,10 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, "Базовые команды: !ko3 !lo3 !bo1 !bo3 !me !cm !pause !pause5 !check", Colors.ivory);
                 await RconHelper.SendMessage(rcon, "Напишите !gethelp для получения описания всех команд", Colors.ivory);
                 await RconHelper.SendMessage(rcon, "Примечание: запуск матча может быть осуществлен без админских прав", Colors.ivory);
+//#if DEBUG
+                await RconHelper.SendMessage(rcon, "The process has been started in debug mode", Colors.crimson);
+                await RconHelper.SendMessage(rcon, "If you spot a bug please submit it to developer", Colors.crimson);
+//#endif
             }
 
             private async void CheckIsDeadMapVote()

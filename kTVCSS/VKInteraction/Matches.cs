@@ -143,7 +143,7 @@ namespace kTVCSS.VKInteraction
         {
             try
             {
-                System.Drawing.Image image = System.Drawing.Image.FromFile(@"Pictures\template_match_result.png");
+                System.Drawing.Image image = System.Drawing.Image.FromFile(Path.Combine("Pictures", "template_match_result.png"));
                 Graphics graphics = Graphics.FromImage(image);
 
                 string MVPName = matchResultInfo.MVPlayer.Name;
