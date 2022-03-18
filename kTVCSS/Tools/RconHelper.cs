@@ -18,6 +18,7 @@ namespace kTVCSS.Tools
             try
             {
                 await rcon.SendCommandAsync("sys_say {" + color + "}" + message);
+                Program.Logger.Print(Program.Node.ServerID, "exec say " + message, LogLevel.Info);
             }
             catch (Exception ex)
             {
@@ -31,6 +32,7 @@ namespace kTVCSS.Tools
             try
             {
                 await rcon.SendCommandAsync(cmd);
+                Program.Logger.Print(Program.Node.ServerID, "exec " + cmd, LogLevel.Info);
             }
             catch (Exception ex)
             {
@@ -43,6 +45,7 @@ namespace kTVCSS.Tools
         {
             try
             {
+                Program.Logger.Print(Program.Node.ServerID, "exec lo3", LogLevel.Info);
                 await rcon.SendCommandAsync("exec ktvcss/ruleset_global.cfg");
                 Thread.Sleep(500);
                 await rcon.SendCommandAsync("sm_csay LIVE on three restarts!!!");
@@ -86,6 +89,7 @@ namespace kTVCSS.Tools
         {
             try
             {
+                Program.Logger.Print(Program.Node.ServerID, "exec ko3", LogLevel.Info);
                 await rcon.SendCommandAsync("sm_csay KNIVES on three restarts!!!");
                 await rcon.SendCommandAsync("sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!");
                 Thread.Sleep(2000);
@@ -109,6 +113,7 @@ namespace kTVCSS.Tools
             try
             {
                 await rcon.ConnectAsync();
+                Program.Logger.Print(Program.Node.ServerID, "Reconnected rcon", LogLevel.Trace);
             }
             catch (Exception ex)
             {

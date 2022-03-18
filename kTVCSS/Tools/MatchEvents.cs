@@ -416,6 +416,7 @@ namespace kTVCSS.Tools
                         query.Parameters.AddWithValue("@SERVERID", serverId);
                         await query.ExecuteNonQueryAsync();
                         await connection.CloseAsync();
+                        Program.Logger.Print(serverId, message, LogLevel.Info);
                     }
                     catch (Exception ex)
                     {
