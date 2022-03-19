@@ -1,0 +1,13 @@
+[Unit]
+Description=kTVCSS VK Bot
+After=multi-user.target
+Conflicts=getty@tty1.service
+
+[Service]
+Restart=on-failure
+Type=simple
+ExecStart=/usr/bin/python3 /home/ktvcss/bot/main.py
+StandardInput=tty-force
+
+[Install]
+WantedBy=multi-user.target
