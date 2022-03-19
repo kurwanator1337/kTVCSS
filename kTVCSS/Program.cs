@@ -1303,19 +1303,21 @@ namespace kTVCSS
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
             Logger.Print(0, $"STATGROUP - {ConfigTools.Config.StatGroupID}", LogLevel.Debug);
             Logger.Print(0, $"ADMINID - {ConfigTools.Config.AdminVkID}", LogLevel.Debug);
+            Logger.Print(0, $"SQLCONSTR - {ConfigTools.Config.SQLConnectionString}", LogLevel.Debug);
+            Logger.Print(0, $"VKTOKEN - {ConfigTools.Config.VKToken}", LogLevel.Debug);
 
-            #if DEBUG
+#if DEBUG
 
             args = new string[1];
             args[0] = "0";
 
-            #endif
+#endif
 
             if (args.Length != 0)
             {
                 Loader.LoadServers();
 
-                ForbiddenWords.AddRange(File.ReadAllLines("wordsfilter.txt", System.Text.Encoding.UTF8));
+                ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
 
                 Console.Title = "kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -143,7 +144,7 @@ namespace kTVCSS.VKInteraction
         {
             try
             {
-                System.Drawing.Image image = System.Drawing.Image.FromFile(Path.Combine("Pictures", "template_match_result.png"));
+                System.Drawing.Image image = System.Drawing.Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "template_match_result.png"));
                 Graphics graphics = Graphics.FromImage(image);
 
                 string MVPName = matchResultInfo.MVPlayer.Name;

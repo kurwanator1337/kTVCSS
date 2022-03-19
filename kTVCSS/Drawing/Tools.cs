@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -34,47 +35,47 @@ namespace kTVCSS.Drawing
             {
                 case "LEVEL-I":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl1.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl1.png"));
                     }
                 case "LEVEL-II":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl2.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl2.png"));
                     }
                 case "LEVEL-III":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl3.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl3.png"));
                     }
                 case "LEVEL-IV":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl4.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl4.png"));
                     }
                 case "LEVEL-V":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl5.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl5.png"));
                     }
                 case "LEVEL-VI":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl6.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl6.png"));
                     }
                 case "LEVEL-VII":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl7.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl7.png"));
                     }
                 case "LEVEL-VIII":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl8.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl8.png"));
                     }
                 case "LEVEL-IX":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl9.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl9.png"));
                     }
                 case "LEVEL-X":
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl10.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl10.png"));
                     }
                 default:
                     {
-                        return Image.FromFile(Path.Combine("Pictures", "lvl0.png"));
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "lvl0.png"));
                     }
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,19 +15,21 @@ namespace kTVCSS
 
         public Logger(int loggerID)
         {
-            if (!File.Exists($"kTVCSS_{loggerID}.log"))
+            string path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), $"kTVCSS_{loggerID}.log");
+            if (!File.Exists(path))
             {
-                File.WriteAllText($"kTVCSS_{loggerID}.log", null, Encoding.UTF8);
+                File.WriteAllText(path, null, Encoding.UTF8);
             }
             LoggerID = loggerID;
         }
 
         public void Print(int serverID, string message, LogLevel logLevel)
         {
+            string path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), $"kTVCSS_{serverID}.log");
             Console.WriteLine($"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}");
             try
             {
-                using (streamWriter = new StreamWriter($"kTVCSS_{LoggerID}.log", true, Encoding.UTF8))
+                using (streamWriter = new StreamWriter(path, true, Encoding.UTF8))
                 {
                     streamWriter.WriteLine($"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}");
                 }

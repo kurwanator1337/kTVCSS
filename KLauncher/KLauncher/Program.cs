@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace KLauncher
 {
@@ -14,6 +15,7 @@ namespace KLauncher
                 node.StartInfo.UseShellExecute = true;
                 node.StartInfo.FileName = item.Path;
                 node.StartInfo.Arguments = item.Args;
+                node.StartInfo.WorkingDirectory = Path.GetDirectoryName(item.Path);
                 node.Start();
             }
         }
