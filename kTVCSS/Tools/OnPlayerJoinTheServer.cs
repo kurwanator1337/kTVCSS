@@ -53,6 +53,38 @@ namespace kTVCSS.Tools
             return null;
         }
 
+        public static async Task<bool> IsUserRegistered(string steamID)
+        {
+            int mPlayed = 0;
+            string vkId = string.Empty;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand($"SELECT [MATCHESPLAYED], [VKID] FROM [dbo].[Players] WHERE STEAMID = '{steamID}'", connection);
+                    using (var reader = await query.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            mPlayed = int.Parse(reader[0].ToString());
+                            vkId = reader[1].ToString();
+                        }
+                    }
+                }
+                if (mPlayed >= 10 && string.IsNullOrEmpty(vkId))
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+            }
+            return true;
+        }
+
         public static async Task<PlayerRank> GetPlayerRank(string steamID)
         {
             try

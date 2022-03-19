@@ -891,6 +891,11 @@ namespace kTVCSS
                             }
                         }
 
+                        if (!await OnPlayerJoinTheServer.IsUserRegistered(connection.Player.SteamId))
+                        {
+                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вам нужно привязать VK к группе vk.com/im?sel=-55788587 (команда !setid {connection.Player.SteamId})");
+                        }
+
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been connected to {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                     }
                 });
@@ -1024,8 +1029,9 @@ namespace kTVCSS
                         //    OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
                         //}
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
-                        if (OnlinePlayers.Count() == 0 && NeedRestart && !match.IsMatch)
+                        if (OnlinePlayers.Count() == 0 && NeedRestart)
                         {
+                            Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
                             Environment.Exit(0);
                         }
                     }
@@ -1214,7 +1220,7 @@ namespace kTVCSS
 
             private static void SetAutoRestartTimer()
             {
-                aTimer = new System.Timers.Timer(15 * 1000);
+                aTimer = new System.Timers.Timer(15 * 60 * 1000);
                 aTimer.Elapsed += ATimer_Elapsed;
                 aTimer.AutoReset = true;
                 aTimer.Enabled = true;
@@ -1224,6 +1230,7 @@ namespace kTVCSS
             {
                 if (OnlinePlayers.Count() == 0)
                 {
+                    Logger.Print(ServerID, "Autorestart (on timer) cuz players count is zero", LogLevel.Debug);
                     Environment.Exit(0);
                 }
             }
