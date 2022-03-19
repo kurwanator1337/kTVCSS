@@ -15,6 +15,7 @@ using System.IO;
 using System.Diagnostics;
 using MySqlConnector;
 using static kTVCSS.Game.Sourcemod;
+using System.Timers;
 
 namespace kTVCSS
 {
@@ -37,11 +38,13 @@ namespace kTVCSS
             private Match match = new Match(0);
             private List<string> mapQueue = new List<string>();
             private Dictionary<int, string> mapPool = new Dictionary<int, string>();
+            private static System.Timers.Timer aTimer;
 
             public List<Player> MatchPlayers = null;
             public static List<PlayerRank> PlayersRank = new List<PlayerRank>();
             public static List<Player> OnlinePlayers = new List<Player>();
             public static int ServerID = 0;
+            public static bool NeedRestart = false;
 
             private bool isCanBeginMatch = true;
             private bool isResetFreezeTime = false;
@@ -58,8 +61,8 @@ namespace kTVCSS
             public async Task StartNode(Server server)
             {
                 Logger.LoggerID = server.ID;
-
                 ServerID = server.ID;
+                SetAutoRestartTimer();
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(server.Host), server.GamePort);
                 rcon = new RCON(endpoint, server.RconPassword);
                 rcon.OnDisconnected += Rcon_OnDisconnected;
@@ -862,6 +865,7 @@ namespace kTVCSS
                         if (OnlinePlayers.Where(x => x.SteamId == connection.Player.SteamId).Count() == 0)
                         {
                             OnlinePlayers.Add(connection.Player);
+                            NeedRestart = true;
                             if (match.IsMatch)
                             {
                                 if (MatchPlayers.Where(x => x.SteamId == connection.Player.SteamId).Count() == 0) MatchPlayers.Add(connection.Player);
@@ -1020,6 +1024,10 @@ namespace kTVCSS
                         //    OnlinePlayers.RemoveAll(x => x.SteamId == connection.Player.SteamId);
                         //}
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
+                        if (OnlinePlayers.Count() == 0 && NeedRestart && !match.IsMatch)
+                        {
+                            Environment.Exit(0);
+                        }
                     }
                 });
 
@@ -1187,10 +1195,10 @@ namespace kTVCSS
             {
                 await RconHelper.SendMessage(rcon, "Базовые команды: !ko3 !lo3 !bo1 !bo3 !me !cm !pause !pause5 !check", Colors.ivory);
                 await RconHelper.SendMessage(rcon, "Напишите !gethelp для получения описания всех команд", Colors.ivory);
-                await RconHelper.SendMessage(rcon, "Примечание: запуск матча может быть осуществлен без админских прав", Colors.ivory);
+                await RconHelper.SendMessage(rcon, "Примечание: запуск матча может быть осуществлен без админских прав", Colors.crimson);
 //#if DEBUG
-                await RconHelper.SendMessage(rcon, "The process has been started in debug mode", Colors.crimson);
-                await RconHelper.SendMessage(rcon, "If you spot a bug please submit it to developer", Colors.crimson);
+                await RconHelper.SendMessage(rcon, "The process has been started in debug mode", Colors.mediumseagreen);
+                await RconHelper.SendMessage(rcon, "If you spot a bug please submit it to developer", Colors.mediumseagreen);
 //#endif
             }
 
@@ -1201,6 +1209,22 @@ namespace kTVCSS
                 {
                     isBestOfOneStarted = !isBestOfOneStarted;
                     await RconHelper.SendMessage(rcon, "Голосование bo1/bo3 было аннулировано!", Colors.crimson);
+                }
+            }
+
+            private static void SetAutoRestartTimer()
+            {
+                aTimer = new System.Timers.Timer(15 * 1000);
+                aTimer.Elapsed += ATimer_Elapsed;
+                aTimer.AutoReset = true;
+                aTimer.Enabled = true;
+            }
+
+            private static void ATimer_Elapsed(object sender, ElapsedEventArgs e)
+            {
+                if (OnlinePlayers.Count() == 0)
+                {
+                    Environment.Exit(0);
                 }
             }
 
