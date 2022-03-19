@@ -10,9 +10,9 @@ namespace WardenCat
     {
         private static List<ProcessInfo> ProcessList = new List<ProcessInfo>();
 
-        private static void GetProcessList()
+        private static void GetProcessList(string exeName)
         {
-            string wmiQuery = string.Format("select CommandLine, ProcessId from Win32_Process where Name='{0}'", "kTVCSS.exe");
+            string wmiQuery = string.Format("select CommandLine, ProcessId from Win32_Process where Name='{0}'", exeName);
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(wmiQuery);
             ManagementObjectCollection retObjectCollection = searcher.Get();
             foreach (ManagementObject retObject in retObjectCollection)
@@ -33,26 +33,35 @@ namespace WardenCat
         {
             foreach (ProcessInfo process in ProcessList)
             {
-                Process proc = Process.GetProcessById(process.Id);
+                System.Diagnostics.Process proc = System.Diagnostics.Process.GetProcessById(process.Id);
                 proc.EnableRaisingEvents = true;
 
                 proc.Exited += (a, e) =>
                 {
-                    Process node = new Process();
+                    System.Diagnostics.Process node = new System.Diagnostics.Process();
                     node.StartInfo.UseShellExecute = true;
                     node.StartInfo.FileName = process.Path;
                     node.StartInfo.Arguments = process.Args;
                     node.Start();
                     ProcessList.Clear();
-                    GetProcessList();
+                    GetConfig();
                     SetHook();
                 };
             }
         }
 
+        private static void GetConfig()
+        {
+            ConfigTool config = new ConfigTool();
+            foreach (var item in config.ProcessList.Process)
+            {
+                GetProcessList(item.Name);
+            }
+        }
+
         static void Main(string[] args)
         {
-            GetProcessList();
+            GetConfig();
 
             SetHook();
 
