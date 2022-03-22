@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace KLauncher
 {
@@ -17,6 +18,7 @@ namespace KLauncher
                 node.StartInfo.Arguments = item.Args;
                 node.StartInfo.WorkingDirectory = Path.GetDirectoryName(item.Path);
                 node.Start();
+                Thread.Sleep(2000);
             }
         }
     }

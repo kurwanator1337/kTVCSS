@@ -62,10 +62,4 @@ Use Concurrent dictionary for PendingCommands.</PackageReleaseNotes>
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="CoreRCON">
-      <HintPath>..\..\..\..\..\..\..\..\kTVCSS\kTVCSS\kTVCSS\bin\Release\net5.0\Release\net5.0\CoreRCON.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

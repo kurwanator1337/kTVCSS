@@ -114,14 +114,14 @@ namespace kTVCSS
                         if (!match.PlayerKills.ContainsKey(kill.Killer.SteamId))
                         {
                             match.PlayerKills.Add(kill.Killer.SteamId, 1);
-                            await OnPlayerConnectAuth.AuthPlayer(kill.Killer.SteamId, kill.Killer.Name);
+                            await ServerEvents.AuthPlayer(kill.Killer.SteamId, kill.Killer.Name);
                         }
                         else
                         {
                             match.PlayerKills[kill.Killer.SteamId]++;
                         }
 
-                        await OnPlayerKill.SetValues(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId);
+                        await MatchEvents.PlayerKill(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId);
 
                         if (!MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) MatchPlayers.Add(kill.Killer);
                         else
@@ -431,6 +431,7 @@ namespace kTVCSS
 
                 log.Listen<ChatMessage>(async chat =>
                 {
+                    await ServerEvents.InsertChatMessage(chat.Player.SteamId, chat.Message, ServerID);
                     int.TryParse(chat.Message, out int mapNum);
                     if (chat.Channel == MessageChannel.All && mapNum > 0 && mapNum < 10 && currentMapSelector == chat.Player.Name)
                     {
@@ -540,7 +541,7 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message == "!me")
                     {
-                        var info = await OnPlayerJoinTheServer.PrintPlayerInfo(chat.Player.SteamId);
+                        var info = await ServerEvents.PrintPlayerInfo(chat.Player.SteamId);
 
                         if (info.IsCalibration == 0)
                         {
@@ -765,7 +766,7 @@ namespace kTVCSS
                             MatchPlayers.AddRange(OnlinePlayers);
                             foreach (var player in MatchPlayers)
                             {
-                                await OnPlayerConnectAuth.AuthPlayer(player.SteamId, player.Name);
+                                await ServerEvents.AuthPlayer(player.SteamId, player.Name);
                             }
                             foreach (var player in PlayersRank)
                             {
@@ -795,7 +796,7 @@ namespace kTVCSS
                             //await RconHelper.SendMessage(rcon, $"{tName} [{match.AScore}-{match.BScore}] {ctName}");
                             foreach (var player in MatchPlayers)
                             {
-                                await OnPlayerConnectAuth.AuthPlayer(player.SteamId, player.Name);
+                                await ServerEvents.AuthPlayer(player.SteamId, player.Name);
                             }
                         }
                         else
@@ -845,9 +846,10 @@ namespace kTVCSS
                 {
                     if (connection.Player.SteamId != "STEAM_ID_PENDING" && connection.Player.SteamId != "BOT")
                     {
-                        var result = await OnPlayerConnectAuth.AuthPlayer(connection.Player.SteamId, connection.Player.Name);
-                        var info = await OnPlayerJoinTheServer.PrintPlayerInfo(connection.Player.SteamId);
-                        var playerRank = await OnPlayerJoinTheServer.GetPlayerRank(connection.Player.SteamId);
+                        var result = await ServerEvents.AuthPlayer(connection.Player.SteamId, connection.Player.Name);
+                        var info = await ServerEvents.PrintPlayerInfo(connection.Player.SteamId);
+                        var playerRank = await ServerEvents.GetPlayerRank(connection.Player.SteamId);
+                        await ServerEvents.InsertConnectData(ServerID, connection);
 
                         if (info.IsCalibration == 0)
                         {
@@ -891,9 +893,14 @@ namespace kTVCSS
                             }
                         }
 
-                        if (!await OnPlayerJoinTheServer.IsUserRegistered(connection.Player.SteamId))
+                        if (!await ServerEvents.IsUserRegistered(connection.Player.SteamId))
                         {
                             await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вам нужно привязать VK к группе vk.com/im?sel=-55788587 (команда !setid {connection.Player.SteamId})");
+                        }
+
+                        if (await ServerEvents.CheckIsBanned(connection.Player.SteamId))
+                        {
+                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы были заблокированны на проекте. Для уточнения информации посетите Ваш профиль на сайте проекта.");
                         }
 
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been connected to {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
@@ -904,6 +911,43 @@ namespace kTVCSS
                 {
                     await RconHelper.SendCmd(rcon, "sm_swap @all");
                     await RconHelper.SendMessage(rcon, "Напишите !lo3 для запуска матча!", Colors.mediumseagreen);
+                });
+
+                log.Listen<MapChange>(async result =>
+                {
+                    Logger.Print(server.ID, $"Map change to {result.Map}", LogLevel.Trace);
+
+                    if (match.IsMatch)
+                    {
+                        if (match.AScore == 0 && match.BScore == 0 || (match.AScore + match.BScore < 8))
+                        {
+                            await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                            await MatchEvents.ResetMatch(match.MatchId, server.ID);
+                            await RconHelper.SendMessage(rcon, "Матч отменен!", Colors.crimson);
+                            await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
+                            await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
+                            isCanBeginMatch = true;
+                            match = new Match(0);
+                        }
+                        else
+                        {
+                            string winner = string.Empty;
+                            string looser = string.Empty;
+                            if (match.AScore > match.BScore)
+                            {
+                                winner = tName;
+                                looser = ctName;
+                            }
+                            else
+                            {
+                                winner = ctName;
+                                looser = tName;
+                            }
+
+                            var tags = MatchEvents.GetTeamNames(MatchPlayers);
+                            await OnEndMatch(tags, winner, currentMapName, server);
+                        }
+                    }
                 });
 
                 log.Listen<NoChangeSides>(async result =>
@@ -1016,6 +1060,7 @@ namespace kTVCSS
                         {
                             PlayersRank.RemoveAll(x => x.SteamID == connection.Player.SteamId);
                         }
+                        await ServerEvents.InsertDisconnectData(ServerID, connection);
                         //if (match.IsMatch)
                         //{
                         //    Thread banThread = new Thread(BanOnLeftTheMatch)
