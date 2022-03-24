@@ -10,8 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentFTP" Version="37.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="MySqlConnector" Version="2.1.6" />
+    <PackageReference Include="SSH.NET" Version="2020.0.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.IO.Pipelines" Version="6.0.0" />

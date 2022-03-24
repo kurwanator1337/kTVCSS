@@ -30,3 +30,7 @@
 /KLauncher/.vs/KLauncher/v17
 /KLauncher/.vs/KLauncher/DesignTimeBuild
 /KLauncher/.vs/KLauncher
+/.vscode
+/Tests/FTPTool/.vs/FTPTool/v17
+/Tests/FTPTool/FTPTool/bin/Debug/net5.0
+/Tests/FTPTool/FTPTool/obj

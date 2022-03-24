@@ -14,5 +14,8 @@ namespace kTVCSS.Models
         public string SourceBansConnectionString { get; set; }
         public long StatGroupID { get; set; }
         public long AdminVkID { get; set; }
+        public string SSHHost { get; set; }
+        public string SSHLogin { get; set; }
+        public string SSHPassword { get; set; }
     }
 }

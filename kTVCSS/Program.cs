@@ -40,11 +40,13 @@ namespace kTVCSS
             private Dictionary<int, string> mapPool = new Dictionary<int, string>();
             private static System.Timers.Timer aTimer;
 
+            public static FTPTools FTPTools = null;
             public List<Player> MatchPlayers = null;
             public static List<PlayerRank> PlayersRank = new List<PlayerRank>();
             public static List<Player> OnlinePlayers = new List<Player>();
             public static int ServerID = 0;
             public static bool NeedRestart = false;
+            public static string DemoName = string.Empty;
 
             private bool isCanBeginMatch = true;
             private bool isResetFreezeTime = false;
@@ -55,7 +57,6 @@ namespace kTVCSS
             private string ctPlayerSelector = string.Empty;
             private string tName = "TERRORIST";
             private string ctName = "CT";
-            private string demoName = string.Empty;
             private string currentMapName = string.Empty;
             
             public async Task StartNode(Server server)
@@ -85,6 +86,7 @@ namespace kTVCSS
                 var checkList = players.ToList();
                 checkList.RemoveAll(x => x.Duration == -1);
                 SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
+                FTPTools = new FTPTools(server);
                 Logger.Print(server.ID, $"Created connection to {info.Name}", LogLevel.Trace);
                 await RconHelper.SendMessage(rcon, "Соединение до центрального сервера kTVCSS установлено!", Colors.ivory);
 #if DEBUG
@@ -757,8 +759,8 @@ namespace kTVCSS
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_start.cfg");
                             SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                             currentMapName = info.Map;
-                            demoName = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss") + "_" + info.Map;
-                            await RconHelper.SendCmd(rcon, "tv_record " + demoName);
+                            DemoName = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss") + "_" + info.Map;
+                            await RconHelper.SendCmd(rcon, "tv_record " + DemoName);
                             await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
                             match = new Match(15);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
@@ -1155,7 +1157,7 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.", Colors.mediumseagreen);
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", info.Map, server.ID);
-                await MatchEvents.InsertDemoName(match.MatchId, demoName);
+                await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
                 
                 isCanBeginMatch = true;
@@ -1204,7 +1206,7 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.", Colors.mediumseagreen);
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", mapName, server.ID);
-                await MatchEvents.InsertDemoName(match.MatchId, demoName);
+                await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
                 
                 isCanBeginMatch = true;
