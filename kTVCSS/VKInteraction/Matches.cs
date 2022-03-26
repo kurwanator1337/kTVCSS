@@ -140,6 +140,13 @@ namespace kTVCSS.VKInteraction
             return match;
         }
 
+        private static string CutMapName(string mapName)
+        {
+            mapName = mapName.Replace("de_", "");
+            mapName = mapName.Replace("_csgo", "");
+            return mapName.ToUpper();
+        }
+
         public static void PublishResult(MatchResultInfo matchResultInfo)
         {
             Program.Node.FTPTools.DownloadFile(Program.Node.DemoName + ".dem");
@@ -172,7 +179,7 @@ namespace kTVCSS.VKInteraction
                 Drawing.Tools.DrawText(graphics, matchResultInfo.MatchScore.AScore, new Rectangle(300, 225, 0, 200), StringAlignment.Center, 36, Brushes.White, FontStyle.Regular, "Play-Regular");
                 Drawing.Tools.DrawText(graphics, matchResultInfo.MatchScore.BScore, new Rectangle(985, 225, 0, 200), StringAlignment.Center, 36, Brushes.White, FontStyle.Regular, "Play-Regular");
                 // DRAWING MAP NAME 
-                Drawing.Tools.DrawText(graphics, matchResultInfo.MapName, new Rectangle(650, 225, 0, 200), StringAlignment.Center, 36, Brushes.White, FontStyle.Regular, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, CutMapName(matchResultInfo.MapName), new Rectangle(650, 225, 0, 200), StringAlignment.Center, 36, Brushes.White, FontStyle.Regular, "Play-Regular");
                 // DRAWING MVP PLAYER NAME 
                 Drawing.Tools.Draw(graphics, MVPName, 420, 403, 36);
                 // DRAWING FIRST BLOCK
@@ -260,10 +267,12 @@ namespace kTVCSS.VKInteraction
                     AccessToken = Program.ConfigTools.Config.VKToken,
                 });
 
+                string demoLink = "http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip";
+
                 var wallPostParams = new WallPostParams
                 {
                     OwnerId = -Program.ConfigTools.Config.StatGroupID,
-                    Message = "Демо-запись: http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip",
+                    Message = $"Демо-запись: [{demoLink}|скачать здесь]",
                     FromGroup = true,
                     Signed = false
                 };
