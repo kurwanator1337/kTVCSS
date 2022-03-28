@@ -149,9 +149,6 @@ namespace kTVCSS.VKInteraction
 
         public static void PublishResult(MatchResultInfo matchResultInfo)
         {
-            Program.Node.FTPTools.DownloadFile(Program.Node.DemoName + ".dem");
-            Program.Node.FTPTools.UploadFile(Program.Node.DemoName + ".dem.zip");
-
             try
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "template_match_result.png"));
@@ -267,12 +264,10 @@ namespace kTVCSS.VKInteraction
                     AccessToken = Program.ConfigTools.Config.VKToken,
                 });
 
-                string demoLink = "http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip";
-
                 var wallPostParams = new WallPostParams
                 {
                     OwnerId = -Program.ConfigTools.Config.StatGroupID,
-                    Message = $"Демо-запись: [{demoLink}|скачать здесь]",
+                    Message = "Демо-запись: http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip",
                     FromGroup = true,
                     Signed = false
                 };

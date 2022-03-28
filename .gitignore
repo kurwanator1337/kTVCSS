@@ -36,3 +36,7 @@
 /Tests/FTPTool/FTPTool/obj
 /Tests/FTPTool/.vs/FTPTool/DesignTimeBuild
 /Tests/FTPTool/.vs/FTPTool
+/Deprecated
+/Tests/PrintAVGTeamsTest/.vs/PrintAVGTeamsTest
+/Tests/PrintAVGTeamsTest/PrintAVGTeamsTest/bin/Debug/net5.0
+/Tests/PrintAVGTeamsTest/PrintAVGTeamsTest/obj

@@ -62,6 +62,14 @@ namespace kTVCSS
             public async Task StartNode(Server server)
             {
                 Logger.LoggerID = server.ID;
+                Logger.Print(ServerID, $"[SERVER] {server.ID}", LogLevel.Trace);
+                Logger.Print(ServerID, $"[SERVER] {server.UserName}", LogLevel.Trace);
+                Logger.Print(ServerID, $"[SERVER] {server.Host}", LogLevel.Trace);
+                Logger.Print(ServerID, $"[SERVER] {server.RconPassword}", LogLevel.Trace);
+                Logger.Print(ServerID, $"[SERVER] {server.UserPassword}", LogLevel.Trace);
+                Logger.Print(ServerID, $"[SERVER] {server.Port}", LogLevel.Trace);
+                Logger.Print(ServerID, $"[SERVER] {server.GamePort}", LogLevel.Trace);
+
                 ServerID = server.ID;
                 SetAutoRestartTimer();
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(server.Host), server.GamePort);
@@ -222,9 +230,9 @@ namespace kTVCSS
                                     }
                                 }
                             }
-                            catch (Exception) 
+                            catch (Exception ex) 
                             {
-
+                                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
                             }
                         }
                     }
@@ -1106,6 +1114,30 @@ namespace kTVCSS
                     }
                 });
 
+                log.Listen<PlayerConnectedIPInfo>(async data =>
+                {
+                    try
+                    {
+                        WebClient web = new WebClient();
+                        Uri uri = new Uri("https://blackbox.ipinfo.app/lookup/" + data.IP.Substring(0, data.IP.IndexOf(":")));
+                        string result = await web.DownloadStringTaskAsync(uri);
+
+                        if (result == "Y")
+                        {
+                            Logger.Print(server.ID, $"[VPN CHECK] {data.Player.Name} ({data.IP}) [VPN]", LogLevel.Debug);
+                            await RconHelper.SendCmd(rcon, $"kickid {data.Player.ClientId} Использование VPN запрещено");
+                        }
+                        else
+                        {
+                            Logger.Print(server.ID, $"[VPN CHECK] {data.Player.Name} ({data.IP}) [NORMAL]", LogLevel.Debug);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Print(server.ID, ex.Message, LogLevel.Error);
+                    }
+                });
+
                 log.Listen<MatchBackup>(async data =>
                 {
                     if (match.IsMatch)
@@ -1158,14 +1190,11 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
+                Program.Node.FTPTools.DownloadFile(Program.Node.DemoName + ".dem");
+                Program.Node.FTPTools.UploadFile(Program.Node.DemoName + ".dem.zip");
                 if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
                 {
                     VKInteraction.Matches.PublishResult(matchResultInfo);
-                }
-                else 
-                {
-                    Program.Node.FTPTools.DownloadFile(Program.Node.DemoName + ".dem");
-                    Program.Node.FTPTools.UploadFile(Program.Node.DemoName + ".dem.zip");
                 }
 
                 match = new Match(0);
