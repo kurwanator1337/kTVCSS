@@ -110,6 +110,19 @@ namespace kTVCSS
 
                 log.Listen<KillFeed>(async kill =>
                 {
+                    if (!OnlinePlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) OnlinePlayers.Add(kill.Killer);
+                    else
+                    {
+                        OnlinePlayers.Where(x => x.SteamId == kill.Killer.SteamId).First().Name = kill.Killer.Name;
+                        OnlinePlayers.Where(x => x.SteamId == kill.Killer.SteamId).First().Team = kill.Killer.Team;
+                    }
+                    if (!OnlinePlayers.Where(x => x.SteamId == kill.Killed.SteamId).Any()) OnlinePlayers.Add(kill.Killed);
+                    else
+                    {
+                        OnlinePlayers.Where(x => x.SteamId == kill.Killed.SteamId).First().Name = kill.Killed.Name;
+                        OnlinePlayers.Where(x => x.SteamId == kill.Killed.SteamId).First().Team = kill.Killed.Team;
+                    }
+
                     if (match.IsMatch)
                     {
                         int hs = 0;
@@ -1106,11 +1119,11 @@ namespace kTVCSS
                         }
                         await ServerEvents.InsertDisconnectData(ServerID, connection);
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
-                        if (OnlinePlayers.Count() == 0 && NeedRestart)
-                        {
-                            Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
-                            Environment.Exit(0);
-                        }
+                        //if (OnlinePlayers.Count() == 0 && NeedRestart)
+                        //{
+                        //    Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
+                        //    Environment.Exit(0);
+                        //}
                     }
                 });
 
@@ -1121,7 +1134,7 @@ namespace kTVCSS
                         WebClient web = new WebClient();
                         Uri uri = new Uri("https://blackbox.ipinfo.app/lookup/" + data.IP.Substring(0, data.IP.IndexOf(":")));
                         string result = await web.DownloadStringTaskAsync(uri);
-
+                        await ServerEvents.InsertConnectData(ServerID, data);
                         if (result == "Y")
                         {
                             Logger.Print(server.ID, $"[VPN CHECK] {data.Player.Name} ({data.IP}) [VPN]", LogLevel.Debug);
@@ -1178,8 +1191,7 @@ namespace kTVCSS
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", info.Map, server.ID);
                 await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
-                
-                isCanBeginMatch = true;
+
                 Match bMatch = match;
 
                 MatchResultInfo matchResultInfo = new MatchResultInfo
@@ -1190,19 +1202,18 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
-                Program.Node.FTPTools.DownloadFile(Program.Node.DemoName + ".dem");
-                Program.Node.FTPTools.UploadFile(Program.Node.DemoName + ".dem.zip");
-                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
-                {
-                    VKInteraction.Matches.PublishResult(matchResultInfo);
-                }
-
-                match = new Match(0);
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                match = new Match(0);
+                isCanBeginMatch = true;
+                Program.Node.FTPTools.UploadDemo(Program.Node.DemoName);
+                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
+                {
+                    VKInteraction.Matches.PublishResult(matchResultInfo);
+                }
             }
 
             private async Task OnEndMatch(Dictionary<string, string> tags, string winningTeam, string mapName, Server server)
@@ -1227,8 +1238,7 @@ namespace kTVCSS
                 await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", mapName, server.ID);
                 await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
-                
-                isCanBeginMatch = true;
+
                 Match bMatch = match;
 
                 MatchResultInfo matchResultInfo = new MatchResultInfo
@@ -1239,22 +1249,18 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
-                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
-                {
-                    VKInteraction.Matches.PublishResult(matchResultInfo);
-                }
-                else 
-                {
-                    Program.Node.FTPTools.DownloadFile(Program.Node.DemoName + ".dem");
-                    Program.Node.FTPTools.UploadFile(Program.Node.DemoName + ".dem.zip");
-                }
-
-                match = new Match(0);
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                match = new Match(0);
+                isCanBeginMatch = true;
+                Program.Node.FTPTools.UploadDemo(Program.Node.DemoName);
+                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
+                {
+                    VKInteraction.Matches.PublishResult(matchResultInfo);
+                }
             }
 
             private void Rcon_OnDisconnected()
@@ -1316,6 +1322,7 @@ namespace kTVCSS
                     }
                     else
                     {
+                        //await RconHelper.SendCmd(rcon, "echo sended life packet");
                         if (OnlinePlayers.Count < match.MinPlayersToStop)
                         {
                             if (match.AScore == 0 && match.BScore == 0 || (match.AScore + match.BScore < 8))

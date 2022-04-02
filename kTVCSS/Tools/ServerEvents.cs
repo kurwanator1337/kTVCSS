@@ -86,6 +86,24 @@ namespace kTVCSS.Tools
             return true;
         }
 
+        public static async Task InsertConnectData(int serverId, PlayerConnectedIPInfo player)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand($"INSERT INTO kTVCSS.dbo.PlayersJoinHistory (STEAMID, IP, DATETIME, TYPE, SERVERID) VALUES ('{player.Player.SteamId}', '{player.IP}', GETDATE(), 'CONNECT', '{serverId}');", connection);
+                    await query.ExecuteNonQueryAsync();
+                    await connection.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+            }
+        }
+
         public static async Task InsertConnectData(int serverId, PlayerConnected player)
         {
             try

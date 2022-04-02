@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace kTVCSS.Tools
@@ -24,7 +25,22 @@ namespace kTVCSS.Tools
             APassword = server.UserPassword;
         }
 
-        public void DownloadFile(string fileName)
+        public void UploadDemo(object fileName)
+        {
+            Thread thread = new Thread(UploadDemoFile)
+            {
+                IsBackground = true
+            };
+            thread.Start(fileName);
+        }
+
+        private void UploadDemoFile(object fileName)
+        {
+            DownloadFile(fileName.ToString() + ".dem");
+            UploadFile(fileName.ToString() + ".dem.zip");
+        }
+
+        private void DownloadFile(string fileName)
         {
             try
             {
@@ -49,7 +65,7 @@ namespace kTVCSS.Tools
             }
         }
 
-        public void UploadFile(string fileName)
+        private void UploadFile(string fileName)
         {
             try
             {
