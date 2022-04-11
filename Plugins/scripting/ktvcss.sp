@@ -1,6 +1,6 @@
 #define PLUGIN_NAME           "kTVCSS HELPER"
 #define PLUGIN_AUTHOR         "Rurix"
-#define PLUGIN_VERSION        "1.3.3"
+#define PLUGIN_VERSION        "1.3.4"
 
 #include <sourcemod>
 #include <sdktools>
@@ -525,11 +525,25 @@ public void grenadecounter_null(Event hEvent, const char[] sEvName, bool bDontBr
 
 public Action CS_OnBuyCommand(int client, const char[] weapon)
 {
-	if (!GetConVarBool(isMatch) || (client == 0))
+	if (GetConVarBool(isMatch) == false)
 	{
-		return Plugin_Continue;
+		if (client == 0) 
+		{
+			return Plugin_Continue;
+		}
+		new String:the_weapon[32];
+		Format(the_weapon, sizeof(the_weapon), "%s", weapon);
+		ReplaceString(the_weapon, sizeof(the_weapon), "weapon_", "");
+		ReplaceString(the_weapon, sizeof(the_weapon), "item_", "");
+		if (IsClientInGame(client) && !IsFakeClient(client))
+		{
+			if (StrEqual(the_weapon, "hegrenade", false) || StrEqual(the_weapon, "flashbang", false) || StrEqual(the_weapon, "smokegrenade", false))
+			{
+				return Plugin_Handled;
+			}
+		}
 	}
-
+	
 	if (StrEqual(weapon, "nvgs", false))
 	{
 		CPrintToChat(client, "{fullred}[kTVCSS] Nightvision Blocked!");
