@@ -1,4 +1,4 @@
-﻿using CoreRCON;
+using CoreRCON;
 using CoreRCON.PacketFormats;
 using CoreRCON.Parsers.Standard;
 using kTVCSS.Models;
@@ -69,7 +69,7 @@ namespace kTVCSS
                 Logger.Print(ServerID, $"[SERVER] {server.UserPassword}", LogLevel.Trace);
                 Logger.Print(ServerID, $"[SERVER] {server.Port}", LogLevel.Trace);
                 Logger.Print(ServerID, $"[SERVER] {server.GamePort}", LogLevel.Trace);
-
+                Thread.Sleep(1000);
                 ServerID = server.ID;
                 SetAutoRestartTimer();
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(server.Host), server.GamePort);
@@ -85,7 +85,7 @@ namespace kTVCSS
                     }
                     catch (Exception ex)
                     {
-                        Logger.Print(server.ID, $"{ex.Message}", LogLevel.Error);
+                        Logger.Print(server.ID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                         Thread.Sleep(30000);
                     }
                 }
@@ -110,19 +110,6 @@ namespace kTVCSS
 
                 log.Listen<KillFeed>(async kill =>
                 {
-                    if (!OnlinePlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) OnlinePlayers.Add(kill.Killer);
-                    else
-                    {
-                        OnlinePlayers.Where(x => x.SteamId == kill.Killer.SteamId).First().Name = kill.Killer.Name;
-                        OnlinePlayers.Where(x => x.SteamId == kill.Killer.SteamId).First().Team = kill.Killer.Team;
-                    }
-                    if (!OnlinePlayers.Where(x => x.SteamId == kill.Killed.SteamId).Any()) OnlinePlayers.Add(kill.Killed);
-                    else
-                    {
-                        OnlinePlayers.Where(x => x.SteamId == kill.Killed.SteamId).First().Name = kill.Killed.Name;
-                        OnlinePlayers.Where(x => x.SteamId == kill.Killed.SteamId).First().Team = kill.Killed.Team;
-                    }
-
                     if (match.IsMatch)
                     {
                         int hs = 0;
@@ -169,6 +156,25 @@ namespace kTVCSS
                     }
                 });
 
+                log.Listen<TeamChange>(async data =>
+                {
+                    if (!match.IsMatch)
+                    {
+                        try
+                        {
+                            if (data.Player.SteamId != "BOT")
+                            {
+                                OnlinePlayers.Where(x => x.SteamId == data.Player.SteamId).First().Team = data.Team;
+                                Logger.Print(ServerID, $"{data.Player.Name} joined team {data.Team}", LogLevel.Debug);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+                        }
+                    }
+                });
+
                 log.Listen<RoundStart>(async result =>
                 {
                     if (match.IsMatch)
@@ -205,21 +211,35 @@ namespace kTVCSS
                             {
                                 foreach (var player in ters) 
                                 {
-                                    int pts = PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
-                                    if (pts != 0)
+                                    try
                                     {
-                                        terAvg += pts;
-                                        terCount++;
+                                        int pts = PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
+                                        if (pts != 0)
+                                        {
+                                            terAvg += pts;
+                                            terCount++;
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        // Ignored
                                     }
                                 }
 
                                 foreach (var player in cts) 
                                 {
-                                    int pts = PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
-                                    if (pts != 0)
+                                    try
                                     {
-                                        ctAvg += pts;
-                                        ctCount++;
+                                        int pts = PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
+                                        if (pts != 0)
+                                        {
+                                            ctAvg += pts;
+                                            ctCount++;
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        // Ignored
                                     }
                                 }
 
@@ -245,7 +265,7 @@ namespace kTVCSS
                             }
                             catch (Exception ex) 
                             {
-                                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
                         }
                     }
@@ -700,7 +720,7 @@ namespace kTVCSS
                         }
                         catch (Exception ex)
                         {
-                            Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                            Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                         }
 
                         var result = await rcon.SendCommandAsync("sm_usrlst");
@@ -760,7 +780,7 @@ namespace kTVCSS
                         }
                         catch (Exception ex)
                         {
-                            Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                            Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                         }
 
                         var result = await rcon.SendCommandAsync("sm_usrlst");
@@ -1144,10 +1164,20 @@ namespace kTVCSS
                         {
                             Logger.Print(server.ID, $"[VPN CHECK] {data.Player.Name} ({data.IP}) [NORMAL]", LogLevel.Debug);
                         }
+                        List<string> IpTables = new List<string>();
+                        IpTables.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "iptables.txt"), System.Text.Encoding.UTF8));
+                        foreach (var rule in IpTables)
+                        {
+                            if (data.IP.Contains(rule))
+                            {
+                                Logger.Print(server.ID, $"[IPTABLES] {data.Player.Name} ({data.IP}) [BAN IT!!!]", LogLevel.Debug);
+                                await RconHelper.SendCmd(rcon, $"kickid {data.Player.ClientId} Вам запрещен доступ на сервера из-за правил IP Tables");
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Logger.Print(server.ID, ex.Message, LogLevel.Error);
+                        Logger.Print(server.ID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                     }
                 });
 
@@ -1277,10 +1307,10 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, "Базовые команды: !ko3 !lo3 !bo1 !bo3 !me !cm !pause !pause5 !check", Colors.ivory);
                 await RconHelper.SendMessage(rcon, "Напишите !gethelp для получения описания всех команд", Colors.ivory);
                 await RconHelper.SendMessage(rcon, "Примечание: запуск матча может быть осуществлен без админских прав", Colors.crimson);
-//#if DEBUG
+#if DEBUG
                 await RconHelper.SendMessage(rcon, "The process has been started in debug mode", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, "If you spot a bug please submit it to developer", Colors.mediumseagreen);
-//#endif
+#endif
             }
 
             private async void CheckIsDeadMapVote()
@@ -1396,7 +1426,7 @@ namespace kTVCSS
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
 
-                Console.Title = "kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + args[0] + "]" + " kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
@@ -1404,3 +1434,4 @@ namespace kTVCSS
         }
     }
 }
+
