@@ -44,7 +44,7 @@ namespace CupWorker
             return staff;
         }
 
-        private static void DeleteMatch(string id)
+        public static void DeleteMatch(string id)
         {
             var connection = new SqlConnection(ProgSettings.Default.SQL);
             connection.Open();

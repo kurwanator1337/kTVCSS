@@ -12,7 +12,7 @@ namespace CupWorker {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
     internal sealed partial class ProgSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static ProgSettings defaultInstance = ((ProgSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new ProgSettings())));
@@ -25,8 +25,8 @@ namespace CupWorker {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost\\SQLEXPRESS;Initial Catalog=kTVCSS;Integrated Security=SSPI;" +
-            "")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=kTVCSS;Integrated Security=false;User ID=sa" +
+            ";Password=psw")]
         public string SQL {
             get {
                 return ((string)(this["SQL"]));

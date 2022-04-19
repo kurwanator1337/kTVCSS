@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Threading;
@@ -34,6 +35,11 @@ namespace CupWorker
                             BackgroundWorker worker = new BackgroundWorker();
                             worker.DoWork += Worker_DoWork;
                             worker.RunWorkerAsync($"{ATeam};{BTeam};{server[0]};{int.Parse(server[1])};{server[2]};{DTEnd};{ID}");
+                        }
+
+                        if (DateTime.Compare(DateTime.Now, DTEnd) == 1)
+                        {
+                            Tools.DeleteMatch(ID);
                         }
                     }
                 }

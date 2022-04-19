@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="SQL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Data Source=localhost\SQLEXPRESS;Initial Catalog=kTVCSS;Integrated Security=SSPI;</Value>
+      <Value Profile="(Default)">Data Source=localhost;Initial Catalog=kTVCSS;Integrated Security=false;User ID=sa;Password=psw</Value>
     </Setting>
   </Settings>
 </SettingsFile>

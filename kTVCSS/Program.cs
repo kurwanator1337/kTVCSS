@@ -58,7 +58,7 @@ namespace kTVCSS
             private string tName = "TERRORIST";
             private string ctName = "CT";
             private string currentMapName = string.Empty;
-            
+
             public async Task StartNode(Server server)
             {
                 Logger.LoggerID = server.ID;
@@ -198,7 +198,7 @@ namespace kTVCSS
                         }
 
                         await MatchEvents.InsertMatchLog(match.MatchId, $"<Round Start>", info.Map, server.ID);
-                        
+
                         if (match.AScore == 0 && match.BScore == 0)
                         {
                             IEnumerable<Player> ters = MatchPlayers.Where(x => x.Team == tName);
@@ -207,9 +207,9 @@ namespace kTVCSS
                             int terCount = 0;
                             int ctAvg = 0;
                             int ctCount = 0;
-                            try 
+                            try
                             {
-                                foreach (var player in ters) 
+                                foreach (var player in ters)
                                 {
                                     try
                                     {
@@ -226,7 +226,7 @@ namespace kTVCSS
                                     }
                                 }
 
-                                foreach (var player in cts) 
+                                foreach (var player in cts)
                                 {
                                     try
                                     {
@@ -263,7 +263,7 @@ namespace kTVCSS
                                     }
                                 }
                             }
-                            catch (Exception ex) 
+                            catch (Exception ex)
                             {
                                 Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
@@ -273,7 +273,7 @@ namespace kTVCSS
 
                 //log.Listen<RestartRound>(async result =>
                 //{
-                    
+
                 //});
 
                 log.Listen<RoundEndScore>(async result =>
@@ -557,7 +557,7 @@ namespace kTVCSS
                                 if (mapPool.Count() != 1)
                                 {
                                     mapPool.Remove(mapNum);
-                                }  
+                                }
                             }
                         }
 
@@ -853,7 +853,6 @@ namespace kTVCSS
                             currentMapName = info.Map;
                             DemoName = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss") + "_" + info.Map;
                             await RconHelper.SendCmd(rcon, "tv_record " + DemoName);
-                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
                             match = new Match(15);
                             match.MatchId = await MatchEvents.CreateMatch(server.ID, info.Map);
                             MatchPlayers = new List<Player>();
@@ -866,6 +865,7 @@ namespace kTVCSS
                             {
                                 await MatchEvents.InsertPlayerRatingProgress(player.SteamID, player.Points);
                             }
+                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
                         }
                     }
 
@@ -930,8 +930,8 @@ namespace kTVCSS
                     {
                         if (ForbiddenWords.Contains(word.ToLower()))
                         {
-                            await RconHelper.SendCmd(rcon, $"sm_gag \"{chat.Player.Name}\" 10 Вы были заглушены за использование запрещенных слов ({word})");
-                            await RconHelper.SendMessage(rcon, $"{chat.Player.Name} был заглушен за использование запрещенных слов ({word})", Colors.crimson);
+                            await RconHelper.SendCmd(rcon, $"kickid {chat.Player.ClientId} Вы были кикнуты за использование запрещенных слов ({word})");
+                            await RconHelper.SendMessage(rcon, $"{chat.Player.Name} был кикнут за использование запрещенных слов ({word})", Colors.crimson);
                             break;
                         }
                     }
@@ -997,6 +997,27 @@ namespace kTVCSS
                         {
                             await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы были заблокированны на проекте. Для уточнения информации посетите Ваш профиль на сайте проекта.");
                         }
+
+                        #region Connection Check
+
+                        if (ConnectionController.Connections.Where(x => x.ClientId == connection.Player.ClientId).Any())
+                        {
+                            Connection connectionInfo = ConnectionController.Connections.Where(x => x.ClientId == connection.Player.ClientId).First();
+                            connectionInfo.SteamId = connection.Player.SteamId;
+                            var connectionCheckerResult = await ConnectionController.ExecuteChecker(connectionInfo);
+                            if (connectionCheckerResult == 1)
+                            {
+                                await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Использование VPN запрещено");
+                            }
+                            if (connectionCheckerResult == 2)
+                            {
+                                await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вам запрещен доступ на сервера из-за правил IP Tables");
+                            }
+
+                            ConnectionController.RemoveItem(connectionInfo);
+                        }
+                        
+                        #endregion
 
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been connected to {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
                     }
@@ -1149,36 +1170,14 @@ namespace kTVCSS
 
                 log.Listen<PlayerConnectedIPInfo>(async data =>
                 {
-                    try
+                    await ServerEvents.InsertConnectData(Program.Node.ServerID, data);
+                    ConnectionController.AddItem(new Connection()
                     {
-                        WebClient web = new WebClient();
-                        Uri uri = new Uri("https://blackbox.ipinfo.app/lookup/" + data.IP.Substring(0, data.IP.IndexOf(":")));
-                        string result = await web.DownloadStringTaskAsync(uri);
-                        await ServerEvents.InsertConnectData(ServerID, data);
-                        if (result == "Y")
-                        {
-                            Logger.Print(server.ID, $"[VPN CHECK] {data.Player.Name} ({data.IP}) [VPN]", LogLevel.Debug);
-                            await RconHelper.SendCmd(rcon, $"kickid {data.Player.ClientId} Использование VPN запрещено");
-                        }
-                        else
-                        {
-                            Logger.Print(server.ID, $"[VPN CHECK] {data.Player.Name} ({data.IP}) [NORMAL]", LogLevel.Debug);
-                        }
-                        List<string> IpTables = new List<string>();
-                        IpTables.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "iptables.txt"), System.Text.Encoding.UTF8));
-                        foreach (var rule in IpTables)
-                        {
-                            if (data.IP.Contains(rule))
-                            {
-                                Logger.Print(server.ID, $"[IPTABLES] {data.Player.Name} ({data.IP}) [BAN IT!!!]", LogLevel.Debug);
-                                await RconHelper.SendCmd(rcon, $"kickid {data.Player.ClientId} Вам запрещен доступ на сервера из-за правил IP Tables");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Print(server.ID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
-                    }
+                        ClientId = data.Player.ClientId,
+                        Name = data.Player.Name,
+                        SteamId = string.Empty,
+                        IP = data.IP
+                    });
                 });
 
                 log.Listen<MatchBackup>(async data =>
@@ -1426,7 +1425,7 @@ namespace kTVCSS
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
 
-                Console.Title = "[#" + args[0] + "]" + " kTVCSS @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.68) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
@@ -1434,4 +1433,3 @@ namespace kTVCSS
         }
     }
 }
-
