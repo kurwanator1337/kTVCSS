@@ -147,6 +147,105 @@ namespace kTVCSS.VKInteraction
             return mapName.ToUpper();
         }
 
+        public static void SendPlayerResult(PlayerPictureData player)
+        {
+            try
+            {
+                System.Drawing.Image image = System.Drawing.Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "player_result.png"));
+                Graphics graphics = Graphics.FromImage(image);
+                // upper block
+                Drawing.Tools.DrawText(graphics, player.Name, new Rectangle(220, 139, 0, 200), StringAlignment.Near, 30, Brushes.White, FontStyle.Regular, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, DateTime.Now.ToString("dd-MM-yyyy HH:mm"), new Rectangle(220, 242, 0, 200), StringAlignment.Near, 30, Brushes.White, FontStyle.Regular, "Play-Regular");
+                // first block
+                if (player.IsVictory)
+                {
+                    Drawing.Tools.DrawText(graphics, "WON", new Rectangle(275, 370, 0, 200), StringAlignment.Center, 36, Brushes.LimeGreen, FontStyle.Bold, "Play-Regular");
+                }
+                else
+                {
+                    Drawing.Tools.DrawText(graphics, "LOST", new Rectangle(275, 370, 0, 200), StringAlignment.Center, 36, Brushes.Red, FontStyle.Bold, "Play-Regular");
+                }
+                Drawing.Tools.DrawText(graphics, player.Kills, new Rectangle(383, 457, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.Deaths, new Rectangle(383, 504, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.HSR + "%", new Rectangle(383, 552, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                // second block
+                graphics.DrawImage(Drawing.Tools.GetRankImage(player.RankName), 485, 360, 70, 70);
+                Drawing.Tools.DrawText(graphics, player.MMR, new Rectangle(700, 365, 0, 200), StringAlignment.Center, 36, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.MatchesTotal, new Rectangle(790, 457, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.MatchesWon, new Rectangle(790, 504, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.MatchesLost, new Rectangle(790, 552, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                // third block 
+                Drawing.Tools.DrawText(graphics, player.KDR, new Rectangle(383, 787, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.AVG, new Rectangle(383, 834, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.Aces, new Rectangle(383, 882, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.Quadra, new Rectangle(790, 787, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.Tripple, new Rectangle(790, 834, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.Opens, new Rectangle(790, 882, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+
+                //image.Save("player_result.png", System.Drawing.Imaging.ImageFormat.Png);
+
+                string uploadImage = DateTime.Now.ToString("yyyy-MM-dd_hh_mm_ss") + ".png";
+
+                image.Save(uploadImage, System.Drawing.Imaging.ImageFormat.Png);
+
+                var web = new WebClient();
+                var api = new VkApi();
+                api.Authorize(new ApiAuthParams
+                {
+                    AccessToken = Program.ConfigTools.Config.VKToken,
+                });
+
+                var uploadServer = api.Photo.GetWallUploadServer(Program.ConfigTools.Config.StatGroupID);
+                var result = Encoding.ASCII.GetString(web.UploadFile(uploadServer.UploadUrl, uploadServer.UploadUrl, uploadImage));
+                var photo = api.Photo.SaveWallPhoto(result, (ulong?)Program.ConfigTools.Config.AdminVkID, (ulong?)Program.ConfigTools.Config.StatGroupID);
+
+                string vkId = string.Empty;
+
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    connection.Open();
+                    SqlCommand query = new SqlCommand($"SELECT VKID FROM [kTVCSS].[dbo].[Players] WHERE STEAMID = '{player.SteamId}'", connection);
+                    using (var reader = query.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            vkId = reader[0].ToString();
+                        }
+                    }
+                    connection.Close();
+                }
+
+                if (!string.IsNullOrEmpty(vkId))
+                {
+                    var messageParams = new MessagesSendParams
+                    {
+                        GroupId = (ulong)Program.ConfigTools.Config.MainGroupID,
+                        UserId = long.Parse(vkId),
+                        RandomId = new Random().Next(),
+                        Message = "",
+                        Attachments = new List<MediaAttachment>
+                        {
+                            photo.FirstOrDefault()
+                        }
+                    };
+                    api.Messages.Send(messageParams);
+                }
+
+                try
+                {
+                    File.Delete(uploadImage);
+                }
+                catch (Exception ex)
+                {
+                    Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+            }
+        }
+
         public static void PublishResult(MatchResultInfo matchResultInfo)
         {
             try

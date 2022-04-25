@@ -11,7 +11,6 @@ namespace kTVCSS.Models
         public string MapName { get; set; }
         public MVPlayer MVPlayer { get; set; }
         public MatchScore MatchScore { get; set; }
-
         public List<PlayerResult> PlayerResults = new List<PlayerResult>();
     }
 }

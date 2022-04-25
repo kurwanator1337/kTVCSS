@@ -170,6 +170,49 @@ namespace kTVCSS.Tools
             }
         }
 
+        public static async Task<PlayerPictureData> GetPlayerResultData(string steamId, Match match)
+        {
+            PlayerPictureData player = new PlayerPictureData();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand($"GetPlayerInfoForPicture", connection);
+                    query.CommandType = System.Data.CommandType.StoredProcedure;
+                    query.Parameters.AddWithValue("@STEAMID", steamId);
+                    query.Parameters.AddWithValue("@MATCHID", match.MatchId);
+                    using (var reader = await query.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            player.Kills = reader[0].ToString();
+                            player.Deaths = reader[1].ToString();
+                            player.HSR = reader[2].ToString();
+                            player.MMR = reader[3].ToString();
+                            player.RankName = reader[4].ToString();
+                            player.MatchesTotal = reader[5].ToString();
+                            player.MatchesWon = reader[6].ToString();
+                            player.MatchesLost = reader[7].ToString();
+                            player.KDR = reader[8].ToString();
+                            player.AVG = reader[9].ToString();
+                            player.Aces = reader[10].ToString();
+                            player.Quadra = reader[11].ToString();
+                            player.Tripple = reader[12].ToString();
+                            player.Opens = reader[13].ToString();
+                        }
+                    }
+                    await connection.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+            }
+            return player;
+        }
+
         public static async Task<Match> GetLiveMatchResults(int serverId, Match match)
         {
             try

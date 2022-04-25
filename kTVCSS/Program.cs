@@ -1231,6 +1231,23 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
+                List<PlayerPictureData> playerPictures = new List<PlayerPictureData>();
+                foreach (var player in MatchPlayers)
+                {
+                    var data = await MatchEvents.GetPlayerResultData(player.SteamId, match);
+                    data.Name = player.Name;
+                    if (player.Team == winningTeam)
+                    {
+                        data.IsVictory = true;
+                    }
+                    else
+                    {
+                        data.IsVictory = false;
+                    }
+                    data.SteamId = player.SteamId;
+                    playerPictures.Add(data);
+                }
+
                 Thread.Sleep(3000);
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
@@ -1242,6 +1259,10 @@ namespace kTVCSS
                 if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
                 {
                     VKInteraction.Matches.PublishResult(matchResultInfo);
+                }
+                foreach (var data in playerPictures)
+                {
+                    VKInteraction.Matches.SendPlayerResult(data);
                 }
             }
 
@@ -1278,6 +1299,23 @@ namespace kTVCSS
                     PlayerResults = VKInteraction.Matches.GetPlayerResults(bMatch.MatchId).Result
                 };
 
+                List<PlayerPictureData> playerPictures = new List<PlayerPictureData>();
+                foreach (var player in MatchPlayers)
+                {
+                    var data = await MatchEvents.GetPlayerResultData(player.SteamId, match);
+                    data.Name = player.Name;
+                    if (player.Team == winningTeam)
+                    {
+                        data.IsVictory = true;
+                    }
+                    else
+                    {
+                        data.IsVictory = false;
+                    }
+                    data.SteamId = player.SteamId;
+                    playerPictures.Add(data);
+                }
+
                 Thread.Sleep(3000);
 
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
@@ -1289,6 +1327,10 @@ namespace kTVCSS
                 if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
                 {
                     VKInteraction.Matches.PublishResult(matchResultInfo);
+                }
+                foreach (var data in playerPictures)
+                {
+                    VKInteraction.Matches.SendPlayerResult(data);
                 }
             }
 
@@ -1407,6 +1449,7 @@ namespace kTVCSS
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
             Logger.Print(0, $"STATGROUP - {ConfigTools.Config.StatGroupID}", LogLevel.Debug);
+            Logger.Print(0, $"MAINGROUP - {ConfigTools.Config.MainGroupID}", LogLevel.Debug);
             Logger.Print(0, $"ADMINID - {ConfigTools.Config.AdminVkID}", LogLevel.Debug);
             Logger.Print(0, $"SQLCONSTR - {ConfigTools.Config.SQLConnectionString}", LogLevel.Debug);
             Logger.Print(0, $"VKTOKEN - {ConfigTools.Config.VKToken}", LogLevel.Debug);
@@ -1425,7 +1468,7 @@ namespace kTVCSS
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
 
-                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.68) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.69) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
