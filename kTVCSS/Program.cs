@@ -1263,6 +1263,7 @@ namespace kTVCSS
                 foreach (var data in playerPictures)
                 {
                     VKInteraction.Matches.SendPlayerResult(data);
+                    Thread.Sleep(1000);
                 }
             }
 
@@ -1331,6 +1332,7 @@ namespace kTVCSS
                 foreach (var data in playerPictures)
                 {
                     VKInteraction.Matches.SendPlayerResult(data);
+                    Thread.Sleep(500);
                 }
             }
 

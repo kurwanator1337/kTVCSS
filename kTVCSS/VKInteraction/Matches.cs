@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using VkNet;
 using VkNet.Model;
@@ -167,7 +168,7 @@ namespace kTVCSS.VKInteraction
                 }
                 Drawing.Tools.DrawText(graphics, player.Kills, new Rectangle(383, 457, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
                 Drawing.Tools.DrawText(graphics, player.Deaths, new Rectangle(383, 504, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
-                Drawing.Tools.DrawText(graphics, player.HSR + "%", new Rectangle(383, 552, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
+                Drawing.Tools.DrawText(graphics, player.HSR, new Rectangle(383, 552, 0, 200), StringAlignment.Far, 24, Brushes.White, FontStyle.Bold, "Play-Regular");
                 // second block
                 graphics.DrawImage(Drawing.Tools.GetRankImage(player.RankName), 485, 360, 70, 70);
                 Drawing.Tools.DrawText(graphics, player.MMR, new Rectangle(700, 365, 0, 200), StringAlignment.Center, 36, Brushes.White, FontStyle.Bold, "Play-Regular");
@@ -195,9 +196,9 @@ namespace kTVCSS.VKInteraction
                     AccessToken = Program.ConfigTools.Config.VKToken,
                 });
 
-                var uploadServer = api.Photo.GetWallUploadServer(Program.ConfigTools.Config.StatGroupID);
-                var result = Encoding.ASCII.GetString(web.UploadFile(uploadServer.UploadUrl, uploadServer.UploadUrl, uploadImage));
-                var photo = api.Photo.SaveWallPhoto(result, (ulong?)Program.ConfigTools.Config.AdminVkID, (ulong?)Program.ConfigTools.Config.StatGroupID);
+                var uploadServer = api.Photo.GetWallUploadServer(Program.ConfigTools.Config.MainGroupID);
+                var result = Encoding.ASCII.GetString(web.UploadFile(uploadServer.UploadUrl, uploadImage));
+                var photo = api.Photo.SaveWallPhoto(result, (ulong?)Program.ConfigTools.Config.AdminVkID, (ulong?)Program.ConfigTools.Config.MainGroupID);
 
                 string vkId = string.Empty;
 
@@ -228,6 +229,7 @@ namespace kTVCSS.VKInteraction
                             photo.FirstOrDefault()
                         }
                     };
+                    Thread.Sleep(500);
                     api.Messages.Send(messageParams);
                 }
 
