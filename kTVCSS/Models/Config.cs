@@ -11,7 +11,6 @@ namespace kTVCSS.Models
     {
         public string SQLConnectionString { get; set; }
         public string VKToken { get; set; }
-        public string SourceBansConnectionString { get; set; }
         public long StatGroupID { get; set; }
         public long MainGroupID { get; set; }
         public long AdminVkID { get; set; }

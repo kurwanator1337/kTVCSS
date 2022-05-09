@@ -62,13 +62,6 @@ namespace kTVCSS
             public async Task StartNode(Server server)
             {
                 Logger.LoggerID = server.ID;
-                Logger.Print(ServerID, $"[SERVER] {server.ID}", LogLevel.Trace);
-                Logger.Print(ServerID, $"[SERVER] {server.UserName}", LogLevel.Trace);
-                Logger.Print(ServerID, $"[SERVER] {server.Host}", LogLevel.Trace);
-                Logger.Print(ServerID, $"[SERVER] {server.RconPassword}", LogLevel.Trace);
-                Logger.Print(ServerID, $"[SERVER] {server.UserPassword}", LogLevel.Trace);
-                Logger.Print(ServerID, $"[SERVER] {server.Port}", LogLevel.Trace);
-                Logger.Print(ServerID, $"[SERVER] {server.GamePort}", LogLevel.Trace);
                 Thread.Sleep(1000);
                 ServerID = server.ID;
                 SetAutoRestartTimer();
@@ -164,8 +157,29 @@ namespace kTVCSS
                         {
                             if (data.Player.SteamId != "BOT")
                             {
-                                OnlinePlayers.Where(x => x.SteamId == data.Player.SteamId).First().Team = data.Team;
-                                Logger.Print(ServerID, $"{data.Player.Name} joined team {data.Team}", LogLevel.Debug);
+                                if (data.Team != "Spectator")
+                                {
+                                    OnlinePlayers.Where(x => x.SteamId == data.Player.SteamId).First().Team = data.Team;
+                                    Logger.Print(ServerID, $"{data.Player.Name} joined team {data.Team}", LogLevel.Debug);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (data.Player.SteamId != "BOT")
+                            {
+                                if (data.Team != "Spectator")
+                                {
+                                    MatchPlayers.Where(x => x.SteamId == data.Player.SteamId).First().Team = data.Team;
+                                    Logger.Print(ServerID, $"{data.Player.Name} joined team {data.Team}", LogLevel.Debug);
+                                } 
                             }
                         }
                         catch (Exception ex)
@@ -394,8 +408,8 @@ namespace kTVCSS
 
                                     if (mapQueue.Count > 0 && isBestOfThree)
                                     {
-                                        await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!", Colors.legendary);
-                                        Thread.Sleep(60000);
+                                        await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через 5 секунд!", Colors.legendary);
+                                        Thread.Sleep(5000);
                                         await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                         mapQueue.Remove(mapQueue.FirstOrDefault());
                                     }
@@ -473,8 +487,8 @@ namespace kTVCSS
 
                                 if (mapQueue.Count > 0 && isBestOfThree)
                                 {
-                                    await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через минуту!", Colors.legendary);
-                                    Thread.Sleep(60000);
+                                    await RconHelper.SendMessage(rcon, $"Автоматическая смены карты на {mapQueue.FirstOrDefault().Trim()} через 5 секунд!", Colors.legendary);
+                                    Thread.Sleep(5000);
                                     await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                     mapQueue.Remove(mapQueue.FirstOrDefault());
                                 }
@@ -527,7 +541,7 @@ namespace kTVCSS
                 {
                     await ServerEvents.InsertChatMessage(chat.Player.SteamId, chat.Message, ServerID);
                     int.TryParse(chat.Message, out int mapNum);
-                    if (chat.Channel == MessageChannel.All && mapNum > 0 && mapNum < 10 && currentMapSelector == chat.Player.Name)
+                    if (chat.Channel == MessageChannel.All && mapNum > 0 && mapNum < 9 && currentMapSelector == chat.Player.Name)
                     {
                         if (mapPool.Count() == 1)
                         {
@@ -547,7 +561,7 @@ namespace kTVCSS
 
                         if (isBestOfThree)
                         {
-                            if (mapPool.Count() == 6 || mapPool.Count() == 7)
+                            if (mapPool.Count() == 5 || mapPool.Count() == 6)
                             {
                                 mapQueue.Add(mapPool[mapNum]);
                                 mapPool.Remove(mapNum);
@@ -620,7 +634,7 @@ namespace kTVCSS
 
                         if (isBestOfThree)
                         {
-                            if (mapPool.Count() == 6 || mapPool.Count() == 7)
+                            if (mapPool.Count() == 5 || mapPool.Count() == 6)
                             {
                                 await RconHelper.SendCmd(rcon, $"sm_hsay {currentMapSelector}, Ваша очередь пикать карту!");
                                 await RconHelper.SendMessage(rcon, $"{currentMapSelector}, пожалуйста, напишите номер карты, чтобы пикнуть ее!", Colors.legendary);
@@ -1131,8 +1145,8 @@ namespace kTVCSS
 
                         if (mapQueue.Count > 0 && isBestOfThree)
                         {
-                            await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через минуту!", Colors.legendary);
-                            Thread.Sleep(60000);
+                            await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через 5 секунд!", Colors.legendary);
+                            Thread.Sleep(5000);
                             await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                             mapQueue.Remove(mapQueue.FirstOrDefault());
                         }
@@ -1212,7 +1226,14 @@ namespace kTVCSS
                 {
                     looser = tName;
                 }
-
+                Logger.Print(ServerID, $"winner - {winningTeam}", LogLevel.Debug);
+                Logger.Print(ServerID, $"looser - {looser}", LogLevel.Debug);
+                // for debug 
+                Logger.Print(ServerID, $"count matchplayers - {MatchPlayers.Count}", LogLevel.Debug);
+                foreach (var player in MatchPlayers)
+                {
+                    Logger.Print(ServerID, $"{player.Name} - {player.Team}", LogLevel.Debug);
+                }
                 await RconHelper.SendCmd(rcon, $"sm_msay {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nМатч завершен!\\nПоздравляем с победой команду {tags[winningTeam]}!\\n{tags[looser]}, в следующий раз Вам повезет.");
                 await RconHelper.SendMessage(rcon, "Матч завершен!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!", Colors.mediumseagreen);
@@ -1234,6 +1255,7 @@ namespace kTVCSS
                 List<PlayerPictureData> playerPictures = new List<PlayerPictureData>();
                 foreach (var player in MatchPlayers)
                 {
+                    Logger.Print(ServerID, $"{player.Name} - {player.Team}", LogLevel.Debug);
                     var data = await MatchEvents.GetPlayerResultData(player.SteamId, match);
                     data.Name = player.Name;
                     if (player.Team == winningTeam)
@@ -1265,6 +1287,7 @@ namespace kTVCSS
                     VKInteraction.Matches.SendPlayerResult(data);
                     Thread.Sleep(1000);
                 }
+                OnlinePlayers.Clear();
             }
 
             private async Task OnEndMatch(Dictionary<string, string> tags, string winningTeam, string mapName, Server server)
@@ -1334,6 +1357,7 @@ namespace kTVCSS
                     VKInteraction.Matches.SendPlayerResult(data);
                     Thread.Sleep(500);
                 }
+                OnlinePlayers.Clear();
             }
 
             private void Rcon_OnDisconnected()
@@ -1429,8 +1453,8 @@ namespace kTVCSS
 
                             if (mapQueue.Count > 0 && isBestOfThree)
                             {
-                                await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через минуту!", Colors.legendary);
-                                Thread.Sleep(60000);
+                                await RconHelper.SendMessage(rcon, $"Автоматическая смена карты на {mapQueue.FirstOrDefault().Trim()} через 5 секунд!", Colors.legendary);
+                                Thread.Sleep(5000);
                                 await RconHelper.SendCmd(rcon, $"changelevel {mapQueue.FirstOrDefault().Trim()}");
                                 mapQueue.Remove(mapQueue.FirstOrDefault());
                             }
@@ -1440,7 +1464,7 @@ namespace kTVCSS
                             }
                         }
                     }
-                    Thread.Sleep(60000);
+                    Thread.Sleep(120000);
                 }
             }
         }
@@ -1450,11 +1474,6 @@ namespace kTVCSS
             Console.Title = "kTVCSS NODE LAUNCHER";
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
-            Logger.Print(0, $"STATGROUP - {ConfigTools.Config.StatGroupID}", LogLevel.Debug);
-            Logger.Print(0, $"MAINGROUP - {ConfigTools.Config.MainGroupID}", LogLevel.Debug);
-            Logger.Print(0, $"ADMINID - {ConfigTools.Config.AdminVkID}", LogLevel.Debug);
-            Logger.Print(0, $"SQLCONSTR - {ConfigTools.Config.SQLConnectionString}", LogLevel.Debug);
-            Logger.Print(0, $"VKTOKEN - {ConfigTools.Config.VKToken}", LogLevel.Debug);
 
 #if DEBUG
 
@@ -1468,9 +1487,8 @@ namespace kTVCSS
                 Loader.LoadServers();
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
-                Logger.Print(0, "Words filter has been loaded", LogLevel.Info);
 
-                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.69) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.7) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
