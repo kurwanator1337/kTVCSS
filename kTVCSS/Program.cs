@@ -207,7 +207,14 @@ namespace kTVCSS
 
                         if (match.Pause)
                         {
-                            await RconHelper.SendCmd(rcon, "mp_freezetime 10");
+                            if (match.MatchType == 0)
+                            {
+                                await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
+                            }
+                            else
+                            {
+                                await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MIX}");
+                            }
                             match.Pause = !match.Pause;
                         }
 
@@ -270,6 +277,20 @@ namespace kTVCSS
                                             if (ct != 0)
                                             {
                                                 var tags = MatchEvents.GetTeamNames(MatchPlayers);
+                                                if (tags[tName].Contains("Team ") || tags[ctName].Contains("Team "))
+                                                {
+                                                    match.MatchType = 1;
+                                                    await RconHelper.SendMessage(rcon, $"Установка правил для микс-матча:", Colors.crimson);
+                                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MIX}");
+                                                    await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MIX}");
+                                                }
+                                                else
+                                                {
+                                                    match.MatchType = 0;
+                                                    await RconHelper.SendMessage(rcon, $"Установка правил для обычного матча:", Colors.crimson);
+                                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
+                                                    await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MATCH}");
+                                                }
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[tName]} - {ter}", Colors.crimson);
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[ctName]} - {ct}", Colors.dodgerblue);
                                             }
@@ -279,6 +300,10 @@ namespace kTVCSS
                             }
                             catch (Exception ex)
                             {
+                                match.MatchType = 0;
+                                await RconHelper.SendMessage(rcon, $"Установка правил для обычного матча:", Colors.crimson);
+                                await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
+                                await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MATCH}");
                                 Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
                         }
@@ -366,13 +391,18 @@ namespace kTVCSS
 
                             if (match.AScore + match.BScore == match.MaxRounds)
                             {
-                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут на одну минуту.\\nМатч продолжится автоматически.");
-                                await RconHelper.SendMessage(rcon, "Тайм-аут!", Colors.crimson);
-                                await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут.\\nМатч продолжится автоматически.");
+                                if (match.MatchType == 0)
+                                {
+                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH}");
+                                }
+                                else
+                                {
+                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX}");
+                                }
                                 Thread.Sleep(2000);
                                 await RconHelper.SendCmd(rcon, "sm_swap @all");
                                 await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                                await RconHelper.SendMessage(rcon, "Одна минута перерыва!", Colors.crimson);
                                 isResetFreezeTime = true;
                                 match.FirstHalf = false;
                                 var _aScore = match.AScore;
@@ -428,9 +458,15 @@ namespace kTVCSS
                                         match.IsOvertime = true;
                                         await RconHelper.SendMessage(rcon, "Овертайм!!!", Colors.crimson);
                                         await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                                        await RconHelper.SendCmd(rcon, "mp_freezetime 30");
+                                        if (match.MatchType == 0)
+                                        {
+                                            await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
+                                        }
+                                        else
+                                        {
+                                            await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME}");
+                                        }
                                         Thread.Sleep(2000);
-                                        await RconHelper.SendMessage(rcon, "Полминуты перерыва!", Colors.crimson);
                                         isResetFreezeTime = true;
                                         match.MaxRounds = 3;
                                     }
@@ -447,13 +483,18 @@ namespace kTVCSS
 
                             if (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime)
                             {
-                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут на одну минуту.\\nМатч продолжится автоматически.");
-                                await RconHelper.SendMessage(rcon, "Тайм-аут!", Colors.crimson);
-                                await RconHelper.SendCmd(rcon, "mp_freezetime 60");
+                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут.\\nМатч продолжится автоматически.");
+                                if (match.MatchType == 0)
+                                {
+                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
+                                }
+                                else
+                                {
+                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME}");
+                                }
                                 Thread.Sleep(2000);
                                 await RconHelper.SendCmd(rcon, "sm_swap @all");
                                 await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                                await RconHelper.SendMessage(rcon, "Одна минута перерыва!", Colors.crimson);
                                 isResetFreezeTime = true;
                                 match.FirstHalf = false;
                                 var _aScore = match.AScore;
@@ -507,9 +548,15 @@ namespace kTVCSS
                                     match.IsOvertime = true;
                                     await RconHelper.SendMessage(rcon, "Овертайм!!!", Colors.crimson);
                                     await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                                    await RconHelper.SendCmd(rcon, "mp_freezetime 30");
+                                    if (match.MatchType == 0)
+                                    {
+                                        await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
+                                    }
+                                    else
+                                    {
+                                        await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME}");
+                                    }
                                     Thread.Sleep(2000);
-                                    await RconHelper.SendMessage(rcon, "Полминуты перерыва!", Colors.crimson);
                                     isResetFreezeTime = true;
                                     match.MaxRounds = 3;
                                 }
@@ -944,9 +991,16 @@ namespace kTVCSS
                     {
                         if (ForbiddenWords.Contains(word.ToLower()))
                         {
-                            await RconHelper.SendCmd(rcon, $"kickid {chat.Player.ClientId} Вы были кикнуты за использование запрещенных слов ({word})");
-                            await RconHelper.SendMessage(rcon, $"{chat.Player.Name} был кикнут за использование запрещенных слов ({word})", Colors.crimson);
-                            break;
+                            if (chat.Channel == MessageChannel.All)
+                            {
+                                await RconHelper.SendCmd(rcon, $"kickid {chat.Player.ClientId} Вы были кикнуты за использование запрещенных слов ({word})");
+                                await RconHelper.SendMessage(rcon, $"{chat.Player.Name} был кикнут за использование запрещенных слов ({word})", Colors.crimson);
+                                break;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
                     }
                 });
@@ -1009,7 +1063,7 @@ namespace kTVCSS
 
                         if (await ServerEvents.CheckIsBanned(connection.Player.SteamId))
                         {
-                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы были заблокированны на проекте. Для уточнения информации посетите Ваш профиль на сайте проекта.");
+                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы были заблокированны на проекте. Для уточнения информации обратитесь к администрации проекта.");
                         }
 
                         #region Connection Check
@@ -1226,14 +1280,7 @@ namespace kTVCSS
                 {
                     looser = tName;
                 }
-                Logger.Print(ServerID, $"winner - {winningTeam}", LogLevel.Debug);
-                Logger.Print(ServerID, $"looser - {looser}", LogLevel.Debug);
-                // for debug 
-                Logger.Print(ServerID, $"count matchplayers - {MatchPlayers.Count}", LogLevel.Debug);
-                foreach (var player in MatchPlayers)
-                {
-                    Logger.Print(ServerID, $"{player.Name} - {player.Team}", LogLevel.Debug);
-                }
+
                 await RconHelper.SendCmd(rcon, $"sm_msay {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nМатч завершен!\\nПоздравляем с победой команду {tags[winningTeam]}!\\n{tags[looser]}, в следующий раз Вам повезет.");
                 await RconHelper.SendMessage(rcon, "Матч завершен!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!", Colors.mediumseagreen);
@@ -1488,7 +1535,7 @@ namespace kTVCSS
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
 
-                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.7) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.0b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();

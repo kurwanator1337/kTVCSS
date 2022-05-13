@@ -13,6 +13,7 @@ namespace kTVCSS.Models
         {
             MaxRounds = mr;
             FirstHalf = true;
+            MatchType = 0;
             AScore = 0;
             BScore = 0;
             RoundID = 0;
@@ -66,5 +67,6 @@ namespace kTVCSS.Models
         public bool Pause { get; set; }
         public bool IsNeedSetTeamScores { get; set; }
         public bool KnifeRound { get; set; }
+        public int MatchType { get; set; } // 0 - match, 1 - mix
     }
 }
