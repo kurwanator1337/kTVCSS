@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Api</name>
+    </assembly>
+    <members>
+        <member name="T:Api.Controllers.MapsController">
+            <summary>
+            Maps
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.MapsController.Get">
+            <summary>
+            Get current project's map pool
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Api.Controllers.MatchesController">
+            <summary>
+            Matches
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.Get">
+            <summary>
+            Get all matches
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchDemo(System.Int32)">
+            <summary>
+            Get match demoname
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchMVP(System.Int32)">
+            <summary>
+            Get MVP of the match
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchesHighlights(System.Int32)">
+            <summary>
+            Get match highlights
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchesLogs(System.Int32)">
+            <summary>
+            Get match log
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchesResults(System.Int32)">
+            <summary>
+            Get match results
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchesLive">
+            <summary>
+            Get live matches
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchesResultsLive(System.Int32)">
+            <summary>
+            Get live results of the match
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.Controllers.MatchesController.GetMatchesBackups(System.Int32)">
+            <summary>
+            Get match backup info
+            </summary>
+            <param name="id">match id</param>
+            <returns></returns>
+        </member>
+        <member name="T:Api.Controllers.RanksController">
+            <summary>
+            Ranks
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.RanksController.Get">
+            <summary>
+            Get rank list
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Api.PlayersController">
+            <summary>
+            Get players info
+            </summary>
+        </member>
+        <member name="M:Api.PlayersController.Get">
+            <summary>
+            Get all players
+            </summary>
+        </member>
+        <member name="M:Api.PlayersController.GetById(System.Int32)">
+            <summary>
+            Get player by id
+            </summary>
+            <param name="id">id in the database</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.PlayersController.GetBySteamId(System.String)">
+            <summary>
+            Get player by steamid
+            </summary>
+            <param name="steamid">player's steamid</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.PlayersController.GetHighlights(System.String)">
+            <summary>
+            Get player's highlights
+            </summary>
+            <param name="steamid">player's steamid</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.PlayersController.GetProgress(System.String)">
+            <summary>
+            Get player's rating progress
+            </summary>
+            <param name="steamid">player's steamid</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.PlayersController.GetWeaponKills(System.String)">
+            <summary>
+            Get player's weapon kills
+            </summary>
+            <param name="steamid">player's steamid</param>
+            <returns></returns>
+        </member>
+        <member name="M:Api.PlayersController.GetChat(System.String)">
+            <summary>
+            Get player's chat history
+            </summary>
+            <param name="steamid">player's steamid</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
