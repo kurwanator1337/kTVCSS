@@ -74,7 +74,7 @@ namespace kTVCSS.Tools
                     client.Connect();
                     using (FileStream filestream = File.OpenRead(Path.Combine("demos", fileName)))
                     {
-                        client.UploadFile(filestream, "/home/web/publish/wwwroot/demos/" + fileName, true);
+                        client.UploadFile(filestream, @"/C:/kTVCSS/Web/ktvcss.ru/wwwroot/demos/" + fileName, true);
                         client.Disconnect();
                     }
                 }

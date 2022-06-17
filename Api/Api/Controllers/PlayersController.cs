@@ -16,6 +16,11 @@ namespace Api
     [ApiController]
     public class PlayersController : ControllerBase
     {
+        public class PlayersList
+        {
+            public int ID { get; set; }
+            public string STEAMID { get; set; }
+        }
         /// <summary>
         /// Get all players
         /// </summary>
@@ -25,12 +30,12 @@ namespace Api
             using (SqlConnection connection = new SqlConnection(Program.SQLConnectionString))
             {
                 connection.Open();
-                SqlCommand query = new SqlCommand($"SELECT * FROM [kTVCSS].[dbo].[Players]", connection);
+                SqlCommand query = new SqlCommand($"SELECT ID, STEAMID FROM [kTVCSS].[dbo].[Players]", connection);
                 using (var reader = query.ExecuteReader())
                 {
                     DataTable dataTable = new DataTable();
                     dataTable.Load(reader);
-                    return Tools.DataTableToList<Players>(dataTable);
+                    return Tools.DataTableToList<PlayersList>(dataTable);
                 }
             }
         }

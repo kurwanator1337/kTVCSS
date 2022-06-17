@@ -26,6 +26,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Api.Controllers.MatchesController.Get(System.Int32)">
+            <summary>
+            Get match by id
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Api.Controllers.MatchesController.GetMatchDemo(System.Int32)">
             <summary>
             Get match demoname

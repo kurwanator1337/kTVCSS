@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
+    public class MatchesList
+    {
+        public int ID { get; set; }
+    }
     /// <summary>
     /// Matches
     /// </summary>
@@ -26,7 +30,26 @@ namespace Api.Controllers
             using (SqlConnection connection = new SqlConnection(Program.SQLConnectionString))
             {
                 connection.Open();
-                SqlCommand query = new SqlCommand($"SELECT * FROM [kTVCSS].[dbo].[Matches]", connection);
+                SqlCommand query = new SqlCommand($"SELECT ID FROM [kTVCSS].[dbo].[Matches]", connection);
+                using (var reader = query.ExecuteReader())
+                {
+                    DataTable dataTable = new DataTable();
+                    dataTable.Load(reader);
+                    return Tools.DataTableToList<MatchesList>(dataTable);
+                }
+            }
+        }
+        /// <summary>
+        /// Get match by id
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        public object Get(int id)
+        {
+            using (SqlConnection connection = new SqlConnection(Program.SQLConnectionString))
+            {
+                connection.Open();
+                SqlCommand query = new SqlCommand($"SELECT * FROM [kTVCSS].[dbo].[Matches] WHERE ID = {id}", connection);
                 using (var reader = query.ExecuteReader())
                 {
                     DataTable dataTable = new DataTable();

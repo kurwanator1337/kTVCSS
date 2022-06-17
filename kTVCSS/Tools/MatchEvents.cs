@@ -266,6 +266,35 @@ namespace kTVCSS.Tools
 
                     foreach (Player player in players)
                     {
+                        string kills = string.Empty;
+                        string deaths = string.Empty;
+                        string headshots = string.Empty;
+                        try
+                        {
+                            using (SqlConnection con = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                            {
+                                con.Open();
+                                SqlCommand cmd = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [kTVCSS].[dbo].[MatchesResultsLive] WHERE ID = {match.MatchId} AND STEAMID = '{player.SteamId}'", con);
+                                using (var reader = cmd.ExecuteReader())
+                                {
+                                    while (reader.Read())
+                                    {
+                                        kills = reader[0].ToString();
+                                        deaths = reader[1].ToString();
+                                        headshots = reader[2].ToString();
+                                    }
+                                }
+                                con.Close();
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // ???
+                        }
+                        if ((string.IsNullOrEmpty(kills) || kills == "0") && (string.IsNullOrEmpty(deaths) || deaths == "0"))
+                        {
+                            continue;
+                        }  
                         if (player.Team == winnerTeam)
                         {
                             int playerPts = Program.Node.PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;
@@ -306,7 +335,7 @@ namespace kTVCSS.Tools
                             {
                                 SetPlayerMatchResult(player.SteamId, 1, 15);
                             }
-                        }   
+                        }
                         else
                         {
                             int playerPts = Program.Node.PlayersRank.Where(x => x.SteamID == player.SteamId).First().Points;

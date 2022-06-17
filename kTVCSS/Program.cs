@@ -1534,8 +1534,8 @@ namespace kTVCSS
                 Loader.LoadServers();
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
-
-                Console.Title = "[#" + args[0] + "]" + " kTVCSS (v1.0b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                int id = int.Parse(args[0]);
+                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.1b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
