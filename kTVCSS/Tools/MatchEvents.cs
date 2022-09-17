@@ -9,8 +9,22 @@ using System.Threading.Tasks;
 
 namespace kTVCSS.Tools
 {
+    /// <summary>
+    /// События матча
+    /// </summary>
     public static class MatchEvents
     {
+        /// <summary>
+        /// Когда игрок кого-то убивает
+        /// </summary>
+        /// <param name="killerName">Имя убийцы</param>
+        /// <param name="killedName">Имя убитого</param>
+        /// <param name="killerSteamID">Стим убийцы</param>
+        /// <param name="killedSteamID">Стим убитого</param>
+        /// <param name="killerHeadshot">Хедшот?</param>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="matchId">Айди матча</param>
+        /// <returns></returns>
         public static async Task PlayerKill(string killerName, string killedName, string killerSteamID, string killedSteamID, int killerHeadshot, int serverId, int matchId)
         {
             try
@@ -39,7 +53,11 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Проверка на наличие матча на сервере
+        /// </summary>
+        /// <param name="serverId">Айди сервера</param>
+        /// <returns></returns>
         public static async Task<int> CheckMatchLiveExists(int serverId)
         {
             try
@@ -65,7 +83,12 @@ namespace kTVCSS.Tools
                 return 0;
             }
         }
-
+        /// <summary>
+        /// Вставить в таблицу актуальный рейтинг игрока
+        /// </summary>
+        /// <param name="steamID">Стим игрока</param>
+        /// <param name="mmr">Очки рейтинга</param>
+        /// <returns></returns>
         public static async Task InsertPlayerRatingProgress(string steamID, int mmr)
         {
             try
@@ -90,7 +113,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Создать матч
+        /// </summary>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="mapName">Название карты</param>
+        /// <returns>Айди созданного матча</returns>
         public static async Task<int> CreateMatch(int serverId, string mapName)
         {
             try
@@ -117,7 +145,14 @@ namespace kTVCSS.Tools
                 return 0;
             }
         }
-
+        /// <summary>
+        /// Обновить счет матча
+        /// </summary>
+        /// <param name="AScore">Счет команды А</param>
+        /// <param name="BScore">Счет команды Б</param>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="matchId">Айди матча</param>
+        /// <returns></returns>
         public static async Task UpdateMatchScore(int AScore, int BScore, int serverId, int matchId)
         {
             try
@@ -144,7 +179,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить название демки в БД
+        /// </summary>
+        /// <param name="matchId">Айди матча</param>
+        /// <param name="demoName">Название демки</param>
+        /// <returns></returns>
         public static async Task InsertDemoName(int matchId, string demoName)
         {
             try
@@ -169,7 +209,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Получить данные об игроке для формирование картинки для игрока
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="match">Матч</param>
+        /// <returns></returns>
         public static async Task<PlayerPictureData> GetPlayerResultData(string steamId, Match match)
         {
             PlayerPictureData player = new PlayerPictureData();
@@ -212,7 +257,12 @@ namespace kTVCSS.Tools
             }
             return player;
         }
-
+        /// <summary>
+        /// !Пока не юзается (для бекапов)
+        /// </summary>
+        /// <param name="serverId"></param>
+        /// <param name="match"></param>
+        /// <returns></returns>
         public static async Task<Match> GetLiveMatchResults(int serverId, Match match)
         {
             try
@@ -239,7 +289,18 @@ namespace kTVCSS.Tools
                 return match;
             }
         }
-
+        /// <summary>
+        /// Завершить матч
+        /// </summary>
+        /// <param name="AScore">Счет команды А</param>
+        /// <param name="BScore">Счет команды Б</param>
+        /// <param name="AName">Название команды А</param>
+        /// <param name="BName">Название команды Б</param>
+        /// <param name="Map">Карта</param>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="players">Список игроков</param>
+        /// <param name="winnerTeam">Название победившей команды</param>
+        /// <param name="match">Матч</param>
         public static void FinishMatch(int AScore, int BScore, string AName, string BName, string Map, int serverId, List<Player> players, string winnerTeam, Match match)
         {
             try
@@ -387,7 +448,11 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Получить название команд с сервера
+        /// </summary>
+        /// <param name="players">Список игроков</param>
+        /// <returns></returns>
         public static Dictionary<string, string> GetTeamNames(List<Player> players)
         {
             Dictionary<string, string> tags = new Dictionary<string, string>
@@ -442,7 +507,14 @@ namespace kTVCSS.Tools
                 return tags;
             }
         }
-
+        /// <summary>
+        /// Обновить результаты матча
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="matchId">Айди матч</param>
+        /// <param name="teamName">Название команды</param>
+        /// <param name="playerName">Имя игрока</param>
+        /// <param name="serverId">Айди сервера</param>
         private static void UpdateMatchesResults(string steamId, int matchId, string teamName, string playerName, int serverId)
         {
             try
@@ -497,7 +569,14 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить лог матча
+        /// </summary>
+        /// <param name="matchId">Айди матча</param>
+        /// <param name="message">Сообщение</param>
+        /// <param name="mapName">Название карты</param>
+        /// <param name="serverId">Айди сервера</param>
+        /// <returns></returns>
         public async static Task InsertMatchLog(int matchId, string message, string mapName, int serverId)
         {
             try
@@ -531,7 +610,14 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить хайлайт матча
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="killsCount">Количество киллов</param>
+        /// <param name="matchID">Айди матча</param>
+        /// <param name="isOpenFrag">Опен фраг?</param>
+        /// <returns></returns>
         public async static Task SetMatchHighlight(string steamId, int killsCount, int matchID, bool isOpenFrag)
         {
             try
@@ -563,7 +649,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Задать хайлайт матча
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="killsCount">Количество киллов</param>
+        /// <returns></returns>
         public async static Task SetHighlight(string steamId, int killsCount)
         {
             try
@@ -586,7 +677,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Килл с оружия
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="weaponName">Название оружия</param>
+        /// <returns></returns>
         public async static Task WeaponKill(string steamId, string weaponName)
         {
             try
@@ -609,7 +705,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Сбросить матч (удалить из БД)
+        /// </summary>
+        /// <param name="matchId">Айди матча</param>
+        /// <param name="serverID">Айди сервера</param>
+        /// <returns></returns>
         public async static Task ResetMatch(int matchId, int serverID)
         {
             try
@@ -632,7 +733,11 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить опен фраг
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <returns></returns>
         public async static Task SetOpenFrag(string steamId)
         {
             try
@@ -654,7 +759,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Задать результат игрока
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="win">Победы</param>
+        /// <param name="pts">Очки рейтинга</param>
         private static void SetPlayerMatchResult(string steamId, int win, int pts)
         {
             try
@@ -678,7 +788,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить запись в БД для бекапов матчей
+        /// </summary>
+        /// <param name="match"></param>
+        /// <param name="backup"></param>
+        /// <returns></returns>
         public async static Task InsertMatchBackupRecord(Match match, MatchBackup backup)
         {
             try

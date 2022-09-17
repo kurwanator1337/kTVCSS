@@ -2,3 +2,6 @@
 
 # CA1416: Проверка совместимости платформы
 dotnet_diagnostic.CA1416.severity = none
+
+# IDE0055: Исправить форматирование
+dotnet_diagnostic.IDE0055.severity = none

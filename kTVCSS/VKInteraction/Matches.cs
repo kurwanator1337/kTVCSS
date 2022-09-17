@@ -17,8 +17,16 @@ using VkNet.Model.RequestParams;
 
 namespace kTVCSS.VKInteraction
 {
+    /// <summary>
+    /// Матчи для ВК
+    /// </summary>
     public static class Matches
     {
+        /// <summary>
+        /// Получить МВП матча
+        /// </summary>
+        /// <param name="ID">айди матча</param>
+        /// <returns></returns>
         public static async Task<MVPlayer> GetMatchMVP(int ID)
         {
             MVPlayer player = new MVPlayer();
@@ -60,6 +68,11 @@ namespace kTVCSS.VKInteraction
             }
             return player;
         }
+        /// <summary>
+        /// Получить результаты матча
+        /// </summary>
+        /// <param name="ID">Айди матча</param>
+        /// <returns></returns>
         public static async Task<List<PlayerResult>> GetPlayerResults(int ID)
         {
             List<PlayerResult> results = new List<PlayerResult>();
@@ -101,7 +114,11 @@ namespace kTVCSS.VKInteraction
             }
             return results;
         }
-
+        /// <summary>
+        /// Получить результат матча
+        /// </summary>
+        /// <param name="ID">Айди матча</param>
+        /// <returns></returns>
         public static async Task<MatchScore> GetMatchResult(int ID)
         {
             MatchScore match = null;
@@ -147,7 +164,10 @@ namespace kTVCSS.VKInteraction
             mapName = mapName.Replace("_csgo", "");
             return mapName.ToUpper();
         }
-
+        /// <summary>
+        /// Отправить картинку с результатом матча игроку
+        /// </summary>
+        /// <param name="player"></param>
         public static void SendPlayerResult(PlayerPictureData player)
         {
             try
@@ -247,7 +267,10 @@ namespace kTVCSS.VKInteraction
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Опубликовать результат матча на стену
+        /// </summary>
+        /// <param name="matchResultInfo">Результат матча</param>
         public static void PublishResult(MatchResultInfo matchResultInfo)
         {
             try

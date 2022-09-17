@@ -15,11 +15,13 @@ namespace CoreRCON.Parsers.Standard
 
 		public override NameChange Load(GroupCollection groups)
 		{
+#pragma warning disable CA1062 // Проверить аргументы или открытые методы
 			return new NameChange
 			{
 				Player = playerParser.Parse(groups["Player"]),
 				NewName = groups["Name"].Value
 			};
+#pragma warning restore CA1062 // Проверить аргументы или открытые методы
 		}
 	}
 }

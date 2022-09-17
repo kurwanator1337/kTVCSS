@@ -9,13 +9,34 @@ using System.Threading.Tasks;
 
 namespace kTVCSS.Drawing
 {
+    /// <summary>
+    /// Набор инструментов для работы с графикой
+    /// </summary>
     public static class Tools
     {
+        /// <summary>
+        /// Нарисовать текст
+        /// </summary>
+        /// <param name="graphics">Изображение</param>
+        /// <param name="text">Текст</param>
+        /// <param name="x">Координата Х</param>
+        /// <param name="y">Координата У</param>
+        /// <param name="fontSize">Размер шрифта</param>
         public static void Draw(Graphics graphics, string text, int x, int y, int fontSize)
         {
             graphics.DrawString(text.ToUpper(), new Font("Play-Regular", fontSize), Brushes.White, x, y);
         }
-
+        /// <summary>
+        /// Нарисовать текст
+        /// </summary>
+        /// <param name="gr">Изображение</param>
+        /// <param name="text">Текст</param>
+        /// <param name="rect">Треугольник (хуй знает зачем)</param>
+        /// <param name="alignment">Выравнивание</param>
+        /// <param name="fontSize">Размер шрифта</param>
+        /// <param name="color">Цвет текста</param>
+        /// <param name="fontStyle">Стиль шрифта</param>
+        /// <param name="fontName">Название шрифта</param>
         public static void DrawText(Graphics gr, string text, Rectangle rect, StringAlignment alignment, float fontSize, Brush color, FontStyle fontStyle, string fontName)
         {
             gr.DrawRectangle(Pens.Blue, rect);
@@ -28,7 +49,11 @@ namespace kTVCSS.Drawing
                 gr.DrawString(text, font, color, rect, stringFormat);
             }
         }
-
+        /// <summary>
+        /// Получить картинку по названию ранга
+        /// </summary>
+        /// <param name="rankName">Название ранга</param>
+        /// <returns></returns>
         public static Image GetRankImage(string rankName)
         {
             switch (rankName)

@@ -8,11 +8,20 @@ using System.Threading.Tasks;
 
 namespace kTVCSS
 {
+    /// <summary>
+    /// Логгер
+    /// </summary>
     public class Logger
     {
         private StreamWriter streamWriter = null;
+        /// <summary>
+        /// Айди сервера
+        /// </summary>
         public int LoggerID = 0;
-
+        /// <summary>
+        /// Создать логгер программы
+        /// </summary>
+        /// <param name="loggerID">Айди сервера</param>
         public Logger(int loggerID)
         {
             string path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), $"kTVCSS_{loggerID}.log");
@@ -22,7 +31,12 @@ namespace kTVCSS
             }
             LoggerID = loggerID;
         }
-
+        /// <summary>
+        /// Создать запись в лог
+        /// </summary>
+        /// <param name="serverID">Айди сервера</param>
+        /// <param name="message">Сообщение</param>
+        /// <param name="logLevel">Уровень лог сообщения</param>
         public void Print(int serverID, string message, LogLevel logLevel)
         {
             string path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), $"kTVCSS_{serverID}.log");
@@ -40,13 +54,30 @@ namespace kTVCSS
             }
         }
     }
-
+    /// <summary>
+    /// Уровень логов
+    /// </summary>
     public enum LogLevel
     {
+        /// <summary>
+        /// Информация
+        /// </summary>
         Info,
+        /// <summary>
+        /// Предупреждение
+        /// </summary>
         Warn,
+        /// <summary>
+        /// Ошибка
+        /// </summary>
         Error,
+        /// <summary>
+        /// Дебаг отладка
+        /// </summary>
         Debug,
+        /// <summary>
+        /// Релиз отладка
+        /// </summary>
         Trace
     }
 }

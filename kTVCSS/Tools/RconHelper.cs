@@ -11,8 +11,18 @@ using static kTVCSS.Game.Sourcemod;
 
 namespace kTVCSS.Tools
 {
+    /// <summary>
+    /// Помощь в ркон взаимодействии с сервером
+    /// </summary>
     public static class RconHelper
     {
+        /// <summary>
+        /// Отправить сообщение в чат
+        /// </summary>
+        /// <param name="rcon">РКОН соединение</param>
+        /// <param name="message">Текст сообщения</param>
+        /// <param name="color">Цвет сообщения</param>
+        /// <returns></returns>
         public static async Task SendMessage(RCON rcon, string message, Colors color)
         {
             try
@@ -26,7 +36,12 @@ namespace kTVCSS.Tools
                 await RconReconnect(rcon);
             }
         }
-
+        /// <summary>
+        /// Выполнить команду на сервере
+        /// </summary>
+        /// <param name="rcon">РКОН соединение</param>
+        /// <param name="cmd">Команда</param>
+        /// <returns></returns>
         public static async Task SendCmd(RCON rcon, string cmd)
         {
             try
@@ -40,7 +55,13 @@ namespace kTVCSS.Tools
                 await RconReconnect(rcon);
             }
         }
-
+        /// <summary>
+        /// Запустить лайв
+        /// </summary>
+        /// <param name="rcon">РКОН соединение</param>
+        /// <param name="match">Матч</param>
+        /// <param name="OnlinePlayers">Список онлайн игроков</param>
+        /// <returns></returns>
         public static async Task LiveOnThree(RCON rcon, Match match, List<Player> OnlinePlayers)
         {
             try
@@ -94,7 +115,11 @@ namespace kTVCSS.Tools
                 await RconReconnect(rcon);
             }
         }
-
+        /// <summary>
+        /// Запустить ножевой раунд
+        /// </summary>
+        /// <param name="rcon">РКОН соединение</param>
+        /// <returns></returns>
         public static async Task Knives(RCON rcon)
         {
             try
@@ -117,7 +142,11 @@ namespace kTVCSS.Tools
                 await RconReconnect(rcon);
             }
         }
-
+        /// <summary>
+        /// Переподключение по РКОНу
+        /// </summary>
+        /// <param name="rcon">РКОН соединение</param>
+        /// <returns></returns>
         public static async Task RconReconnect(RCON rcon)
         {
             try

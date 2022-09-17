@@ -7,8 +7,15 @@ using System.Threading.Tasks;
 
 namespace kTVCSS.Models
 {
+    /// <summary>
+    /// Объект матча
+    /// </summary>
     public class Match
     {
+        /// <summary>
+        /// Создание матча
+        /// </summary>
+        /// <param name="mr">Количество раундов одной половины</param>
         public Match(int mr)
         {
             MaxRounds = mr;
@@ -44,29 +51,89 @@ namespace kTVCSS.Models
                 TechnicalPauses = 2;
             }
         }
-
+        /// <summary>
+        /// Количество киллов в раунде от конкретного игрока
+        /// </summary>
         public Dictionary<string, int> PlayerKills = new Dictionary<string, int>();
+        /// <summary>
+        /// Бэкапы, пока не юзается
+        /// </summary>
         public List<MatchBackup> Backups = new List<MatchBackup>();
-
+        /// <summary>
+        /// Минимальное количество игроков для старта матча
+        /// </summary>
         public int MinPlayersToStart { get; set; }
+        /// <summary>
+        /// Минимальное количество игроков для остановки матча
+        /// </summary>
         public int MinPlayersToStop { get; set; }
-
+        /// <summary>
+        /// Количество раундов одной половины матча
+        /// </summary>
         public int MaxRounds { get; set; }
+        /// <summary>
+        /// Счет команды А
+        /// </summary>
         public int AScore { get; set; }
+        /// <summary>
+        /// Счет команды Б
+        /// </summary>
         public int BScore { get; set; }
+        /// <summary>
+        /// Статус матча (активен/неактивен)
+        /// </summary>
         public bool IsMatch { get; set; }
+        /// <summary>
+        /// ID матча
+        /// </summary>
         public int MatchId { get; set; }
+        /// <summary>
+        /// Первая половина?
+        /// </summary>
         public bool FirstHalf { get; set; }
+        /// <summary>
+        /// ID раунда
+        /// </summary>
         public int RoundID { get; set; }
+        /// <summary>
+        /// Стим айди игрока, давшего опен фраг
+        /// </summary>
         public string OpenFragSteamID { get; set; }
+        /// <summary>
+        /// Овертайм?
+        /// </summary>
         public bool IsOvertime { get; set; }
+        /// <summary>
+        /// Счет команды А в овертайме
+        /// </summary>
         public int AScoreOvertime { get; set; }
+        /// <summary>
+        /// Счет команды Б в овертайме
+        /// </summary>
         public int BScoreOvertime { get; set; }
+        /// <summary>
+        /// Количество технических пауз
+        /// </summary>
         public int TechnicalPauses { get; set; }
+        /// <summary>
+        /// Количество тактических пауз
+        /// </summary>
         public int TacticalPauses { get; set; }
+        /// <summary>
+        /// Пауза?
+        /// </summary>
         public bool Pause { get; set; }
+        /// <summary>
+        /// Необходимость задания вручную счета команд после первой половины
+        /// </summary>
         public bool IsNeedSetTeamScores { get; set; }
+        /// <summary>
+        /// Ножевой раунд?
+        /// </summary>
         public bool KnifeRound { get; set; }
-        public int MatchType { get; set; } // 0 - match, 1 - mix
+        /// <summary>
+        /// Тип матча (0 - кланвар, 1 - микс)
+        /// </summary>
+        public int MatchType { get; set; }
     }
 }

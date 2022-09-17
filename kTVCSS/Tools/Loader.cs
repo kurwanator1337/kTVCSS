@@ -9,8 +9,14 @@ using kTVCSS.Models;
 
 namespace kTVCSS.Tools
 {
+    /// <summary>
+    /// Загрузчик серверов
+    /// </summary>
     public static class Loader
     {
+        /// <summary>
+        /// Загрузить сервера из БД
+        /// </summary>
         public static void LoadServers()
         {
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))

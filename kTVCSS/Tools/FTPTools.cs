@@ -12,19 +12,37 @@ using System.Threading.Tasks;
 
 namespace kTVCSS.Tools
 {
+    /// <summary>
+    /// Инструменты для работы с FTP
+    /// </summary>
     public class FTPTools
     {
+        /// <summary>
+        /// Хост
+        /// </summary>
         public string AHost { get; set; }
+        /// <summary>
+        /// Имя пользователя
+        /// </summary>
         public string AUserName { get; set; }
+        /// <summary>
+        /// Пароль
+        /// </summary>
         public string APassword { get; set; }
-
+        /// <summary>
+        /// Создание инструментов ФТП для работы с игровым сервером
+        /// </summary>
+        /// <param name="server">Сервер</param>
         public FTPTools(Server server)
         {
             AHost = server.Host;
             AUserName = server.UserName;
             APassword = server.UserPassword;
         }
-
+        /// <summary>
+        /// Загрузить демо на сайт
+        /// </summary>
+        /// <param name="fileName">Имя файла</param>
         public void UploadDemo(object fileName)
         {
             Thread thread = new Thread(UploadDemoFile)
@@ -33,13 +51,19 @@ namespace kTVCSS.Tools
             };
             thread.Start(fileName);
         }
-
+        /// <summary>
+        /// Загрузить демо на сайт
+        /// </summary>
+        /// <param name="fileName">Название файла</param>
         private void UploadDemoFile(object fileName)
         {
             DownloadFile(fileName.ToString() + ".dem");
             UploadFile(fileName.ToString() + ".dem.zip");
         }
-
+        /// <summary>
+        /// Скачать демо
+        /// </summary>
+        /// <param name="fileName">Название файла</param>
         private void DownloadFile(string fileName)
         {
             try
@@ -64,7 +88,10 @@ namespace kTVCSS.Tools
                 // Ignored
             }
         }
-
+        /// <summary>
+        /// Загрузить файл на сервер по SFTP
+        /// </summary>
+        /// <param name="fileName"></param>
         private void UploadFile(string fileName)
         {
             try

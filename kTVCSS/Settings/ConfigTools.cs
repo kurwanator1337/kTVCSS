@@ -12,10 +12,18 @@ using System.Xml.Serialization;
 
 namespace kTVCSS.Settings
 {
+    /// <summary>
+    /// Конфиг
+    /// </summary>
     public class ConfigTools
     {
+        /// <summary>
+        /// Сам конфиг
+        /// </summary>
         public Config Config = new Config();
-
+        /// <summary>
+        /// Создание и загрузка конфига
+        /// </summary>
         public ConfigTools()
         {
             if (File.Exists(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "kTVCSS.cfg")))

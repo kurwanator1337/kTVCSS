@@ -149,7 +149,7 @@ namespace kTVCSS
                     }
                 });
 
-                log.Listen<TeamChange>(async data =>
+                log.Listen<TeamChange>(data =>
                 {
                     if (!match.IsMatch)
                     {
@@ -179,7 +179,7 @@ namespace kTVCSS
                                 {
                                     MatchPlayers.Where(x => x.SteamId == data.Player.SteamId).First().Team = data.Team;
                                     Logger.Print(ServerID, $"{data.Player.Name} joined team {data.Team}", LogLevel.Debug);
-                                } 
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -934,30 +934,30 @@ namespace kTVCSS
                     {
                         // not done
                         return;
-                        var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
-                        if (recoveredMatchID != 0)
-                        {
-                            //await RconHelper.SendMessage(rcon, "RECOVERED LIVE");
-                            MatchPlayers = new List<Player>();
-                            MatchPlayers.AddRange(OnlinePlayers);
-                            match = new Match(15);
-                            match.MatchId = recoveredMatchID;
-                            match = await MatchEvents.GetLiveMatchResults(server.ID, match);
-                            match.RoundID = match.AScore + match.BScore;
-                            if (match.AScore + match.BScore >= match.MaxRounds)
-                            {
-                                match.FirstHalf = false;
-                            }
-                            //await RconHelper.SendMessage(rcon, $"{tName} [{match.AScore}-{match.BScore}] {ctName}");
-                            foreach (var player in MatchPlayers)
-                            {
-                                await ServerEvents.AuthPlayer(player.SteamId, player.Name);
-                            }
-                        }
-                        else
-                        {
-                            //await RconHelper.SendMessage(rcon, "Не найдено матчей для восстановления!");
-                        }
+                        //var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
+                        //if (recoveredMatchID != 0)
+                        //{
+                        //    //await RconHelper.SendMessage(rcon, "RECOVERED LIVE");
+                        //    MatchPlayers = new List<Player>();
+                        //    MatchPlayers.AddRange(OnlinePlayers);
+                        //    match = new Match(15);
+                        //    match.MatchId = recoveredMatchID;
+                        //    match = await MatchEvents.GetLiveMatchResults(server.ID, match);
+                        //    match.RoundID = match.AScore + match.BScore;
+                        //    if (match.AScore + match.BScore >= match.MaxRounds)
+                        //    {
+                        //        match.FirstHalf = false;
+                        //    }
+                        //    //await RconHelper.SendMessage(rcon, $"{tName} [{match.AScore}-{match.BScore}] {ctName}");
+                        //    foreach (var player in MatchPlayers)
+                        //    {
+                        //        await ServerEvents.AuthPlayer(player.SteamId, player.Name);
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    //await RconHelper.SendMessage(rcon, "Не найдено матчей для восстановления!");
+                        //}
                     }
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!score") && match.IsMatch)

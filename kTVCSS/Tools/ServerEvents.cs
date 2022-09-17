@@ -9,8 +9,16 @@ using System.Threading.Tasks;
 
 namespace kTVCSS.Tools
 {
+    /// <summary>
+    /// Серверные события
+    /// </summary>
     public static class ServerEvents
     {
+        /// <summary>
+        /// Напечатать инфу об игроке
+        /// </summary>
+        /// <param name="steamID">Стим айди</param>
+        /// <returns></returns>
         public static async Task<ConnectInfo> PrintPlayerInfo(string steamID)
         {
             try
@@ -53,7 +61,11 @@ namespace kTVCSS.Tools
             }
             return null;
         }
-
+        /// <summary>
+        /// Проверка на наличие игрока в системе
+        /// </summary>
+        /// <param name="steamID">Стим айди</param>
+        /// <returns></returns>
         public static async Task<bool> IsUserRegistered(string steamID)
         {
             int mPlayed = 0;
@@ -85,7 +97,12 @@ namespace kTVCSS.Tools
             }
             return true;
         }
-
+        /// <summary>
+        /// Вставить лог об коннекте игрока
+        /// </summary>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="player">Игрок</param>
+        /// <returns></returns>
         public static async Task InsertConnectData(int serverId, PlayerConnectedIPInfo player)
         {
             try
@@ -103,7 +120,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить лог коннекта игрока
+        /// </summary>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="player">Игрок</param>
+        /// <returns></returns>
         public static async Task InsertConnectData(int serverId, PlayerConnected player)
         {
             try
@@ -121,7 +143,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Вставить лог о дисконнекте игрока
+        /// </summary>
+        /// <param name="serverId">Айди сервера</param>
+        /// <param name="player">Игрок</param>
+        /// <returns></returns>
         public static async Task InsertDisconnectData(int serverId, PlayerDisconnected player)
         {
             try
@@ -139,7 +166,12 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Авторизация игрока
+        /// </summary>
+        /// <param name="SteamID">Стим айди</param>
+        /// <param name="Name">Ник</param>
+        /// <returns></returns>
         public static async Task<bool> AuthPlayer(string SteamID, string Name)
         {
             try
@@ -181,7 +213,11 @@ namespace kTVCSS.Tools
                 return true;
             }
         }
-
+        /// <summary>
+        /// Проверка на бан игрока
+        /// </summary>
+        /// <param name="steamID">Стим айди</param>
+        /// <returns></returns>
         public static async Task<bool> CheckIsBanned(string steamID)
         {
             try
@@ -208,7 +244,13 @@ namespace kTVCSS.Tools
             }
             return false;
         }
-
+        /// <summary>
+        /// Вставить сообщение игрока в БД
+        /// </summary>
+        /// <param name="steamId">Стим айди</param>
+        /// <param name="text">Текст сообщения</param>
+        /// <param name="serverId">Айди сервера</param>
+        /// <returns></returns>
         public static async Task InsertChatMessage(string steamId, string text, int serverId)
         {
             try
@@ -234,7 +276,11 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
         }
-
+        /// <summary>
+        /// Получить ранг игрока
+        /// </summary>
+        /// <param name="steamID">Стим айди</param>
+        /// <returns></returns>
         public static async Task<PlayerRank> GetPlayerRank(string steamID)
         {
             try
