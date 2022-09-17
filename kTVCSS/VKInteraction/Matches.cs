@@ -205,7 +205,7 @@ namespace kTVCSS.VKInteraction
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     connection.Open();
-                    SqlCommand query = new SqlCommand($"SELECT VKID FROM [kTVCSS].[dbo].[Players] WHERE STEAMID = '{player.SteamId}'", connection);
+                    SqlCommand query = new SqlCommand($"SELECT VKID FROM [dbo].[Players] WHERE STEAMID = '{player.SteamId}'", connection);
                     using (var reader = query.ExecuteReader())
                     {
                         while (reader.Read())

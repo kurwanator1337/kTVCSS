@@ -274,7 +274,7 @@ namespace kTVCSS.Tools
                             using (SqlConnection con = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                             {
                                 con.Open();
-                                SqlCommand cmd = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [kTVCSS].[dbo].[MatchesResultsLive] WHERE ID = {match.MatchId} AND STEAMID = '{player.SteamId}'", con);
+                                SqlCommand cmd = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [dbo].[MatchesResultsLive] WHERE ID = {match.MatchId} AND STEAMID = '{player.SteamId}'", con);
                                 using (var reader = cmd.ExecuteReader())
                                 {
                                     while (reader.Read())
@@ -453,7 +453,7 @@ namespace kTVCSS.Tools
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     connection.Open();
-                    SqlCommand query = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [kTVCSS].[dbo].[MatchesResultsLive] WHERE ID = {matchId} AND STEAMID = '{steamId}'", connection);
+                    SqlCommand query = new SqlCommand($"SELECT [KILLS], [DEATHS], [HEADSHOTS] FROM [dbo].[MatchesResultsLive] WHERE ID = {matchId} AND STEAMID = '{steamId}'", connection);
                     using (var reader = query.ExecuteReader())
                     {
                         while (reader.Read())

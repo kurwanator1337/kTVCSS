@@ -93,7 +93,7 @@ namespace kTVCSS.Tools
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     await connection.OpenAsync();
-                    SqlCommand query = new SqlCommand($"INSERT INTO kTVCSS.dbo.PlayersJoinHistory (STEAMID, IP, DATETIME, TYPE, SERVERID) VALUES ('{player.Player.SteamId}', '{player.IP}', GETDATE(), 'CONNECT', '{serverId}');", connection);
+                    SqlCommand query = new SqlCommand($"INSERT INTO PlayersJoinHistory (STEAMID, IP, DATETIME, TYPE, SERVERID) VALUES ('{player.Player.SteamId}', '{player.IP}', GETDATE(), 'CONNECT', '{serverId}');", connection);
                     await query.ExecuteNonQueryAsync();
                     await connection.CloseAsync();
                 }
@@ -111,7 +111,7 @@ namespace kTVCSS.Tools
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     await connection.OpenAsync();
-                    SqlCommand query = new SqlCommand($"INSERT INTO kTVCSS.dbo.PlayersJoinHistory (STEAMID, IP, DATETIME, TYPE, SERVERID) VALUES ('{player.Player.SteamId}', '{player.Host}', GETDATE(), 'CONNECT', '{serverId}');", connection);
+                    SqlCommand query = new SqlCommand($"INSERT INTO PlayersJoinHistory (STEAMID, IP, DATETIME, TYPE, SERVERID) VALUES ('{player.Player.SteamId}', '{player.Host}', GETDATE(), 'CONNECT', '{serverId}');", connection);
                     await query.ExecuteNonQueryAsync();
                     await connection.CloseAsync();
                 }
@@ -129,7 +129,7 @@ namespace kTVCSS.Tools
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     await connection.OpenAsync();
-                    SqlCommand query = new SqlCommand($"INSERT INTO kTVCSS.dbo.PlayersJoinHistory (STEAMID, DATETIME, TYPE, SERVERID, REASON) VALUES ('{player.Player.SteamId}', GETDATE(), N'DISCONNECT', '{serverId}', '{player.Reason}');", connection);
+                    SqlCommand query = new SqlCommand($"INSERT INTO PlayersJoinHistory (STEAMID, DATETIME, TYPE, SERVERID, REASON) VALUES ('{player.Player.SteamId}', GETDATE(), N'DISCONNECT', '{serverId}', '{player.Reason}');", connection);
                     await query.ExecuteNonQueryAsync();
                     await connection.CloseAsync();
                 }

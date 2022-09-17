@@ -17,7 +17,7 @@ namespace kTVCSS.Tools
             {
                 connection.Open();
                 using (SqlCommand query = new SqlCommand("SELECT HOST, USERNAME, USERPASSWORD, PORT, GAMEPORT, RCONPASSWORD, NODEHOST, NODEPORT, ID " +
-                    "FROM [kTVCSS].[dbo].[GameServers] WHERE ENABLED = 1", connection))
+                    "FROM [dbo].[GameServers] WHERE ENABLED = 1", connection))
                 {
                     using (SqlDataReader reader = query.ExecuteReader())
                     {
