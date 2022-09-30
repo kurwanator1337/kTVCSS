@@ -371,6 +371,7 @@ namespace kTVCSS
                                         }
                                     case 5:
                                         {
+                                            await rcon.SendCommandAsync($"sm_csay {MatchPlayers.Find(x => x.SteamId == player.Key).Name} RAMPAGE!!!");
                                             await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID);
                                             break;
@@ -1061,9 +1062,11 @@ namespace kTVCSS
                             await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вам нужно привязать VK к группе vk.com/im?sel=-55788587 (команда !setid {connection.Player.SteamId})");
                         }
 
-                        if (await ServerEvents.CheckIsBanned(connection.Player.SteamId))
+                        var banCheckResult = await ServerEvents.CheckIsBanned(connection.Player.SteamId);
+
+                        if (banCheckResult.FirstOrDefault().Key)
                         {
-                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы были заблокированны на проекте. Для уточнения информации обратитесь к администрации проекта.");
+                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы были заблокированны на проекте. Причина: {banCheckResult.FirstOrDefault().Value}");
                         }
 
                         #region Connection Check
@@ -1227,6 +1230,19 @@ namespace kTVCSS
                             PlayersRank.RemoveAll(x => x.SteamID == connection.Player.SteamId);
                         }
                         await ServerEvents.InsertDisconnectData(ServerID, connection);
+                        if (match.IsMatch)
+                        {
+                            if (match.IsNeedPauseOnPlayerTimeOut)
+                            {
+                                if (connection.Reason.Contains("timeout") || connection.Reason.Contains("time out"))
+                                {
+                                    await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена двухминутная пауза, поскольку игрок вылетел!", Colors.legendary);
+                                    await RconHelper.SendCmd(rcon, "mp_freezetime 120");
+                                    match.Pause = true;
+                                    match.IsNeedPauseOnPlayerTimeOut = false;
+                                }
+                            }
+                        }
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
                         //if (OnlinePlayers.Count() == 0 && NeedRestart)
                         //{

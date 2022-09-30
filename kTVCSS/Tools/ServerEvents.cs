@@ -218,8 +218,9 @@ namespace kTVCSS.Tools
         /// </summary>
         /// <param name="steamID">Стим айди</param>
         /// <returns></returns>
-        public static async Task<bool> CheckIsBanned(string steamID)
+        public static async Task<Dictionary<bool, string>> CheckIsBanned(string steamID)
         {
+            Dictionary<bool, string> result = new Dictionary<bool, string>();
             try
             {
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
@@ -233,7 +234,10 @@ namespace kTVCSS.Tools
                             int.TryParse(reader[0].ToString(), out int ban);
 
                             if (ban == 1)
-                                return true;
+                            {
+                                result.Add(true, reader[1].ToString());
+                                return result;
+                            }
                         }
                     }
                 }
@@ -242,7 +246,8 @@ namespace kTVCSS.Tools
             {
                 Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
             }
-            return false;
+            result.Add(false, null);
+            return result;
         }
         /// <summary>
         /// Вставить сообщение игрока в БД

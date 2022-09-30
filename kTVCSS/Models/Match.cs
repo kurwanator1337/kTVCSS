@@ -32,6 +32,7 @@ namespace kTVCSS.Models
             IsNeedSetTeamScores = false;
             MinPlayersToStart = 8; // 8
             MinPlayersToStop = 6; // 6
+            IsNeedPauseOnPlayerTimeOut = true;
 
 #if DEBUG
             MinPlayersToStart = 0; // 8
@@ -135,5 +136,9 @@ namespace kTVCSS.Models
         /// Тип матча (0 - кланвар, 1 - микс)
         /// </summary>
         public int MatchType { get; set; }
+        /// <summary>
+        /// Нужда в паузе по случаю вылета игрока
+        /// </summary>
+        public bool IsNeedPauseOnPlayerTimeOut { get; set; }
     }
 }
