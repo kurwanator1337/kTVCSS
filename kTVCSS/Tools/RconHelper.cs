@@ -74,7 +74,7 @@ namespace kTVCSS.Tools
                 Thread.Sleep(2000);
                 if (match.IsOvertime)
                 {
-                    await RconHelper.SendCmd(rcon, "mp_startmoney 10000");
+                    await rcon.SendCommandAsync("exec ktvcss/on_match_overtime.cfg");
                 }
                 await rcon.SendCommandAsync("clear;mp_restartgame 1;sys_say {mediumseagreen}Restart 1");
                 Thread.Sleep(2000);

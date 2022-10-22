@@ -33,6 +33,7 @@ namespace kTVCSS.Models
             MinPlayersToStart = 8; // 8
             MinPlayersToStop = 6; // 6
             IsNeedPauseOnPlayerTimeOut = true;
+            CanPause = true;
 
 #if DEBUG
             MinPlayersToStart = 0; // 8
@@ -140,5 +141,9 @@ namespace kTVCSS.Models
         /// Нужда в паузе по случаю вылета игрока
         /// </summary>
         public bool IsNeedPauseOnPlayerTimeOut { get; set; }
+        /// <summary>
+        /// Проверка на возможность объявления паузы
+        /// </summary>
+        public bool CanPause { get; set; }
     }
 }

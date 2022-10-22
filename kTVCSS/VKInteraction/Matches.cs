@@ -271,7 +271,7 @@ namespace kTVCSS.VKInteraction
         /// Опубликовать результат матча на стену
         /// </summary>
         /// <param name="matchResultInfo">Результат матча</param>
-        public static void PublishResult(MatchResultInfo matchResultInfo)
+        public static void PublishResult(MatchResultInfo matchResultInfo, int matchId)
         {
             try
             {
@@ -391,7 +391,7 @@ namespace kTVCSS.VKInteraction
                 var wallPostParams = new WallPostParams
                 {
                     OwnerId = -Program.ConfigTools.Config.StatGroupID,
-                    Message = "Демо-запись: http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip",
+                    Message = $"ID матча: {matchId}\r\nДемо-запись: http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip",
                     FromGroup = true,
                     Signed = false
                 };

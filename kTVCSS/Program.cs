@@ -193,6 +193,8 @@ namespace kTVCSS
                 {
                     if (match.IsMatch)
                     {
+                        match.CanPause = true;
+
                         await RconHelper.SendCmd(rcon, "save_match");
 
                         match.PlayerKills.Clear();
@@ -306,19 +308,19 @@ namespace kTVCSS
                                 await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MATCH}");
                                 Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
+
+                            await RconHelper.SendMessage(rcon, "У Вас доступны 4 паузы по 1 минуте (!pause)", Colors.mediumseagreen);
+                            await RconHelper.SendMessage(rcon, "И 2 паузы по 5 минут (!pause5)", Colors.mediumseagreen);
                         }
                     }
                 });
-
-                //log.Listen<RestartRound>(async result =>
-                //{
-
-                //});
 
                 log.Listen<RoundEndScore>(async result =>
                 {
                     if (match.IsMatch)
                     {
+                        match.CanPause = false;
+
                         await RconHelper.SendCmd(rcon, "save_match");
 
                         if (result.WinningTeam == tName)
@@ -717,6 +719,12 @@ namespace kTVCSS
                     {
                         if (!match.Pause)
                         {
+                            if (!match.CanPause)
+                            {
+                                await RconHelper.SendMessage(rcon, "В данный момент нельзя брать паузу. " +
+                                    "Пишите эту команду во время раунда, а не в конце/начале раунда.", Colors.crimson);
+                                return;
+                            }
                             if (match.TacticalPauses != 0)
                             {
                                 await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена минутная пауза!", Colors.legendary);
@@ -740,6 +748,12 @@ namespace kTVCSS
                     {
                         if (!match.Pause)
                         {
+                            if (!match.CanPause)
+                            {
+                                await RconHelper.SendMessage(rcon, "В данный момент нельзя брать паузу. " +
+                                    "Пишите эту команду во время раунда, а не в конце/начале раунда.", Colors.crimson);
+                                return;
+                            }
                             if (match.TechnicalPauses != 0)
                             {
                                 await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена пятиминутная пауза!", Colors.legendary);
@@ -1232,9 +1246,9 @@ namespace kTVCSS
                         await ServerEvents.InsertDisconnectData(ServerID, connection);
                         if (match.IsMatch)
                         {
-                            if (match.IsNeedPauseOnPlayerTimeOut)
+                            if (match.IsNeedPauseOnPlayerTimeOut && match.MatchType == 0)
                             {
-                                if (connection.Reason.Contains("timeout") || connection.Reason.Contains("time out"))
+                                if (connection.Reason.Contains("timed out"))
                                 {
                                     await RconHelper.SendMessage(rcon, "По окончании раунда будет установлена двухминутная пауза, поскольку игрок вылетел!", Colors.legendary);
                                     await RconHelper.SendCmd(rcon, "mp_freezetime 120");
@@ -1262,6 +1276,32 @@ namespace kTVCSS
                         SteamId = string.Empty,
                         IP = data.IP
                     });
+
+                    //if (match.IsMatch)
+                    //{
+                    //    try
+                    //    {
+                    //        using (SqlConnection con = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                    //        {
+                    //            await con.OpenAsync();
+                    //            SqlCommand query = new SqlCommand($"SELECT FRAGS, DEATHS FROM MatchesBackups WHERE ID = {match.MatchId}" +
+                    //                $" AND STEAMID = '{data.Player.SteamId}'", con);
+                    //            using (var reader = await query.ExecuteReaderAsync())
+                    //            {
+                    //                while (await reader.ReadAsync())
+                    //                {
+                    //                    await Task.Delay(3000);
+                    //                    await RconHelper.SendCmd(rcon, $"player_score_set {data.Player.SteamId.Replace(":", "|")} " +
+                    //                        $"{reader[0].ToString()} {reader[1].ToString()}");
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                    //    }
+                    //}
                 });
 
                 log.Listen<MatchBackup>(async data =>
@@ -1338,12 +1378,13 @@ namespace kTVCSS
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                int matchId = match.MatchId;
                 match = new Match(0);
                 isCanBeginMatch = true;
                 Program.Node.FTPTools.UploadDemo(Program.Node.DemoName);
                 if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
                 {
-                    VKInteraction.Matches.PublishResult(matchResultInfo);
+                    VKInteraction.Matches.PublishResult(matchResultInfo, matchId);
                 }
                 foreach (var data in playerPictures)
                 {
@@ -1408,12 +1449,13 @@ namespace kTVCSS
                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_match_end.cfg");
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
+                int matchId = match.MatchId;
                 match = new Match(0);
                 isCanBeginMatch = true;
                 Program.Node.FTPTools.UploadDemo(Program.Node.DemoName);
                 if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
                 {
-                    VKInteraction.Matches.PublishResult(matchResultInfo);
+                    VKInteraction.Matches.PublishResult(matchResultInfo, matchId);
                 }
                 foreach (var data in playerPictures)
                 {

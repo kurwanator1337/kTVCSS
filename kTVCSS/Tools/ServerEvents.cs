@@ -226,7 +226,7 @@ namespace kTVCSS.Tools
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     await connection.OpenAsync();
-                    SqlCommand query = new SqlCommand($"SELECT BLOCK FROM [dbo].[Players] WHERE STEAMID = '{steamID}'", connection);
+                    SqlCommand query = new SqlCommand($"SELECT BLOCK, BLOCKREASON FROM [dbo].[Players] WHERE STEAMID = '{steamID}'", connection);
                     using (var reader = await query.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
