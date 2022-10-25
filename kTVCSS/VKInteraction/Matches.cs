@@ -55,7 +55,7 @@ namespace kTVCSS.VKInteraction
                             }
                             catch (Exception ex)
                             {
-                                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
                         }
                     }
@@ -64,7 +64,7 @@ namespace kTVCSS.VKInteraction
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
             return player;
         }
@@ -101,7 +101,7 @@ namespace kTVCSS.VKInteraction
                             }
                             catch (Exception ex)
                             {
-                                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
                         }
                     }
@@ -110,7 +110,7 @@ namespace kTVCSS.VKInteraction
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
             return results;
         }
@@ -144,7 +144,7 @@ namespace kTVCSS.VKInteraction
                             }
                             catch (Exception ex)
                             {
-                                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                             }
                         }
                     }
@@ -153,7 +153,7 @@ namespace kTVCSS.VKInteraction
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
             return match;
         }
@@ -259,12 +259,12 @@ namespace kTVCSS.VKInteraction
                 }
                 catch (Exception ex)
                 {
-                    Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                    Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 }
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -409,12 +409,12 @@ namespace kTVCSS.VKInteraction
                 }
                 catch (Exception ex)
                 {
-                    Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                    Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 }
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
     }

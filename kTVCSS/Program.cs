@@ -203,13 +203,13 @@ namespace kTVCSS
                         if (isResetFreezeTime)
                         {
                             match.IsNeedSetTeamScores = true;
-                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
+                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers, server.ServerType);
                             isResetFreezeTime = !isResetFreezeTime;
                         }
 
                         if (match.Pause)
                         {
-                            if (match.MatchType == 0)
+                            if (server.ServerType == ServerType.ClanMatch)
                             {
                                 await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
                             }
@@ -279,19 +279,17 @@ namespace kTVCSS
                                             if (ct != 0)
                                             {
                                                 var tags = MatchEvents.GetTeamNames(MatchPlayers);
-                                                if (tags[tName].Contains("Team ") || tags[ctName].Contains("Team "))
+                                                if (server.ServerType == ServerType.ClanMatch)
                                                 {
-                                                    match.MatchType = 1;
-                                                    await RconHelper.SendMessage(rcon, $"Установка правил для микс-матча:", Colors.crimson);
-                                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MIX}");
-                                                    await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MIX}");
-                                                }
-                                                else
-                                                {
-                                                    match.MatchType = 0;
                                                     await RconHelper.SendMessage(rcon, $"Установка правил для обычного матча:", Colors.crimson);
                                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
                                                     await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MATCH}");
+                                                }
+                                                else if (server.ServerType == ServerType.Mix)
+                                                {
+                                                    await RconHelper.SendMessage(rcon, $"Установка правил для микс-матча:", Colors.crimson);
+                                                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MIX}");
+                                                    await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MIX}");
                                                 }
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[tName]} - {ter}", Colors.crimson);
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[ctName]} - {ct}", Colors.dodgerblue);
@@ -302,7 +300,6 @@ namespace kTVCSS
                             }
                             catch (Exception ex)
                             {
-                                match.MatchType = 0;
                                 await RconHelper.SendMessage(rcon, $"Установка правил для обычного матча:", Colors.crimson);
                                 await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
                                 await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MATCH}");
@@ -395,11 +392,11 @@ namespace kTVCSS
                             if (match.AScore + match.BScore == match.MaxRounds)
                             {
                                 await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут.\\nМатч продолжится автоматически.");
-                                if (match.MatchType == 0)
+                                if (server.ServerType == ServerType.ClanMatch)
                                 {
                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH}");
                                 }
-                                else
+                                else if (server.ServerType == ServerType.Mix)
                                 {
                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX}");
                                 }
@@ -461,11 +458,11 @@ namespace kTVCSS
                                         match.IsOvertime = true;
                                         await RconHelper.SendMessage(rcon, "Овертайм!!!", Colors.crimson);
                                         await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                                        if (match.MatchType == 0)
+                                        if (server.ServerType == ServerType.ClanMatch)
                                         {
                                             await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
                                         }
-                                        else
+                                        else if (server.ServerType == ServerType.Mix)
                                         {
                                             await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME}");
                                         }
@@ -487,11 +484,11 @@ namespace kTVCSS
                             if (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime)
                             {
                                 await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут.\\nМатч продолжится автоматически.");
-                                if (match.MatchType == 0)
+                                if (server.ServerType == ServerType.ClanMatch)
                                 {
                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
                                 }
-                                else
+                                else if (server.ServerType == ServerType.Mix)
                                 {
                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME}");
                                 }
@@ -551,11 +548,11 @@ namespace kTVCSS
                                     match.IsOvertime = true;
                                     await RconHelper.SendMessage(rcon, "Овертайм!!!", Colors.crimson);
                                     await RconHelper.SendCmd(rcon, "sv_pausable 1");
-                                    if (match.MatchType == 0)
+                                    if (server.ServerType == ServerType.ClanMatch)
                                     {
                                         await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
                                     }
-                                    else
+                                    else if (server.ServerType == ServerType.Mix)
                                     {
                                         await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME}");
                                     }
@@ -941,7 +938,7 @@ namespace kTVCSS
                             {
                                 await MatchEvents.InsertPlayerRatingProgress(player.SteamID, player.Points);
                             }
-                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers);
+                            await RconHelper.LiveOnThree(rcon, match, OnlinePlayers, server.ServerType);
                         }
                     }
 
@@ -1101,10 +1098,15 @@ namespace kTVCSS
 
                             ConnectionController.RemoveItem(connectionInfo);
                         }
-                        
+
                         #endregion
 
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been connected to {endpoint.Address}:{endpoint.Port}", LogLevel.Trace);
+
+                        if (!await ServerEvents.IsUserTeamMember(connection.Player.SteamId) && server.ServerType == ServerType.ClanMatch)
+                        {
+                            await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} Вы не состоите в какой-либо команде!");
+                        }
                     }
                 });
 
@@ -1246,7 +1248,7 @@ namespace kTVCSS
                         await ServerEvents.InsertDisconnectData(ServerID, connection);
                         if (match.IsMatch)
                         {
-                            if (match.IsNeedPauseOnPlayerTimeOut && match.MatchType == 0)
+                            if (match.IsNeedPauseOnPlayerTimeOut && server.ServerType == ServerType.ClanMatch)
                             {
                                 if (connection.Reason.Contains("timed out"))
                                 {
@@ -1299,7 +1301,7 @@ namespace kTVCSS
                     //    }
                     //    catch (Exception ex)
                     //    {
-                    //        Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                    //        Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                     //    }
                     //}
                 });
@@ -1593,7 +1595,7 @@ namespace kTVCSS
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 int id = int.Parse(args[0]);
-                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.1b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.2b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
 
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();

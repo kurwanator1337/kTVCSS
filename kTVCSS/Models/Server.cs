@@ -47,5 +47,9 @@ namespace kTVCSS.Models
         /// Порт ноды-обработчика
         /// </summary>
         public ushort NodePort { get; set; }
+        /// <summary>
+        /// Тип сервера
+        /// </summary>
+        public ServerType ServerType { get; set; }
     }
 }

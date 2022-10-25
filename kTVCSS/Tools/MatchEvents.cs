@@ -50,7 +50,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -79,7 +79,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 return 0;
             }
         }
@@ -110,7 +110,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -141,7 +141,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 return 0;
             }
         }
@@ -176,7 +176,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -206,7 +206,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -253,7 +253,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
             return player;
         }
@@ -285,7 +285,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 return match;
             }
         }
@@ -445,7 +445,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -503,7 +503,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 return tags;
             }
         }
@@ -559,14 +559,14 @@ namespace kTVCSS.Tools
                     }
                     catch (Exception ex)
                     {
-                        Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                        Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                     }
                     connection.Close();
                 }
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -600,14 +600,14 @@ namespace kTVCSS.Tools
                     }
                     catch (Exception ex)
                     {
-                        Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                        Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                     }
                     await connection.CloseAsync();
                 }
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(serverId, ex.Message, LogLevel.Error);
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -646,7 +646,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -674,7 +674,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -702,7 +702,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -730,7 +730,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -756,7 +756,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -785,7 +785,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
         /// <summary>
@@ -824,7 +824,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(Program.Node.ServerID, ex.Message, LogLevel.Error);
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
     }

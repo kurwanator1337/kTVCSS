@@ -20,7 +20,6 @@ namespace kTVCSS.Models
         {
             MaxRounds = mr;
             FirstHalf = true;
-            MatchType = 0;
             AScore = 0;
             BScore = 0;
             RoundID = 0;
@@ -133,10 +132,6 @@ namespace kTVCSS.Models
         /// Ножевой раунд?
         /// </summary>
         public bool KnifeRound { get; set; }
-        /// <summary>
-        /// Тип матча (0 - кланвар, 1 - микс)
-        /// </summary>
-        public int MatchType { get; set; }
         /// <summary>
         /// Нужда в паузе по случаю вылета игрока
         /// </summary>

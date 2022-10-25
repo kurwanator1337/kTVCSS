@@ -32,7 +32,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(0, ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 await RconReconnect(rcon);
             }
         }
@@ -51,7 +51,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(0, ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 await RconReconnect(rcon);
             }
         }
@@ -61,8 +61,9 @@ namespace kTVCSS.Tools
         /// <param name="rcon">РКОН соединение</param>
         /// <param name="match">Матч</param>
         /// <param name="OnlinePlayers">Список онлайн игроков</param>
+        /// <param name="type">Тип сервера</param>
         /// <returns></returns>
-        public static async Task LiveOnThree(RCON rcon, Match match, List<Player> OnlinePlayers)
+        public static async Task LiveOnThree(RCON rcon, Match match, List<Player> OnlinePlayers, ServerType type)
         {
             try
             {
@@ -88,12 +89,12 @@ namespace kTVCSS.Tools
                     await rcon.SendCommandAsync($"score_set {match.BScore} {match.AScore}");
                     match.IsNeedSetTeamScores = !match.IsNeedSetTeamScores;
                 }
-                if (match.MatchType == 0)
+                if (type == ServerType.ClanMatch)
                 {
                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MATCH}");
                     await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MATCH}");
                 }
-                else
+                else if (type == ServerType.Mix)
                 {
                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MIX}");
                     await RconHelper.SendCmd(rcon, $"mp_friendlyfire {Game.Cvars.FRIENDLYFIRE_MIX}");
@@ -111,7 +112,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(0, ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 await RconReconnect(rcon);
             }
         }
@@ -138,7 +139,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(0, ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 await RconReconnect(rcon);
             }
         }
@@ -156,7 +157,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(0, ex.Message, LogLevel.Error);
+                Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
     }
