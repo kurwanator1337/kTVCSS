@@ -1,6 +1,7 @@
 ﻿using CoreRCON.Parsers.Standard;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,7 @@ namespace kTVCSS.Models
                 IsMatch = true;
                 TacticalPauses = 4;
                 TechnicalPauses = 2;
+                Stopwatch.Start();
             }
         }
         /// <summary>
@@ -140,5 +142,9 @@ namespace kTVCSS.Models
         /// Проверка на возможность объявления паузы
         /// </summary>
         public bool CanPause { get; set; }
+        /// <summary>
+        /// Часики
+        /// </summary>
+        public Stopwatch Stopwatch { get; set; }
     }
 }

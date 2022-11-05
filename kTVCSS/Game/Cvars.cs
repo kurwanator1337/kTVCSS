@@ -18,7 +18,7 @@ namespace kTVCSS.Game
         /// <summary>
         /// Фризтайм микса
         /// </summary>
-        public const int FREEZETIME_MIX = 5;
+        public const int FREEZETIME_MIX = 10; // 5
         /// <summary>
         /// Перерыв матча
         /// </summary>
@@ -26,7 +26,7 @@ namespace kTVCSS.Game
         /// <summary>
         /// Перерыв микса
         /// </summary>
-        public const int HALF_TIME_PERIOD_MIX = 10;
+        public const int HALF_TIME_PERIOD_MIX = 30; // 10
         /// <summary>
         /// Перерыв оверов матча
         /// </summary>
@@ -34,7 +34,7 @@ namespace kTVCSS.Game
         /// <summary>
         /// Перерыв оверов микса
         /// </summary>
-        public const int HALF_TIME_PERIOD_MIX_OVERTIME = 5;
+        public const int HALF_TIME_PERIOD_MIX_OVERTIME = 30; // 5
         /// <summary>
         /// ФФ матча
         /// </summary>
@@ -42,6 +42,6 @@ namespace kTVCSS.Game
         /// <summary>
         /// ФФ микса
         /// </summary>
-        public const int FRIENDLYFIRE_MIX = 0;
+        public const int FRIENDLYFIRE_MIX = 1; // 0
     }
 }

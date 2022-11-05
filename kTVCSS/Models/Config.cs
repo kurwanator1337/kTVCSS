@@ -44,5 +44,9 @@ namespace kTVCSS.Models
         /// Пароль
         /// </summary>
         public string SSHPassword { get; set; }
+        /// <summary>
+        /// Токен ВК группы основной
+        /// </summary>
+        public string VKGroupToken { get; set; }
     }
 }

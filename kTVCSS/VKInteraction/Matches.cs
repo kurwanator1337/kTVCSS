@@ -1,4 +1,5 @@
-﻿using kTVCSS.Models;
+﻿using CoreRCON.Parsers.Standard;
+using kTVCSS.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -22,6 +23,34 @@ namespace kTVCSS.VKInteraction
     /// </summary>
     public static class Matches
     {
+        /// <summary>
+        /// Отправить сообщение в беседу проекта
+        /// </summary>
+        /// <param name="message">Сообщение</param>
+        /// <returns></returns>
+        public static async Task SendMessageToConf(string message)
+        {
+            try
+            {
+                using (VkApi api = new VkApi())
+                {
+                    await api.AuthorizeAsync(new ApiAuthParams
+                    {
+                        AccessToken = Program.ConfigTools.Config.VKGroupToken,
+                    });
+                    await api.Messages.SendAsync(new MessagesSendParams()
+                    {
+                        ChatId = 4,
+                        Message = message,
+                        RandomId = new Random().Next()
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+            }
+        }
         /// <summary>
         /// Получить МВП матча
         /// </summary>

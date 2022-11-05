@@ -577,7 +577,7 @@ namespace kTVCSS.Tools
         /// <param name="mapName">Название карты</param>
         /// <param name="serverId">Айди сервера</param>
         /// <returns></returns>
-        public async static Task InsertMatchLog(int matchId, string message, string mapName, int serverId)
+        public async static Task InsertMatchLog(int matchId, string message, string mapName, int serverId, Match match)
         {
             try
             {
@@ -591,7 +591,7 @@ namespace kTVCSS.Tools
                             CommandType = System.Data.CommandType.StoredProcedure
                         };
                         query.Parameters.AddWithValue("@MATCHID", matchId);
-                        query.Parameters.AddWithValue("@MESSAGE", message);
+                        query.Parameters.AddWithValue("@MESSAGE", $"{message} [{match.Stopwatch.Elapsed}]");
                         query.Parameters.AddWithValue("@MAP", mapName);
                         query.Parameters.AddWithValue("@SERVERID", serverId);
                         await query.ExecuteNonQueryAsync();

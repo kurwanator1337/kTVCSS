@@ -13,9 +13,9 @@ using System.Linq;
 using System.Data.SqlClient;
 using System.IO;
 using System.Diagnostics;
-using MySqlConnector;
 using static kTVCSS.Game.Sourcemod;
 using System.Timers;
+using System.Runtime.ConstrainedExecution;
 
 namespace kTVCSS
 {
@@ -145,7 +145,7 @@ namespace kTVCSS
                         }
                         await MatchEvents.WeaponKill(kill.Killer.SteamId, kill.Weapon);
                         await MatchEvents.InsertMatchLog(match.MatchId, $"{kill.Killer.Name}<{kill.Killer.SteamId}> killed" +
-                            $" {kill.Killed.Name}<{kill.Killed.SteamId}> with weapon <{kill.Weapon}> <{kill.Headshot}>", info.Map, server.ID);
+                            $" {kill.Killed.Name}<{kill.Killed.SteamId}> with weapon <{kill.Weapon}> <{kill.Headshot}>", info.Map, server.ID, match);
                     }
                 });
 
@@ -220,7 +220,7 @@ namespace kTVCSS
                             match.Pause = !match.Pause;
                         }
 
-                        await MatchEvents.InsertMatchLog(match.MatchId, $"<Round Start>", info.Map, server.ID);
+                        await MatchEvents.InsertMatchLog(match.MatchId, $"<Round Start>", info.Map, server.ID, match);
 
                         if (match.AScore == 0 && match.BScore == 0)
                         {
@@ -293,6 +293,14 @@ namespace kTVCSS
                                                 }
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[tName]} - {ter}", Colors.crimson);
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[ctName]} - {ct}", Colors.dodgerblue);
+                                                string[] players = OnlinePlayers.Select(x => x.Name).ToArray();
+                                                string playersString = string.Empty;
+                                                foreach (string player in players)
+                                                {
+                                                    playersString += player + "\r\n";
+                                                }
+                                                await VKInteraction.Matches.SendMessageToConf($"Начинается матч на сервере №{ServerID + 1} между командами " +
+                                                    $"{tags[tName]} (AVG: {ter}) и {tags[ctName]} (AVG: {ct}) на карте {currentMapName}. Список игроков:\r\n\r\n{playersString}");
                                             }
                                         }
                                     }
@@ -336,7 +344,7 @@ namespace kTVCSS
                         SourceQueryInfo info = await ServerQuery.Info(endpoint, ServerQuery.ServerType.Source) as SourceQueryInfo;
                         var tags = MatchEvents.GetTeamNames(MatchPlayers);
 
-                        await MatchEvents.InsertMatchLog(match.MatchId, $"<Round End> {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}", info.Map, server.ID);
+                        await MatchEvents.InsertMatchLog(match.MatchId, $"<Round End> {tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}", info.Map, server.ID, match);
 
                         match.RoundID++;
 
@@ -359,20 +367,20 @@ namespace kTVCSS
                                     case 3:
                                         {
                                             await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", Colors.mediumseagreen);
-                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", info.Map, server.ID);
+                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", info.Map, server.ID, match);
                                             break;
                                         }
                                     case 4:
                                         {
                                             await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", Colors.legendary);
-                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", info.Map, server.ID);
+                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", info.Map, server.ID, match);
                                             break;
                                         }
                                     case 5:
                                         {
                                             await rcon.SendCommandAsync($"sm_csay {MatchPlayers.Find(x => x.SteamId == player.Key).Name} RAMPAGE!!!");
                                             await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
-                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID);
+                                            await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID, match);
                                             break;
                                         }
                                 }
@@ -918,6 +926,46 @@ namespace kTVCSS
                             await RconHelper.SendCmd(rcon, "sm_msay Матч не может быть запущен, пока игроков менее восьми");
                             return;
                         }
+                        // проверка на нормальность составов команд
+                        if (server.ServerType == ServerType.ClanMatch)
+                        {
+                            await RconHelper.SendMessage(rcon, "Подождите, идет проверка на возможность запуска матча...", Colors.turquoise);
+
+                            List<TeamMember> members = new List<TeamMember>();
+
+                            foreach (var player in OnlinePlayers)
+                            {
+                                using (SqlConnection sql = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                                {
+                                    sql.Open();
+                                    using (SqlCommand cmd = new SqlCommand($"SELECT NAME FROM Teams INNER JOIN TeamsMembers ON TeamsMembers.TEAMID = Teams.ID WHERE STEAMID = '{player.SteamId}'", sql))
+                                    {
+                                        using (SqlDataReader reader = cmd.ExecuteReader())
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                members.Add(new TeamMember()
+                                                {
+                                                    SteamId = player.SteamId,
+                                                    TeamName = reader[0].ToString()
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            IEnumerable<string> distinctTeams = members.Select(x => x.TeamName).Distinct();
+                            foreach (string team in distinctTeams)
+                            {
+                                var playersOfTeamX = members.Where(x => x.TeamName == team);
+                                if (playersOfTeamX.Count() < 4 && playersOfTeamX.Count() > 1)
+                                {
+                                    await RconHelper.SendMessage(rcon, $"Матч не может быть запущен, т.к. в команде {team} слишком много плюсов!", Colors.legendary);
+                                    return;
+                                }
+                            }
+                        }
                         if (!match.IsMatch)
                         {
                             isCanBeginMatch = false;
@@ -1003,6 +1051,23 @@ namespace kTVCSS
                     {
                         if (ForbiddenWords.Contains(word.ToLower()))
                         {
+                            if (chat.Player.SteamId == "STEAM_0:0:1243600807")
+                            {
+                                try
+                                {
+                                    using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                                    {
+                                        await connection.OpenAsync();
+                                        SqlCommand query = new SqlCommand($"UPDATE Players SET BLOCK = 1, BLOCKREASON = '{word}' WHERE STEAMID = 'STEAM_0:0:1243600807'", connection);
+                                        await query.ExecuteNonQueryAsync();
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                    //
+                                }
+                            }
+
                             if (chat.Channel == MessageChannel.All)
                             {
                                 await RconHelper.SendCmd(rcon, $"kickid {chat.Player.ClientId} Вы были кикнуты за использование запрещенных слов ({word})");
@@ -1343,9 +1408,12 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, "Матч завершен!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.", Colors.mediumseagreen);
-                await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", info.Map, server.ID);
+                await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", info.Map, server.ID, match);
                 await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
+
+                await VKInteraction.Matches.SendMessageToConf($"Закончился матч на сервере №{ServerID + 1}\r\n\r\n" +
+                                                    $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed}\r\n\r\nПодробнее о матче в группе KPR: https://vk.com/ktvcss_kpr");
 
                 Match bMatch = match;
 
@@ -1415,7 +1483,7 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, "Матч завершен!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"Поздравляем с победой команду {tags[winningTeam]}!", Colors.mediumseagreen);
                 await RconHelper.SendMessage(rcon, $"{tags[looser]}, в следующий раз Вам повезет.", Colors.mediumseagreen);
-                await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", mapName, server.ID);
+                await MatchEvents.InsertMatchLog(match.MatchId, $"<Match End>", mapName, server.ID, match);
                 await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], mapName, server.ID, MatchPlayers, winningTeam, match);
 
@@ -1576,7 +1644,7 @@ namespace kTVCSS
             }
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.Title = "kTVCSS NODE LAUNCHER";
             Console.ForegroundColor = ConsoleColor.Green;
