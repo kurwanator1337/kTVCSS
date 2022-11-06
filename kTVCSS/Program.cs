@@ -16,6 +16,7 @@ using System.Diagnostics;
 using static kTVCSS.Game.Sourcemod;
 using System.Timers;
 using System.Runtime.ConstrainedExecution;
+using System.Text;
 
 namespace kTVCSS
 {
@@ -293,14 +294,22 @@ namespace kTVCSS
                                                 }
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[tName]} - {ter}", Colors.crimson);
                                                 await RconHelper.SendMessage(rcon, $"Средний рейтинг команды {tags[ctName]} - {ct}", Colors.dodgerblue);
-                                                string[] players = OnlinePlayers.Select(x => x.Name).ToArray();
-                                                string playersString = string.Empty;
-                                                foreach (string player in players)
+                                                string[] players = MatchPlayers.Select(x => x.SteamId).ToArray();
+
+                                                
+                                                if (!tags[tName].Contains("Team ") && !tags[ctName].Contains("Team "))
                                                 {
-                                                    playersString += player + "\r\n";
+                                                    StringBuilder sb = new StringBuilder();
+                                                    sb.AppendLine($"Начинается матч на сервере №{ServerID}!");
+                                                    sb.AppendLine($"{tags[tName]} (Средний рейтинг: {ter}) vs {tags[ctName]} (Средний рейтинг: {ct})");
+                                                    sb.AppendLine($"Карта: {currentMapName}");
+                                                    sb.AppendLine($"Список участников матча:");
+                                                    foreach (string player in players)
+                                                    {
+                                                        sb.AppendLine(PlayerInfoMini.Get(player));
+                                                    }
+                                                    await VKInteraction.Matches.SendMessageToConf(sb.ToString());
                                                 }
-                                                await VKInteraction.Matches.SendMessageToConf($"Начинается матч на сервере №{ServerID + 1} между командами " +
-                                                    $"{tags[tName]} (AVG: {ter}) и {tags[ctName]} (AVG: {ct}) на карте {currentMapName}. Список игроков:\r\n\r\n{playersString}");
                                             }
                                         }
                                     }
@@ -1325,11 +1334,11 @@ namespace kTVCSS
                             }
                         }
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
-                        //if (OnlinePlayers.Count() == 0 && NeedRestart)
-                        //{
-                        //    Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
-                        //    Environment.Exit(0);
-                        //}
+                        if (OnlinePlayers.Count() == 0 && NeedRestart)
+                        {
+                            Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
+                            Environment.Exit(0);
+                        }
                     }
                 });
 
@@ -1412,8 +1421,11 @@ namespace kTVCSS
                 await MatchEvents.InsertDemoName(match.MatchId, DemoName);
                 MatchEvents.FinishMatch(match.AScore, match.BScore, tags[tName], tags[ctName], info.Map, server.ID, MatchPlayers, winningTeam, match);
 
-                await VKInteraction.Matches.SendMessageToConf($"Закончился матч на сервере №{ServerID + 1}\r\n\r\n" +
-                                                    $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed}\r\n\r\nПодробнее о матче в группе KPR: https://vk.com/ktvcss_kpr");
+                if (!tags[tName].Contains("Team ") && !tags[ctName].Contains("Team "))
+                {
+                    await VKInteraction.Matches.SendMessageToConf($"Закончился матч на сервере №{ServerID}\r\n\r\n" +
+                                                    $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed.ToString("HH:mm:ss")}\r\n\r\nПодробнее о матче в группе KPR: https://vk.com/ktvcss_kpr");
+                }
 
                 Match bMatch = match;
 
@@ -1541,6 +1553,7 @@ namespace kTVCSS
                 if (!match.IsMatch)
                 {
                     isCanBeginMatch = true;
+                    Environment.Exit(0);
                 }
             }
 
@@ -1567,7 +1580,7 @@ namespace kTVCSS
 
             private static void SetAutoRestartTimer()
             {
-                aTimer = new System.Timers.Timer(15 * 60 * 1000);
+                aTimer = new System.Timers.Timer(5 * 60 * 1000);
                 aTimer.Elapsed += ATimer_Elapsed;
                 aTimer.AutoReset = true;
                 aTimer.Enabled = true;
@@ -1663,8 +1676,7 @@ namespace kTVCSS
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 int id = int.Parse(args[0]);
-                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.2b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
-
+                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.3b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
             }

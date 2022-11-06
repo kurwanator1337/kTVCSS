@@ -51,6 +51,7 @@ namespace kTVCSS.Models
                 IsMatch = true;
                 TacticalPauses = 4;
                 TechnicalPauses = 2;
+                Stopwatch = new Stopwatch();
                 Stopwatch.Start();
             }
         }
