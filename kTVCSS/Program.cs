@@ -95,6 +95,7 @@ namespace kTVCSS
                 await RconHelper.SendMessage(rcon, "PROCESS STARTED IN DEBUG MODE", Colors.crimson);
 #endif
                 alertThread.Start(server);
+                await ServerEvents.SetServerFree(ServerID);
 
                 var recoveredMatchID = await MatchEvents.CheckMatchLiveExists(server.ID);
                 if (checkList.Count > 0 && recoveredMatchID == 0)
@@ -1334,11 +1335,11 @@ namespace kTVCSS
                             }
                         }
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
-                        if (OnlinePlayers.Count() == 0 && NeedRestart)
-                        {
-                            Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
-                            Environment.Exit(0);
-                        }
+                        //if (OnlinePlayers.Count() == 0 && NeedRestart)
+                        //{
+                        //    Logger.Print(server.ID, "Autorestart cuz players count is zero", LogLevel.Debug);
+                        //    Environment.Exit(0);
+                        //}
                     }
                 });
 
@@ -1423,8 +1424,15 @@ namespace kTVCSS
 
                 if (!tags[tName].Contains("Team ") && !tags[ctName].Contains("Team "))
                 {
-                    await VKInteraction.Matches.SendMessageToConf($"Закончился матч на сервере №{ServerID}\r\n\r\n" +
-                                                    $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed.ToString("HH:mm:ss")}\r\n\r\nПодробнее о матче в группе KPR: https://vk.com/ktvcss_kpr");
+                    try
+                    {
+                        await VKInteraction.Matches.SendMessageToConf($"Закончился матч на сервере №{ServerID}\r\n\r\n" +
+                                                   $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")}\r\n\r\nПодробнее о матче в группе KPR: https://vk.com/ktvcss_kpr");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+                    }
                 }
 
                 Match bMatch = match;
@@ -1580,7 +1588,7 @@ namespace kTVCSS
 
             private static void SetAutoRestartTimer()
             {
-                aTimer = new System.Timers.Timer(5 * 60 * 1000);
+                aTimer = new System.Timers.Timer(10 * 60 * 1000);
                 aTimer.Elapsed += ATimer_Elapsed;
                 aTimer.AutoReset = true;
                 aTimer.Enabled = true;
@@ -1676,7 +1684,7 @@ namespace kTVCSS
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 int id = int.Parse(args[0]);
-                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.3b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.3.1b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
             }

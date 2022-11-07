@@ -5,6 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VkNet.Model.RequestParams;
+using VkNet.Model;
+using VkNet;
 
 namespace kTVCSS
 {
@@ -51,6 +54,32 @@ namespace kTVCSS
             catch (Exception)
             {
                 // file is busy by another process
+            }
+            if (logLevel == LogLevel.Error)
+            {
+                //try
+                //{
+                //    Task.Factory.StartNew(() =>
+                //    {
+                //        using (VkApi api = new VkApi())
+                //        {
+                //            api.AuthorizeAsync(new ApiAuthParams
+                //            {
+                //                AccessToken = Program.ConfigTools.Config.VKGroupToken,
+                //            });
+                //            api.Messages.Send(new MessagesSendParams()
+                //            {
+                //                ChatId = 5,
+                //                Message = $"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}",
+                //                RandomId = new Random().Next()
+                //            });
+                //        }
+                //    });
+                //}
+                //catch (Exception)
+                //{
+                //    // can't send
+                //}
             }
         }
     }

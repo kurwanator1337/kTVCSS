@@ -49,3 +49,6 @@
 /Api/Api/bin
 /Api/Api/obj
 /Api/Api/Properties/PublishProfiles
+/RestartNodeApi/RestartNodeApi/obj
+/RestartNodeApi/RestartNodeApi/bin
+/RestartNodeApi/.vs

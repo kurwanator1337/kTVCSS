@@ -14,6 +14,23 @@ namespace kTVCSS.Tools
     /// </summary>
     public static class ServerEvents
     {
+        public static async Task SetServerFree(int serverId)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand($"UPDATE GameServers SET Busy = 0 WHERE ID = {serverId}", connection);
+                    await query.ExecuteNonQueryAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+            }
+        }
+
         public static async Task<bool> IsUserTeamMember(string steamID)
         {
             bool isMembered = false;
