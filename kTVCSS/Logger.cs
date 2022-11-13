@@ -57,29 +57,29 @@ namespace kTVCSS
             }
             if (logLevel == LogLevel.Error)
             {
-                //try
-                //{
-                //    Task.Factory.StartNew(() =>
-                //    {
-                //        using (VkApi api = new VkApi())
-                //        {
-                //            api.AuthorizeAsync(new ApiAuthParams
-                //            {
-                //                AccessToken = Program.ConfigTools.Config.VKGroupToken,
-                //            });
-                //            api.Messages.Send(new MessagesSendParams()
-                //            {
-                //                ChatId = 5,
-                //                Message = $"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}",
-                //                RandomId = new Random().Next()
-                //            });
-                //        }
-                //    });
-                //}
-                //catch (Exception)
-                //{
-                //    // can't send
-                //}
+                try
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        using (VkApi api = new VkApi())
+                        {
+                            api.AuthorizeAsync(new ApiAuthParams
+                            {
+                                AccessToken = Program.ConfigTools.Config.VKGroupToken,
+                            });
+                            api.Messages.Send(new MessagesSendParams()
+                            {
+                                ChatId = 5,
+                                Message = $"[#{serverID}] {DateTime.Now} [{logLevel}] - {message}",
+                                RandomId = new Random().Next()
+                            });
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Debug);
+                }
             }
         }
     }

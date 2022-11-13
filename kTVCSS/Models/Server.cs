@@ -51,5 +51,9 @@ namespace kTVCSS.Models
         /// Тип сервера
         /// </summary>
         public ServerType ServerType { get; set; }
+        /// <summary>
+        /// Язык сервера
+        /// </summary>
+        public string Language { get; set; }
     }
 }

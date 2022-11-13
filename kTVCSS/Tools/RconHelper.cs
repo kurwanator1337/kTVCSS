@@ -157,7 +157,7 @@ namespace kTVCSS.Tools
             }
             catch (Exception ex)
             {
-                Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+                //Program.Logger.Print(0, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
             }
         }
     }

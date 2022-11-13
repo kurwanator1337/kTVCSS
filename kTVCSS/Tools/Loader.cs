@@ -22,7 +22,7 @@ namespace kTVCSS.Tools
             using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
             {
                 connection.Open();
-                using (SqlCommand query = new SqlCommand("SELECT HOST, USERNAME, USERPASSWORD, PORT, GAMEPORT, RCONPASSWORD, NODEHOST, NODEPORT, ID, TYPE " +
+                using (SqlCommand query = new SqlCommand("SELECT HOST, USERNAME, USERPASSWORD, PORT, GAMEPORT, RCONPASSWORD, NODEHOST, NODEPORT, ID, TYPE, LANGUAGE " +
                     "FROM [dbo].[GameServers] WHERE ENABLED = 1", connection))
                 {
                     using (SqlDataReader reader = query.ExecuteReader())
@@ -43,7 +43,8 @@ namespace kTVCSS.Tools
                                 RconPassword = reader[5]?.ToString(),
                                 NodeHost = reader[6].ToString(),
                                 NodePort = nodePort,
-                                ServerType = (ServerType)int.Parse(reader[9].ToString())
+                                ServerType = (ServerType)int.Parse(reader[9].ToString()),
+                                Language = reader[10].ToString()
                             });
                         }
                     }

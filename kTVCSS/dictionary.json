@@ -1,0 +1,406 @@
+{
+  "locales": [
+    {
+      "name": "ru",
+      "values": [
+        {
+          "name": "ConnectionEstablished",
+          "value": "Соединение до центрального сервера kTVCSS установлено!"
+        },
+        {
+          "name": "RulesetForMatch",
+          "value": "Установка правил для обычного матча:"
+        },
+        {
+          "name": "RulesetForMix",
+          "value": "Установка правил для микс-матча:"
+        },
+        {
+          "name": "MessageAVGTeamRating",
+          "value": "Средний рейтинг команды"
+        },
+        {
+          "name": "Pauses1AvailableMsg",
+          "value": "У Вас доступны 4 паузы по 1 минуте"
+        },
+        {
+          "name": "Pauses5AvailableMsg",
+          "value": "И 2 паузы по 5 минут"
+        },
+        {
+          "name": "AutoChangeMapF",
+          "value": "Автоматическая смены карты на"
+        },
+        {
+          "name": "AutoChangeMapS",
+          "value": "через 60 секунд"
+        },
+        {
+          "name": "Overtime",
+          "value": "Овертайм!!!"
+        },
+        {
+          "name": "NoAvaliableMapsToBanErrorMsg",
+          "value": "Нет карт, которые можно было бы выбрать или запретить!"
+        },
+        {
+          "name": "SelectedMapErrorMsg",
+          "value": "Вы выбрали карту, которая уже была забанена или выбрана!"
+        },
+        {
+          "name": "SelectedMapSuccessMsg",
+          "value": "Выбрана карта:"
+        },
+        {
+          "name": "LastMapSuccessMsg",
+          "value": "Решающая карта:"
+        },
+        {
+          "name": "TurnToBan",
+          "value": "Ваша очередь банить карту!"
+        },
+        {
+          "name": "TurnToPick",
+          "value": "Ваша очередь пикать карту!"
+        },
+        {
+          "name": "PutToBan",
+          "value": "пожалуйста, напишите номер карты, чтобы забанить ее!"
+        },
+        {
+          "name": "PutToPick",
+          "value": "пожалуйста, напишите номер карты, чтобы пикнуть ее!"
+        },
+        {
+          "name": "MatchesCount",
+          "value": "Матчей до конца калибровки:"
+        },
+        {
+          "name": "PauseError",
+          "value": "В данный момент нельзя брать паузу. Пишите эту команду во время раунда, а не в конце/начале раунда."
+        },
+        {
+          "name": "PauseMsg",
+          "value": "По окончании раунда будет установлена минутная пауза!"
+        },
+        {
+          "name": "RemainingTacticalPauses",
+          "value": "Количество оставшихся тактических перерывов:"
+        },
+        {
+          "name": "NoRemainingTacticalPauses",
+          "value": "Вы больше не можете брать тактический перерыв!"
+        },
+        {
+          "name": "PauseDuringThePause",
+          "value": "Нельзя требовать паузу во время паузы!"
+        },
+        {
+          "name": "Pause5Msg",
+          "value": "По окончании раунда будет установлена пятиминутная пауза!"
+        },
+        {
+          "name": "RemainingTechicalPauses",
+          "value": "Количество оставшихся технических перерывов:"
+        },
+        {
+          "name": "NoRemainingTechicalPauses",
+          "value": "Вы больше не можете брать технический перерыв!"
+        },
+        {
+          "name": "FirstOne",
+          "value": "Первым начинает"
+        },
+        {
+          "name": "AvoidMatchStart",
+          "value": "Матч не может быть запущен, пока игроков менее восьми"
+        },
+        {
+          "name": "MatchStartCheckMsg",
+          "value": "Подождите, идет проверка на возможность запуска матча..."
+        },
+        {
+          "name": "MFSTCMX",
+          "value": "Матч не может быть запущен, т.к. в команде"
+        },
+        {
+          "name": "MFSTCMX2",
+          "value": "слишком много плюсов!"
+        },
+        {
+          "name": "ToxicBanReason",
+          "value": "Вы были заблокированы за токсичность"
+        },
+        {
+          "name": "ToxicBan",
+          "value": "был заблокирован за токсичность"
+        },
+        {
+          "name": "MatchesUntilReg",
+          "value": "Матчей до конца калибровки:"
+        },
+        {
+          "name": "VKIDConnection",
+          "value": "Вам нужно привязать VK к группе"
+        },
+        {
+          "name": "ShowBanReasonOnDisconnect",
+          "value": "Вы были заблокированны на проекте. Причина:"
+        },
+        {
+          "name": "PlayerWithNoTeamMsg",
+          "value": "Вы не состоите в какой-либо команде!"
+        },
+        {
+          "name": "Lo3ForStartMsg",
+          "value": "Напишите !lo3 для запуска матча!"
+        },
+        {
+          "name": "MatchIsCanceled",
+          "value": "Матч отменен!"
+        },
+        {
+          "name": "PauseCuzPlayerLostConnection",
+          "value": "По окончании раунда будет установлена двухминутная пауза, поскольку игрок вылетел!"
+        },
+        {
+          "name": "MatchEndF",
+          "value": "Матч завершен!"
+        },
+        {
+          "name": "MatchEndS",
+          "value": "Поздравляем с победой команду"
+        },
+        {
+          "name": "MatchEndT",
+          "value": "в следующий раз Вам повезет."
+        },
+        {
+          "name": "BaseAdvMsg1",
+          "value": "Базовые команды:"
+        },
+        {
+          "name": "BaseAdvMsg2",
+          "value": "Если статистика перестала работать или не запускается матч, напишите"
+        },
+        {
+          "name": "BaseAdvMsg3",
+          "value": "Примечание: запуск матча может быть осуществлен без админских прав"
+        },
+        {
+          "name": "DeadMapVote",
+          "value": "Голосование bo1/bo3 было аннулировано!"
+        },
+        {
+          "name": "VpnKick",
+          "value": "Использование VPN запрещено"
+        },
+        {
+          "name": "SubNetKick",
+          "value": "Вам запрещен доступ на сервера из-за блокировки Вашей подсети"
+        }
+      ]
+    },
+    {
+      "name": "en",
+      "values": [
+        {
+          "name": "ConnectionEstablished",
+          "value": "Connection to kTVCSS processing node is established"
+        },
+        {
+          "name": "RulesetForMatch",
+          "value": "Set rules for the default match"
+        },
+        {
+          "name": "RulesetForMix",
+          "value": "Set rules for the mix match"
+        },
+        {
+          "name": "MessageAVGTeamRating",
+          "value": "Average rating of the team"
+        },
+        {
+          "name": "Pauses1AvailableMsg",
+          "value": "You have 4 pauses available for 1 minute each"
+        },
+        {
+          "name": "Pauses5AvailableMsg",
+          "value": "And 2 pauses of 5 minutes"
+        },
+        {
+          "name": "AutoChangeMapF",
+          "value": "Auto-change to the map"
+        },
+        {
+          "name": "AutoChangeMapS",
+          "value": "after 60 seconds"
+        },
+        {
+          "name": "Overtime",
+          "value": "Overtime!!!"
+        },
+        {
+          "name": "NoAvaliableMapsToBanErrorMsg",
+          "value": "There are no maps that could be selected or banned!"
+        },
+        {
+          "name": "SelectedMapErrorMsg",
+          "value": "You have selected a map that has already been banned or selected!"
+        },
+        {
+          "name": "SelectedMapSuccessMsg",
+          "value": "Selected map:"
+        },
+        {
+          "name": "LastMapSuccessMsg",
+          "value": "The decisive map:"
+        },
+        {
+          "name": "TurnToBan",
+          "value": "it's your turn to ban the map!"
+        },
+        {
+          "name": "TurnToPick",
+          "value": "it's your turn to pick the map!"
+        },
+        {
+          "name": "PutToBan",
+          "value": "please write the map's number to ban it!"
+        },
+        {
+          "name": "PutToPick",
+          "value": "please write the map's number to pick it!"
+        },
+        {
+          "name": "MatchesCount",
+          "value": "Matches until the end of calibration:"
+        },
+        {
+          "name": "PauseError",
+          "value": "You can't take a pause at the moment. Write this command during the round, not at the end/beginning of the round."
+        },
+        {
+          "name": "PauseMsg",
+          "value": "At the end of the round, a one-minute pause will be set!"
+        },
+        {
+          "name": "RemainingTacticalPauses",
+          "value": "The number of remaining tactical breaks:"
+        },
+        {
+          "name": "NoRemainingTacticalPauses",
+          "value": "You can't take a tactical break anymore!"
+        },
+        {
+          "name": "PauseDuringThePause",
+          "value": "You can't require a break during a break!"
+        },
+        {
+          "name": "Pause5Msg",
+          "value": "At the end of the round, a five-minute pause will be set!"
+        },
+        {
+          "name": "NoRemainingTechicalPauses",
+          "value": "You can't take a technical break anymore!"
+        },
+        {
+          "name": "FirstOne",
+          "value": "The first one"
+        },
+        {
+          "name": "AvoidMatchStart",
+          "value": "The match cannot be started until there are less than eight players"
+        },
+        {
+          "name": "MatchStartCheckMsg",
+          "value": "Wait, there is a check on the possibility of starting the match..."
+        },
+        {
+          "name": "MFSTCMX",
+          "value": "The match cannot be started because the team"
+        },
+        {
+          "name": "MFSTCMX2",
+          "value": "contains too many stand-ins!"
+        },
+        {
+          "name": "ToxicBanReason",
+          "value": "You have been blocked for toxicity"
+        },
+        {
+          "name": "ToxicBan",
+          "value": "have been blocked for toxicity"
+        },
+        {
+          "name": "MatchesUntilReg",
+          "value": "Matches until the end of calibration:"
+        },
+        {
+          "name": "VKIDConnection",
+          "value": "You need to link VK to a group"
+        },
+        {
+          "name": "ShowBanReasonOnDisconnect",
+          "value": "You have been blocked on the project. Reason:"
+        },
+        {
+          "name": "PlayerWithNoTeamMsg",
+          "value": "You are not a member of any team!"
+        },
+        {
+          "name": "Lo3ForStartMsg",
+          "value": "Write !lo3 to start the match!"
+        },
+        {
+          "name": "MatchIsCanceled",
+          "value": "The match has been canceled!"
+        },
+        {
+          "name": "PauseCuzPlayerLostConnection",
+          "value": "At the end of the round, a two-minute pause will be set, because the player has lost the connection!"
+        },
+        {
+          "name": "MatchEndF",
+          "value": "The match has been finished!"
+        },
+        {
+          "name": "MatchEndS",
+          "value": "Congratulations on the victory of the team"
+        },
+        {
+          "name": "MatchEndT",
+          "value": "you'll be lucky next time."
+        },
+        {
+          "name": "BaseAdvMsg1",
+          "value": "Basic commands:"
+        },
+        {
+          "name": "BaseAdvMsg2",
+          "value": "If the statistics stopped working or the match doesn't start, write"
+        },
+        {
+          "name": "BaseAdvMsg3",
+          "value": "Note: the match can be started without admin rights"
+        },
+        {
+          "name": "DeadMapVote",
+          "value": "The bo1/bo3 vote has been cancelled!"
+        },
+        {
+          "name": "VpnKick",
+          "value": "Using a VPN is prohibited"
+        },
+        {
+          "name": "SubNetKick",
+          "value": "You are denied access to the servers due to blocking your subnet"
+        },
+        {
+          "name": "RemainingTechicalPauses",
+          "value": "The number of remaining technical breaks:"
+        }
+      ]
+    }
+  ]
+}
