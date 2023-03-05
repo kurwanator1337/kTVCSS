@@ -206,6 +206,10 @@
         {
           "name": "HalfTimeMsg",
           "value": "Сейчас будет установлен тайм-аут. Матч продолжится автоматически."
+        },
+        {
+          "name": "StartMixAttempFailed",
+          "value": "Перед стартом микса Вам необходимо сыграть ножевой раунд."
         }
       ]
     },
@@ -415,6 +419,10 @@
         {
           "name": "HalfTimeMsg",
           "value": "The timeout has been set! The match will continue automatically."
+        },
+        {
+          "name": "StartMixAttempFailed",
+          "value": "Before starting the mix, you need to play a knife round"
         }
       ]
     }

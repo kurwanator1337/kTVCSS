@@ -68,6 +68,7 @@ namespace kTVCSS
             private string tName = "TERRORIST";
             private string ctName = "CT";
             private string currentMapName = string.Empty;
+            private static DateTime lastMatchStartAttemp = DateTime.Now;
 
             public async Task StartNode(Server server)
             {
@@ -950,6 +951,7 @@ namespace kTVCSS
                         if (!match.IsMatch)
                         {
                             match.KnifeRound = true;
+                            lastMatchStartAttemp = DateTime.Now;
                             await RconHelper.SendCmd(rcon, "exec ktvcss/on_knives_start.cfg");
                             await RconHelper.Knives(rcon);
                         }
@@ -961,6 +963,18 @@ namespace kTVCSS
                         {
                             await RconHelper.SendMessage(rcon, "Пацаны, идите спите, потом ныть будете, что не выспались", Colors.crimson);
                             return;
+                        }
+                        if (server.ServerType == ServerType.Mix)
+                        {
+                            if (DateTime.Now.Subtract(lastMatchStartAttemp).TotalMinutes >= 5)
+                            {
+                                await RconHelper.SendMessage(rcon, CurrentLocale.Values["StartMixAttempFailed"], Colors.ivory);
+                                Thread.Sleep(1500);
+                                match.KnifeRound = true;
+                                lastMatchStartAttemp = DateTime.Now;
+                                await RconHelper.SendCmd(rcon, "exec ktvcss/on_knives_start.cfg");
+                                await RconHelper.Knives(rcon);
+                            }
                         }
                         if (OnlinePlayers.Count < match.MinPlayersToStart)
                         {
