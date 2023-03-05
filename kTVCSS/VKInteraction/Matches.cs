@@ -9,8 +9,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using VkNet;
 using VkNet.Model;
 using VkNet.Model.Attachments;
@@ -197,13 +199,14 @@ namespace kTVCSS.VKInteraction
         /// Отправить картинку с результатом матча игроку
         /// </summary>
         /// <param name="player"></param>
-        public static void SendPlayerResult(PlayerPictureData player)
+        public static void SendPlayerResult(PlayerPictureData player, int matchId)
         {
             try
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Pictures", "player_result.png"));
                 Graphics graphics = Graphics.FromImage(image);
                 // upper block
+                player.Name = player.Name.Length > 17 ? player.Name[..17] : player.Name;
                 Drawing.Tools.DrawText(graphics, player.Name, new Rectangle(220, 139, 0, 200), StringAlignment.Near, 30, Brushes.White, FontStyle.Regular, "Play-Regular");
                 Drawing.Tools.DrawText(graphics, DateTime.Now.ToString("dd-MM-yyyy HH:mm"), new Rectangle(220, 242, 0, 200), StringAlignment.Near, 30, Brushes.White, FontStyle.Regular, "Play-Regular");
                 // first block
@@ -272,7 +275,7 @@ namespace kTVCSS.VKInteraction
                         GroupId = (ulong)Program.ConfigTools.Config.MainGroupID,
                         UserId = long.Parse(vkId),
                         RandomId = new Random().Next(),
-                        Message = "",
+                        Message = $"Подробнее: https://ktvcss.ru/match/{matchId}",
                         Attachments = new List<MediaAttachment>
                         {
                             photo.FirstOrDefault()
@@ -369,6 +372,8 @@ namespace kTVCSS.VKInteraction
                         }
                     }
 
+                    name = name.Length > 17 ? name[..17] : name;
+
                     Drawing.Tools.Draw(graphics, name, 100, yForNames, 16);
                     Drawing.Tools.DrawText(graphics, FirstTeam.ElementAt(i).Kills.ToString(), new Rectangle(423, yForNumbers, 0, 200), StringAlignment.Center, 18, Brushes.White, FontStyle.Regular, "Play-Regular");
                     Drawing.Tools.DrawText(graphics, FirstTeam.ElementAt(i).Deaths.ToString(), new Rectangle(505, yForNumbers, 0, 200), StringAlignment.Center, 18, Brushes.White, FontStyle.Regular, "Play-Regular");
@@ -398,6 +403,8 @@ namespace kTVCSS.VKInteraction
                         }
                     }
 
+                    name = name.Length > 17 ? name[..17] : name;
+
                     Drawing.Tools.Draw(graphics, name, 660, yForNames, 16);
                     Drawing.Tools.DrawText(graphics, SecondTeam.ElementAt(i).Kills.ToString(), new Rectangle(985, yForNumbers, 0, 200), StringAlignment.Center, 18, Brushes.White, FontStyle.Regular, "Play-Regular");
                     Drawing.Tools.DrawText(graphics, SecondTeam.ElementAt(i).Deaths.ToString(), new Rectangle(1067, yForNumbers, 0, 200), StringAlignment.Center, 18, Brushes.White, FontStyle.Regular, "Play-Regular");
@@ -420,7 +427,7 @@ namespace kTVCSS.VKInteraction
                 var wallPostParams = new WallPostParams
                 {
                     OwnerId = -Program.ConfigTools.Config.StatGroupID,
-                    Message = $"ID матча: {matchId}\r\nДемо-запись: http://ktvcss.ru/demos/" + Program.Node.DemoName + ".dem.zip",
+                    Message = $"Подробнее: https://ktvcss.ru/match/{matchId}",
                     FromGroup = true,
                     Signed = false
                 };

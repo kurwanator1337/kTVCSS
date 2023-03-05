@@ -24,8 +24,9 @@ namespace kTVCSS.Tools
         /// <param name="killerHeadshot">Хедшот?</param>
         /// <param name="serverId">Айди сервера</param>
         /// <param name="matchId">Айди матча</param>
+        /// <param name="team">Команда игрока</param>
         /// <returns></returns>
-        public static async Task PlayerKill(string killerName, string killedName, string killerSteamID, string killedSteamID, int killerHeadshot, int serverId, int matchId)
+        public static async Task PlayerKill(string killerName, string killedName, string killerSteamID, string killedSteamID, int killerHeadshot, int serverId, int matchId, string team)
         {
             try
             {
@@ -43,6 +44,7 @@ namespace kTVCSS.Tools
                     query.Parameters.AddWithValue("@KILLERHS", killerHeadshot);
                     query.Parameters.AddWithValue("@SERVERID", serverId);
                     query.Parameters.AddWithValue("@ID", matchId);
+                    query.Parameters.AddWithValue("@TEAM", team);
 
                     await query.ExecuteNonQueryAsync();
                     await connection.CloseAsync();
@@ -385,7 +387,7 @@ namespace kTVCSS.Tools
                                 var diff = playerPts - enemiesAvg;
                                 if (diff > 500)
                                 {
-                                    SetPlayerMatchResult(player.SteamId, 1, 10);
+                                    SetPlayerMatchResult(player.SteamId, 1, 1);
                                 }
                                 else
                                 {
@@ -430,7 +432,7 @@ namespace kTVCSS.Tools
                                 }
                                 else
                                 {
-                                    SetPlayerMatchResult(player.SteamId, 0, -10);
+                                    SetPlayerMatchResult(player.SteamId, 0, -25);
                                 }
                             }
                             else

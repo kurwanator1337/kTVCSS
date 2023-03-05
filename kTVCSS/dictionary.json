@@ -198,6 +198,14 @@
         {
           "name": "SubNetKick",
           "value": "Вам запрещен доступ на сервера из-за блокировки Вашей подсети"
+        },
+        {
+          "name": "5minstoban",
+          "value": "будет заблокирован, если не будет заменен или не зайдет вновь через 5 минут!"
+        },
+        {
+          "name": "HalfTimeMsg",
+          "value": "Сейчас будет установлен тайм-аут. Матч продолжится автоматически."
         }
       ]
     },
@@ -399,6 +407,14 @@
         {
           "name": "RemainingTechicalPauses",
           "value": "The number of remaining technical breaks:"
+        },
+        {
+          "name": "5minstoban",
+          "value": "will be banned in 5 mins for leaving the match!"
+        },
+        {
+          "name": "HalfTimeMsg",
+          "value": "The timeout has been set! The match will continue automatically."
         }
       ]
     }

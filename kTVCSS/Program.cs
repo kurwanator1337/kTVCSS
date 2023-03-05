@@ -20,6 +20,10 @@ using System.Text;
 using CoreRCON.Parsers.Csgo;
 using Newtonsoft.Json;
 using kTVCSS.Localization;
+using Microsoft.Extensions.Logging;
+using VkNet.Model.RequestParams;
+using VkNet.Model;
+using VkNet;
 
 namespace kTVCSS
 {
@@ -150,7 +154,7 @@ namespace kTVCSS
                             match.PlayerKills[kill.Killer.SteamId]++;
                         }
 
-                        await MatchEvents.PlayerKill(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId);
+                        await MatchEvents.PlayerKill(kill.Killer.Name, kill.Killed.Name, kill.Killer.SteamId, kill.Killed.SteamId, hs, server.ID, match.MatchId, kill.Killer.Team);
 
                         if (!MatchPlayers.Where(x => x.SteamId == kill.Killer.SteamId).Any()) MatchPlayers.Add(kill.Killer);
                         else
@@ -433,7 +437,7 @@ namespace kTVCSS
 
                             if (match.AScore + match.BScore == match.MaxRounds)
                             {
-                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут.\\nМатч продолжится автоматически.");
+                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\n{CurrentLocale.Values["HalfTimeMsg"]}");
                                 if (server.ServerType == ServerType.ClanMatch)
                                 {
                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH}");
@@ -630,7 +634,7 @@ namespace kTVCSS
                 {
                     await ServerEvents.InsertChatMessage(chat.Player.SteamId, chat.Message, ServerID);
                     int.TryParse(chat.Message, out int mapNum);
-                    if (chat.Channel == MessageChannel.All && mapNum > 0 && mapNum < 9 && currentMapSelector == chat.Player.Name)
+                    if (chat.Channel == MessageChannel.All && mapNum > 0 && mapNum <= 9 && currentMapSelector == chat.Player.Name)
                     {
                         if (mapPool.Count() == 1)
                         {
@@ -953,7 +957,7 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch && !match.KnifeRound)
                     {
-                        if (DateTime.Now.Hour >= 3 && DateTime.Now.Hour <= 8)
+                        if (DateTime.Now.Hour >= 4 && DateTime.Now.Hour <= 9)
                         {
                             await RconHelper.SendMessage(rcon, "Пацаны, идите спите, потом ныть будете, что не выспались", Colors.crimson);
                             return;
@@ -1096,6 +1100,37 @@ namespace kTVCSS
                         var info = await ServerEvents.PrintPlayerInfo(connection.Player.SteamId);
                         var playerRank = await ServerEvents.GetPlayerRank(connection.Player.SteamId);
                         await ServerEvents.InsertConnectData(ServerID, connection);
+
+                        try
+                        {
+                            if (match.IsMatch)
+                            {
+                                foreach (var dp in match.DisconnectedPlayers)
+                                {
+                                    if (DateTime.Now.Subtract(dp.Value).Minutes >= 5)
+                                    {
+                                        try
+                                        {
+                                            using (SqlConnection sql = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                                            {
+                                                await sql.OpenAsync();
+                                                SqlCommand query = new SqlCommand($"UPDATE Players SET BLOCK = 1, BLOCKREASON = 'You got banned for leaving the mix! Ask an administration for details.' WHERE STEAMID = '{dp.Key}'", sql);
+                                                await query.ExecuteNonQueryAsync();
+                                            }
+                                        }
+                                        catch (Exception)
+                                        {
+                                            //
+                                        }
+                                    }
+                                }
+                                match.DisconnectedPlayers.Remove(connection.Player.SteamId);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Print(ServerID, ex.ToString(), LogLevel.Error);
+                        }
 
                         if (info.IsCalibration == 0)
                         {
@@ -1311,6 +1346,20 @@ namespace kTVCSS
                                     match.IsNeedPauseOnPlayerTimeOut = false;
                                 }
                             }
+
+                            if (server.ServerType == ServerType.Mix)
+                            {
+                                if (connection.Reason.Contains("Disconnect by ClientMod"))
+                                {
+                                    await RconHelper.SendMessage(rcon, connection.Player.Name + " " + CurrentLocale.Values["5minstoban"], Colors.legendary);
+                                    if (!match.DisconnectedPlayers.Where(x => x.Key == connection.Player.SteamId).Any())
+                                        match.DisconnectedPlayers.Add(connection.Player.SteamId, DateTime.Now);
+                                    else
+                                    {
+                                        match.DisconnectedPlayers[connection.Player.SteamId] = DateTime.Now;
+                                    }
+                                }
+                            }
                         }
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
                         //if (OnlinePlayers.Count() == 0 && NeedRestart)
@@ -1410,7 +1459,7 @@ namespace kTVCSS
                     try
                     {
                         await VKInteraction.Matches.SendMessageToConf($"Закончился матч на сервере №{ServerID}\r\n\r\n" +
-                                                   $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")}\r\n\r\nПодробнее о матче в группе KPR: https://vk.com/ktvcss_kpr");
+                                                   $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\r\n\r\nКарта: {currentMapName}\r\n\r\nДлительность матча составила: {match.Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")}\r\n\r\nПодробнее о матче на сайте: https://ktvcss.ru/match/{match.MatchId}");
                     }
                     catch (Exception ex)
                     {
@@ -1452,16 +1501,50 @@ namespace kTVCSS
                 await RconHelper.SendCmd(rcon, "exec ktvcss/ruleset_warmup.cfg");
                 await RconHelper.SendCmd(rcon, "tv_stoprecord");
                 int matchId = match.MatchId;
+
+                var disconnectedPlayers = match.DisconnectedPlayers;
+                int mp = MatchPlayers.Count;
+                if (server.ServerType == ServerType.Mix && mp <= 10)
+                {
+                    DateTime now = DateTime.Now;
+                    foreach (var item in disconnectedPlayers)
+                    {
+                        if (now.Subtract(item.Value).Minutes >= 5)
+                        {
+                            try
+                            {
+                                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                                {
+                                    await connection.OpenAsync();
+                                    SqlCommand query = new SqlCommand($"UPDATE Players SET BLOCK = 1, BLOCKREASON = 'You got banned for leaving the mix! Ask an administration for details.' WHERE STEAMID = '{item.Key}'", connection);
+                                    await query.ExecuteNonQueryAsync();
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                //
+                            }
+                        }
+                    }
+                }
+
                 match = new Match(0);
                 isCanBeginMatch = true;
                 Program.Node.FTPTools.UploadDemo(Program.Node.DemoName);
-                if (!matchResultInfo.MatchScore.AName.Contains("Team ") && !matchResultInfo.MatchScore.BName.Contains("Team "))
+                try
                 {
-                    VKInteraction.Matches.PublishResult(matchResultInfo, matchId);
+                    if (!tags[tName].Contains("Team ") && !tags[ctName].Contains("Team "))
+                    {
+                        VKInteraction.Matches.PublishResult(matchResultInfo, matchId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
                 }
                 foreach (var data in playerPictures)
                 {
-                    VKInteraction.Matches.SendPlayerResult(data);
+                    VKInteraction.Matches.SendPlayerResult(data, matchId);
                     Thread.Sleep(1000);
                 }
                 OnlinePlayers.Clear();
@@ -1583,6 +1666,33 @@ namespace kTVCSS
             Console.ForegroundColor = ConsoleColor.Green;
             Logger.Print(0, "Welcome, " + Environment.UserName, LogLevel.Info);
 
+            AppDomain.CurrentDomain.UnhandledException += delegate (object sender, UnhandledExceptionEventArgs args)
+            {
+                Trace.WriteLine("Global exception: " + args.ExceptionObject.ToString());
+                try
+                {
+                    Task.Factory.StartNew(async () =>
+                    {
+                        using (VkApi api = new VkApi())
+                        {
+                            await api.AuthorizeAsync(new ApiAuthParams
+                            {
+                                AccessToken = Program.ConfigTools.Config.VKGroupToken,
+                            });
+                            await api.Messages.SendAsync(new MessagesSendParams()
+                            {
+                                ChatId = 5,
+                                Message = "Global exception: " + args.ExceptionObject.ToString(),
+                                RandomId = new Random().Next()
+                            });
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Debug);
+                }
+            };
 
 #if DEBUG
 
@@ -1598,7 +1708,7 @@ namespace kTVCSS
 
                 ForbiddenWords.AddRange(File.ReadAllLines(Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "wordsfilter.txt"), System.Text.Encoding.UTF8));
                 int id = int.Parse(args[0]);
-                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.4b) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
+                Console.Title = "[#" + ++id + "]" + " kTVCSS (v1.5.1) @ " + Servers[int.Parse(args[0])].Host + ":" + Servers[int.Parse(args[0])].GamePort;
                 Node node = new Node();
                 Task.Run(async () => await node.StartNode(Servers[int.Parse(args[0])])).GetAwaiter().GetResult();
             }

@@ -147,5 +147,9 @@ namespace kTVCSS.Models
         /// Часики
         /// </summary>
         public Stopwatch Stopwatch { get; set; }
+        /// <summary>
+        /// Список игроков, покинувших сервер раньше времени
+        /// </summary>
+        public Dictionary<string, DateTime> DisconnectedPlayers = new Dictionary<string, DateTime>();
     }
 }
