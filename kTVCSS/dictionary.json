@@ -149,7 +149,7 @@
         },
         {
           "name": "PlayerWithNoTeamMsg",
-          "value": "Вы не состоите в какой-либо команде!"
+          "value": "Вы не состоите в какой-либо команде! Создать или вступить в команду: https://ktvcss.ru"
         },
         {
           "name": "Lo3ForStartMsg",
@@ -358,7 +358,7 @@
         },
         {
           "name": "PlayerWithNoTeamMsg",
-          "value": "You are not a member of any team!"
+          "value": "You are not a member of any team! Create or join the team: https://ktvcss.ru"
         },
         {
           "name": "Lo3ForStartMsg",

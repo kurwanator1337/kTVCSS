@@ -128,7 +128,7 @@ namespace kTVCSS.Tools
                         }
                     }
                 }
-                if (mPlayed >= 10 && string.IsNullOrEmpty(vkId))
+                if (string.IsNullOrEmpty(vkId))
                 {
                     return false;
                 }

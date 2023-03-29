@@ -324,6 +324,7 @@ namespace kTVCSS
                                                 }
                                                 await RconHelper.SendMessage(rcon, $"{CurrentLocale.Values["MessageAVGTeamRating"]} {tags[tName]} - {ter}", Colors.crimson);
                                                 await RconHelper.SendMessage(rcon, $"{CurrentLocale.Values["MessageAVGTeamRating"]} {tags[ctName]} - {ct}", Colors.dodgerblue);
+                                                await RconHelper.SendMessage(rcon, $"Check the match on: https://ktvcss.ru/match/{match.MatchId}", Colors.dodgerblue);
                                                 string[] players = MatchPlayers.Select(x => x.SteamId).ToArray();
 
                                                 
@@ -333,6 +334,7 @@ namespace kTVCSS
                                                     sb.AppendLine($"Начинается матч на сервере №{ServerID}!");
                                                     sb.AppendLine($"{tags[tName]} (Средний рейтинг: {ter}) vs {tags[ctName]} (Средний рейтинг: {ct})");
                                                     sb.AppendLine($"Карта: {currentMapName}");
+                                                    sb.AppendLine($"Подробнее о матче: https://ktvcss.ru/match/{match.MatchId}");
                                                     sb.AppendLine($"Список участников матча:");
                                                     foreach (string player in players)
                                                     {
@@ -438,6 +440,7 @@ namespace kTVCSS
 
                             if (match.AScore + match.BScore == match.MaxRounds)
                             {
+                                await RconHelper.SendCmd(rcon, "sm_freeze @all");
                                 await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\n{CurrentLocale.Values["HalfTimeMsg"]}");
                                 if (server.ServerType == ServerType.ClanMatch)
                                 {
@@ -530,7 +533,8 @@ namespace kTVCSS
 
                             if (match.AScoreOvertime + match.BScoreOvertime == match.MaxRounds && match.AScoreOvertime != match.BScoreOvertime)
                             {
-                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\nСейчас будет установлен тайм-аут.\\nМатч продолжится автоматически.");
+                                await RconHelper.SendCmd(rcon, "sm_freeze @all");
+                                await RconHelper.SendCmd(rcon, "sm_msay " + $"{tags[tName]} [{match.AScore}-{match.BScore}] {tags[ctName]}\\n{CurrentLocale.Values["HalfTimeMsg"]}");
                                 if (server.ServerType == ServerType.ClanMatch)
                                 {
                                     await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME}");
@@ -959,14 +963,14 @@ namespace kTVCSS
 
                     if (chat.Channel == MessageChannel.All && chat.Message.StartsWith("!lo3") && isCanBeginMatch && !match.KnifeRound)
                     {
-                        if (DateTime.Now.Hour >= 4 && DateTime.Now.Hour <= 9)
+                        if (DateTime.Now.Hour >= 3 && DateTime.Now.Hour <= 9)
                         {
                             await RconHelper.SendMessage(rcon, "Пацаны, идите спите, потом ныть будете, что не выспались", Colors.crimson);
                             return;
                         }
                         if (server.ServerType == ServerType.Mix)
                         {
-                            if (DateTime.Now.Subtract(lastMatchStartAttemp).TotalMinutes >= 5)
+                            if (DateTime.Now.Subtract(lastMatchStartAttemp).TotalMinutes >= 3)
                             {
                                 await RconHelper.SendMessage(rcon, CurrentLocale.Values["StartMixAttempFailed"], Colors.ivory);
                                 Thread.Sleep(1500);
@@ -974,6 +978,7 @@ namespace kTVCSS
                                 lastMatchStartAttemp = DateTime.Now;
                                 await RconHelper.SendCmd(rcon, "exec ktvcss/on_knives_start.cfg");
                                 await RconHelper.Knives(rcon);
+                                return;
                             }
                         }
                         if (OnlinePlayers.Count < match.MinPlayersToStart)
@@ -1138,7 +1143,7 @@ namespace kTVCSS
                                         }
                                     }
                                 }
-                                match.DisconnectedPlayers.Remove(connection.Player.SteamId);
+                                match.DisconnectedPlayers.Clear();
                             }
                         }
                         catch (Exception ex)
