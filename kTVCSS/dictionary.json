@@ -120,11 +120,11 @@
           "value": "Подождите, идет проверка на возможность запуска матча..."
         },
         {
-          "name": "MFSTCMX",
+          "name": "MatchFailedStartCuzMixNotCwF",
           "value": "Матч не может быть запущен, т.к. в команде"
         },
         {
-          "name": "MFSTCMX2",
+          "name": "MatchFailedStartCuzMixNotCwS",
           "value": "слишком много плюсов!"
         },
         {
@@ -329,11 +329,11 @@
           "value": "Wait, there is a check on the possibility of starting the match..."
         },
         {
-          "name": "MFSTCMX",
+          "name": "MatchFailedStartCuzMixNotCwF",
           "value": "The match cannot be started because the team"
         },
         {
-          "name": "MFSTCMX2",
+          "name": "MatchFailedStartCuzMixNotCwS",
           "value": "contains too many stand-ins!"
         },
         {

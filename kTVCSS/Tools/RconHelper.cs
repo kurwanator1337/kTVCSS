@@ -82,6 +82,12 @@ namespace kTVCSS.Tools
                 await rcon.SendCommandAsync("mp_restartgame 1;sys_say {mediumseagreen}Restart 2");
                 Thread.Sleep(2000);
                 await rcon.SendCommandAsync("mp_restartgame 3;sys_say {mediumseagreen}Restart 3");
+
+                if (type == ServerType.FastCup)
+                {
+                    await RconHelper.SendCmd(rcon, $"mp_freezetime {Game.Cvars.FREEZETIME_MIX}");
+                }
+
                 Thread.Sleep(4000);
                 await rcon.SendCommandAsync("sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!;sys_say {mediumseagreen}MATCH IS LIVE!!!");
                 if (match.IsNeedSetTeamScores)

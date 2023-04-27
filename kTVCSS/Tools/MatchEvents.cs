@@ -85,6 +85,30 @@ namespace kTVCSS.Tools
                 return 0;
             }
         }
+
+        public static async Task DeleteMix(int id)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
+                {
+                    await connection.OpenAsync();
+                    SqlCommand query = new SqlCommand("DeleteMix", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+
+                    query.Parameters.AddWithValue("@ID", id);
+
+                    await query.ExecuteNonQueryAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.Logger.Print(Program.Node.ServerID, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+            }
+        }
+
         /// <summary>
         /// Вставить в таблицу актуальный рейтинг игрока
         /// </summary>
@@ -387,7 +411,7 @@ namespace kTVCSS.Tools
                                 var diff = playerPts - enemiesAvg;
                                 if (diff > 500)
                                 {
-                                    SetPlayerMatchResult(player.SteamId, 1, 10);
+                                    SetPlayerMatchResult(player.SteamId, 1, 25);
                                 }
                                 else
                                 {
@@ -428,7 +452,7 @@ namespace kTVCSS.Tools
                                 var diff = playerPts - enemiesAvg;
                                 if (diff > 500)
                                 {
-                                    SetPlayerMatchResult(player.SteamId, 0, -50);
+                                    SetPlayerMatchResult(player.SteamId, 0, -25);
                                 }
                                 else
                                 {

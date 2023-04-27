@@ -17,7 +17,7 @@ namespace kTVCSS.Models
         /// Создание матча
         /// </summary>
         /// <param name="mr">Количество раундов одной половины</param>
-        public Match(int mr)
+        public Match(int mr, ServerType type)
         {
             MaxRounds = mr;
             FirstHalf = true;
@@ -30,8 +30,17 @@ namespace kTVCSS.Models
             BScoreOvertime = 0;
             Pause = false;
             IsNeedSetTeamScores = false;
-            MinPlayersToStart = 8; // 8
-            MinPlayersToStop = 6; // 6
+            if (type == ServerType.FastCup)
+            {
+                MinPlayersToStart = 8; // 8
+                MinPlayersToStop = 6; // 6
+                MaxRounds = 7;
+            }
+            else
+            {
+                MinPlayersToStart = 0;
+                MinPlayersToStop = 0;
+            }
             IsNeedPauseOnPlayerTimeOut = true;
             CanPause = true;
 
