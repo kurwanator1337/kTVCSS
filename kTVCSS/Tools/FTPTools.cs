@@ -96,12 +96,12 @@ namespace kTVCSS.Tools
         {
             try
             {
-                using (SftpClient client = new SftpClient(Program.ConfigTools.Config.SSHHost, Program.ConfigTools.Config.SSHLogin, Program.ConfigTools.Config.SSHPassword))
+                using (SftpClient client = new SftpClient(Program.ConfigTools.Config.SSHHost, 1337, Program.ConfigTools.Config.SSHLogin, Program.ConfigTools.Config.SSHPassword))
                 {
                     client.Connect();
                     using (FileStream filestream = File.OpenRead(Path.Combine("demos", fileName)))
                     {
-                        client.UploadFile(filestream, @"/C:/kTVCSS/Web/ktvcss.ru/wwwroot/demos/" + fileName, true);
+                        client.UploadFile(filestream, @"/home/aspnet/ktvcss.ru/wwwroot/demos/" + fileName, true);
                         client.Disconnect();
                     }
                 }

@@ -127,7 +127,7 @@ namespace kTVCSS.Tools
         /// </summary>
         /// <param name="rcon">РКОН соединение</param>
         /// <returns></returns>
-        public static async Task Knives(RCON rcon)
+        public static async Task Knives(RCON rcon, Match match, ServerType serverType)
         {
             try
             {
@@ -142,6 +142,10 @@ namespace kTVCSS.Tools
                 await rcon.SendCommandAsync("mp_restartgame 3;sys_say {mediumseagreen}Restart 3");
                 Thread.Sleep(4000);
                 await rcon.SendCommandAsync("sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!;sys_say {mediumseagreen}KNIVES!!!");
+                if (serverType == ServerType.Mix)
+                {
+                    match.KnifeRound = true;
+                }
             }
             catch (Exception ex)
             {

@@ -23,7 +23,7 @@ namespace kTVCSS.Tools
             {
                 connection.Open();
                 using (SqlCommand query = new SqlCommand("SELECT HOST, USERNAME, USERPASSWORD, PORT, GAMEPORT, RCONPASSWORD, NODEHOST, NODEPORT, ID, TYPE, LANGUAGE " +
-                    "FROM [dbo].[GameServers] WHERE ENABLED = 1", connection))
+                    "FROM [dbo].[GameServers] WITH (NOLOCK) WHERE ENABLED = 1", connection))
                 {
                     using (SqlDataReader reader = query.ExecuteReader())
                     {
@@ -49,7 +49,6 @@ namespace kTVCSS.Tools
                         }
                     }
                 }
-                connection.Close();
             }
         }
     }

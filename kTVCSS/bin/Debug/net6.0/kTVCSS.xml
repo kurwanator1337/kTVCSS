@@ -1,0 +1,1196 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>kTVCSS</name>
+    </assembly>
+    <members>
+        <member name="T:kTVCSS.Connection">
+            <summary>
+            Информация о соединении игрока
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Connection.Name">
+            <summary>
+            Ник
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Connection.SteamId">
+            <summary>
+            Стим айди
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Connection.ClientId">
+            <summary>
+            Айди на сервере
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Connection.IP">
+            <summary>
+            IP адрес
+            </summary>
+        </member>
+        <member name="T:kTVCSS.ConnectionController">
+            <summary>
+            Контроллер подключения игрока
+            </summary>
+        </member>
+        <member name="F:kTVCSS.ConnectionController.Connections">
+            <summary>
+            Соединения
+            </summary>
+        </member>
+        <member name="M:kTVCSS.ConnectionController.AddItem(kTVCSS.Connection)">
+            <summary>
+            Добавить соединение в учет
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:kTVCSS.ConnectionController.RemoveItem(kTVCSS.Connection)">
+            <summary>
+            Удалить
+            </summary>
+            <param name="connection"></param>
+        </member>
+        <member name="M:kTVCSS.ConnectionController.ExecuteChecker(kTVCSS.Connection)">
+            <summary>
+            Запустить проверку на впн и блокировку по айпишникам
+            </summary>
+            <param name="data">Соединение игрока</param>
+            <returns></returns>
+        </member>
+        <member name="T:kTVCSS.Drawing.Tools">
+            <summary>
+            Набор инструментов для работы с графикой
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Drawing.Tools.Draw(System.Drawing.Graphics,System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Нарисовать текст
+            </summary>
+            <param name="graphics">Изображение</param>
+            <param name="text">Текст</param>
+            <param name="x">Координата Х</param>
+            <param name="y">Координата У</param>
+            <param name="fontSize">Размер шрифта</param>
+        </member>
+        <member name="M:kTVCSS.Drawing.Tools.DrawText(System.Drawing.Graphics,System.String,System.Drawing.Rectangle,System.Drawing.StringAlignment,System.Single,System.Drawing.Brush,System.Drawing.FontStyle,System.String)">
+            <summary>
+            Нарисовать текст
+            </summary>
+            <param name="gr">Изображение</param>
+            <param name="text">Текст</param>
+            <param name="rect">Треугольник (хуй знает зачем)</param>
+            <param name="alignment">Выравнивание</param>
+            <param name="fontSize">Размер шрифта</param>
+            <param name="color">Цвет текста</param>
+            <param name="fontStyle">Стиль шрифта</param>
+            <param name="fontName">Название шрифта</param>
+        </member>
+        <member name="M:kTVCSS.Drawing.Tools.GetRankImage(System.String)">
+            <summary>
+            Получить картинку по названию ранга
+            </summary>
+            <param name="rankName">Название ранга</param>
+            <returns></returns>
+        </member>
+        <member name="T:kTVCSS.Game.Cvars">
+            <summary>
+            Постоянные переменные
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.FREEZETIME_MATCH">
+            <summary>
+            Фризтайм матча
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.FREEZETIME_MIX">
+            <summary>
+            Фризтайм микса
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.HALF_TIME_PERIOD_MATCH">
+            <summary>
+            Перерыв матча
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.HALF_TIME_PERIOD_MIX">
+            <summary>
+            Перерыв микса
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.HALF_TIME_PERIOD_MATCH_OVERTIME">
+            <summary>
+            Перерыв оверов матча
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.HALF_TIME_PERIOD_MIX_OVERTIME">
+            <summary>
+            Перерыв оверов микса
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.FRIENDLYFIRE_MATCH">
+            <summary>
+            ФФ матча
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Cvars.FRIENDLYFIRE_MIX">
+            <summary>
+            ФФ микса
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Game.Sourcemod">
+            <summary>
+            Вспомогательные вещи для соурсмода
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Game.Sourcemod.Colors">
+            <summary>
+            Цвета
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Sourcemod.Colors.ivory">
+            <summary>
+            Ivory
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Sourcemod.Colors.crimson">
+            <summary>
+            Crimson
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Sourcemod.Colors.dodgerblue">
+            <summary>
+            Dodgerblue
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Sourcemod.Colors.legendary">
+            <summary>
+            Legendary
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Sourcemod.Colors.mediumseagreen">
+            <summary>
+            Green
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Game.Sourcemod.Colors.turquoise">
+            <summary>
+            Light blue
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Logger">
+            <summary>
+            Логгер
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Logger.LoggerID">
+            <summary>
+            Айди сервера
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Logger.#ctor(System.Int32)">
+            <summary>
+            Создать логгер программы
+            </summary>
+            <param name="loggerID">Айди сервера</param>
+        </member>
+        <member name="M:kTVCSS.Logger.Print(System.Int32,System.String,kTVCSS.LogLevel)">
+            <summary>
+            Создать запись в лог
+            </summary>
+            <param name="serverID">Айди сервера</param>
+            <param name="message">Сообщение</param>
+            <param name="logLevel">Уровень лог сообщения</param>
+        </member>
+        <member name="T:kTVCSS.LogLevel">
+            <summary>
+            Уровень логов
+            </summary>
+        </member>
+        <member name="F:kTVCSS.LogLevel.Info">
+            <summary>
+            Информация
+            </summary>
+        </member>
+        <member name="F:kTVCSS.LogLevel.Warn">
+            <summary>
+            Предупреждение
+            </summary>
+        </member>
+        <member name="F:kTVCSS.LogLevel.Error">
+            <summary>
+            Ошибка
+            </summary>
+        </member>
+        <member name="F:kTVCSS.LogLevel.Debug">
+            <summary>
+            Дебаг отладка
+            </summary>
+        </member>
+        <member name="F:kTVCSS.LogLevel.Trace">
+            <summary>
+            Релиз отладка
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.Config">
+            <summary>
+            Конфиг программы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.SQLConnectionString">
+            <summary>
+            Строка подключения к Microsoft SQL Server
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.VKToken">
+            <summary>
+            ВК токен авторизации
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.StatGroupID">
+            <summary>
+            ID группы статистики
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.MainGroupID">
+            <summary>
+            ID основной группы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.AdminVkID">
+            <summary>
+            ID админа групп (обоих)
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.SSHHost">
+            <summary>
+            Адрес SSH сервера для загрузки демок на сервер
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.SSHLogin">
+            <summary>
+            Логин
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.SSHPassword">
+            <summary>
+            Пароль
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Config.VKGroupToken">
+            <summary>
+            Токен ВК группы основной
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.ConnectInfo">
+            <summary>
+            Информация, отображаемая при подключении игрока в чат на сервере
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.KDR">
+            <summary>
+            КДР
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.HSR">
+            <summary>
+            Процентов хедшотов
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.MMR">
+            <summary>
+            Очки рейтинга
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.AVG">
+            <summary>
+            АВГ
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.WinRate">
+            <summary>
+            Винрейт
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.RankName">
+            <summary>
+            Ранг
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.IsCalibration">
+            <summary>
+            Калибровка?
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.ConnectInfo.MatchesPlayed">
+            <summary>
+            Всего матчей сыграно
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.Match">
+            <summary>
+            Объект матча
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Models.Match.#ctor(System.Int32,kTVCSS.ServerType)">
+            <summary>
+            Создание матча
+            </summary>
+            <param name="mr">Количество раундов одной половины</param>
+        </member>
+        <member name="F:kTVCSS.Models.Match.PlayerKills">
+            <summary>
+            Количество киллов в раунде от конкретного игрока
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Models.Match.Backups">
+            <summary>
+            Бэкапы, пока не юзается
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.MinPlayersToStart">
+            <summary>
+            Минимальное количество игроков для старта матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.MinPlayersToStop">
+            <summary>
+            Минимальное количество игроков для остановки матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.MaxRounds">
+            <summary>
+            Количество раундов одной половины матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.AScore">
+            <summary>
+            Счет команды А
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.BScore">
+            <summary>
+            Счет команды Б
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.IsMatch">
+            <summary>
+            Статус матча (активен/неактивен)
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.MatchId">
+            <summary>
+            ID матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.FirstHalf">
+            <summary>
+            Первая половина?
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.RoundID">
+            <summary>
+            ID раунда
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.OpenFragSteamID">
+            <summary>
+            Стим айди игрока, давшего опен фраг
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.IsOvertime">
+            <summary>
+            Овертайм?
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.AScoreOvertime">
+            <summary>
+            Счет команды А в овертайме
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.BScoreOvertime">
+            <summary>
+            Счет команды Б в овертайме
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.TechnicalPauses">
+            <summary>
+            Количество технических пауз
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.TacticalPauses">
+            <summary>
+            Количество тактических пауз
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.Pause">
+            <summary>
+            Пауза?
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.IsNeedSetTeamScores">
+            <summary>
+            Необходимость задания вручную счета команд после первой половины
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.KnifeRound">
+            <summary>
+            Ножевой раунд?
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.IsNeedPauseOnPlayerTimeOut">
+            <summary>
+            Нужда в паузе по случаю вылета игрока
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.CanPause">
+            <summary>
+            Проверка на возможность объявления паузы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Match.Stopwatch">
+            <summary>
+            Часики
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Models.Match.DisconnectedPlayers">
+            <summary>
+            Список игроков, покинувших сервер раньше времени
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.MatchResultInfo">
+            <summary>
+            Результат матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchResultInfo.MapName">
+            <summary>
+            Название карты
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchResultInfo.MVPlayer">
+            <summary>
+            MVP матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchResultInfo.MatchScore">
+            <summary>
+            Счет матча
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Models.MatchResultInfo.PlayerResults">
+            <summary>
+            Список игроков
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.MatchScore">
+            <summary>
+            Результат матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchScore.AName">
+            <summary>
+            Название команды А
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchScore.BName">
+            <summary>
+            Название команды Б
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchScore.AScore">
+            <summary>
+            Счет команды А
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MatchScore.BScore">
+            <summary>
+            Счет команды Б
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.MVPlayer">
+            <summary>
+            MVP матча
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.Name">
+            <summary>
+            Ник
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.WinRate">
+            <summary>
+            Винрейт
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.TotalPlayed">
+            <summary>
+            Всего матчей
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.Won">
+            <summary>
+            Победы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.Lost">
+            <summary>
+            Поражения
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.HSR">
+            <summary>
+            Процент хедшотов
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.KDR">
+            <summary>
+            KDR
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.AVG">
+            <summary>
+            АВГ
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.RankName">
+            <summary>
+            Название ранга
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.MVPlayer.RankMMR">
+            <summary>
+            Количество очков рейтинга
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.PlayerPictureData">
+            <summary>
+            Информация об игроке для формирования картинки
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Kills">
+            <summary>
+            Киллы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Deaths">
+            <summary>
+            Смерти
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.HSR">
+            <summary>
+            Процент хедшотов
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.MMR">
+            <summary>
+            Количество очков рейтинга
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.RankName">
+            <summary>
+            Ранг
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.MatchesTotal">
+            <summary>
+            Матчей сыграно
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.MatchesWon">
+            <summary>
+            Победы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.MatchesLost">
+            <summary>
+            Поражения
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.KDR">
+            <summary>
+            КДР
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.AVG">
+            <summary>
+            АВГ
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Aces">
+            <summary>
+            Эйсы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Quadra">
+            <summary>
+            Квадры (-4)
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Tripple">
+            <summary>
+            Трипплы (-3)
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Opens">
+            <summary>
+            Опенфраги
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.Name">
+            <summary>
+            Ник
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.SteamId">
+            <summary>
+            Стим айди
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerPictureData.IsVictory">
+            <summary>
+            Победа?
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.PlayerRank">
+            <summary>
+            Ранг игрока
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerRank.SteamID">
+            <summary>
+            Стим айди
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerRank.Points">
+            <summary>
+            Очки рейтинга
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.PlayerResult">
+            <summary>
+            Результат игрока за матч
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerResult.Name">
+            <summary>
+            Ник
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerResult.Kills">
+            <summary>
+            Киллы
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerResult.Deaths">
+            <summary>
+            Смерти
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerResult.KDR">
+            <summary>
+            КДР
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.PlayerResult.TeamName">
+            <summary>
+            Название команды
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Models.Server">
+            <summary>
+            Сервер
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.ID">
+            <summary>
+            Айди сервера
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.Host">
+            <summary>
+            Адрес
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.UserName">
+            <summary>
+            ФТП имя пользователя
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.UserPassword">
+            <summary>
+            ФТП пароль
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.Port">
+            <summary>
+            ФТП порт
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.GamePort">
+            <summary>
+            Игровой порт
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.RconPassword">
+            <summary>
+            РКОН пароль
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.NodeHost">
+            <summary>
+            Неиспользуемое поле, используйте 127.0.0.1
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.NodePort">
+            <summary>
+            Порт ноды-обработчика
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.ServerType">
+            <summary>
+            Тип сервера
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Models.Server.Language">
+            <summary>
+            Язык сервера
+            </summary>
+        </member>
+        <member name="T:kTVCSS.ServerType">
+            <summary>
+            Виды серверов
+            </summary>
+        </member>
+        <member name="F:kTVCSS.ServerType.ClanMatch">
+            <summary>
+            Кв
+            </summary>
+        </member>
+        <member name="F:kTVCSS.ServerType.Mix">
+            <summary>
+            Микс
+            </summary>
+        </member>
+        <member name="F:kTVCSS.ServerType.FastCup">
+            <summary>
+            Фасткап сервер (аимки и пр.)
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Settings.ConfigTools">
+            <summary>
+            Конфиг
+            </summary>
+        </member>
+        <member name="F:kTVCSS.Settings.ConfigTools.Config">
+            <summary>
+            Сам конфиг
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Settings.ConfigTools.#ctor">
+            <summary>
+            Создание и загрузка конфига
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Tools.FTPTools">
+            <summary>
+            Инструменты для работы с FTP
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Tools.FTPTools.AHost">
+            <summary>
+            Хост
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Tools.FTPTools.AUserName">
+            <summary>
+            Имя пользователя
+            </summary>
+        </member>
+        <member name="P:kTVCSS.Tools.FTPTools.APassword">
+            <summary>
+            Пароль
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Tools.FTPTools.#ctor(kTVCSS.Models.Server)">
+            <summary>
+            Создание инструментов ФТП для работы с игровым сервером
+            </summary>
+            <param name="server">Сервер</param>
+        </member>
+        <member name="M:kTVCSS.Tools.FTPTools.UploadDemo(System.Object)">
+            <summary>
+            Загрузить демо на сайт
+            </summary>
+            <param name="fileName">Имя файла</param>
+        </member>
+        <member name="M:kTVCSS.Tools.FTPTools.UploadDemoFile(System.Object)">
+            <summary>
+            Загрузить демо на сайт
+            </summary>
+            <param name="fileName">Название файла</param>
+        </member>
+        <member name="M:kTVCSS.Tools.FTPTools.DownloadFile(System.String)">
+            <summary>
+            Скачать демо
+            </summary>
+            <param name="fileName">Название файла</param>
+        </member>
+        <member name="M:kTVCSS.Tools.FTPTools.UploadFile(System.String)">
+            <summary>
+            Загрузить файл на сервер по SFTP
+            </summary>
+            <param name="fileName"></param>
+        </member>
+        <member name="T:kTVCSS.Tools.Loader">
+            <summary>
+            Загрузчик серверов
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Tools.Loader.LoadServers">
+            <summary>
+            Загрузить сервера из БД
+            </summary>
+        </member>
+        <member name="T:kTVCSS.Tools.MatchEvents">
+            <summary>
+            События матча
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.PlayerKill(System.String,System.String,System.String,System.String,System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Когда игрок кого-то убивает
+            </summary>
+            <param name="killerName">Имя убийцы</param>
+            <param name="killedName">Имя убитого</param>
+            <param name="killerSteamID">Стим убийцы</param>
+            <param name="killedSteamID">Стим убитого</param>
+            <param name="killerHeadshot">Хедшот?</param>
+            <param name="serverId">Айди сервера</param>
+            <param name="matchId">Айди матча</param>
+            <param name="team">Команда игрока</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.CheckMatchLiveExists(System.Int32)">
+            <summary>
+            Проверка на наличие матча на сервере
+            </summary>
+            <param name="serverId">Айди сервера</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.InsertPlayerRatingProgress(System.String,System.Int32)">
+            <summary>
+            Вставить в таблицу актуальный рейтинг игрока
+            </summary>
+            <param name="steamID">Стим игрока</param>
+            <param name="mmr">Очки рейтинга</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.CreateMatch(System.Int32,System.String)">
+            <summary>
+            Создать матч
+            </summary>
+            <param name="serverId">Айди сервера</param>
+            <param name="mapName">Название карты</param>
+            <returns>Айди созданного матча</returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.UpdateMatchScore(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Обновить счет матча
+            </summary>
+            <param name="AScore">Счет команды А</param>
+            <param name="BScore">Счет команды Б</param>
+            <param name="serverId">Айди сервера</param>
+            <param name="matchId">Айди матча</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.InsertDemoName(System.Int32,System.String)">
+            <summary>
+            Вставить название демки в БД
+            </summary>
+            <param name="matchId">Айди матча</param>
+            <param name="demoName">Название демки</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.GetPlayerResultData(System.String,kTVCSS.Models.Match)">
+            <summary>
+            Получить данные об игроке для формирование картинки для игрока
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="match">Матч</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.GetLiveMatchResults(System.Int32,kTVCSS.Models.Match)">
+            <summary>
+            !Пока не юзается (для бекапов)
+            </summary>
+            <param name="serverId"></param>
+            <param name="match"></param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.FinishMatch(System.Int32,System.Int32,System.String,System.String,System.String,System.Int32,System.Collections.Generic.List{CoreRCON.Parsers.Standard.Player},System.String,kTVCSS.Models.Match)">
+            <summary>
+            Завершить матч
+            </summary>
+            <param name="AScore">Счет команды А</param>
+            <param name="BScore">Счет команды Б</param>
+            <param name="AName">Название команды А</param>
+            <param name="BName">Название команды Б</param>
+            <param name="Map">Карта</param>
+            <param name="serverId">Айди сервера</param>
+            <param name="players">Список игроков</param>
+            <param name="winnerTeam">Название победившей команды</param>
+            <param name="match">Матч</param>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.GetTeamNames(System.Collections.Generic.List{CoreRCON.Parsers.Standard.Player})">
+            <summary>
+            Получить название команд с сервера
+            </summary>
+            <param name="players">Список игроков</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.UpdateMatchesResults(System.String,System.Int32,System.String,System.String,System.Int32)">
+            <summary>
+            Обновить результаты матча
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="matchId">Айди матч</param>
+            <param name="teamName">Название команды</param>
+            <param name="playerName">Имя игрока</param>
+            <param name="serverId">Айди сервера</param>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.InsertMatchLog(System.Int32,System.String,System.String,System.Int32,kTVCSS.Models.Match)">
+            <summary>
+            Вставить лог матча
+            </summary>
+            <param name="matchId">Айди матча</param>
+            <param name="message">Сообщение</param>
+            <param name="mapName">Название карты</param>
+            <param name="serverId">Айди сервера</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.SetMatchHighlight(System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Вставить хайлайт матча
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="killsCount">Количество киллов</param>
+            <param name="matchID">Айди матча</param>
+            <param name="isOpenFrag">Опен фраг?</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.SetHighlight(System.String,System.Int32)">
+            <summary>
+            Задать хайлайт матча
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="killsCount">Количество киллов</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.WeaponKill(System.String,System.String)">
+            <summary>
+            Килл с оружия
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="weaponName">Название оружия</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.ResetMatch(System.Int32,System.Int32)">
+            <summary>
+            Сбросить матч (удалить из БД)
+            </summary>
+            <param name="matchId">Айди матча</param>
+            <param name="serverID">Айди сервера</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.SetOpenFrag(System.String)">
+            <summary>
+            Вставить опен фраг
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.SetPlayerMatchResult(System.String,System.Int32,System.Int32)">
+            <summary>
+            Задать результат игрока
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="win">Победы</param>
+            <param name="pts">Очки рейтинга</param>
+        </member>
+        <member name="M:kTVCSS.Tools.MatchEvents.InsertMatchBackupRecord(kTVCSS.Models.Match,CoreRCON.Parsers.Standard.MatchBackup)">
+            <summary>
+            Вставить запись в БД для бекапов матчей
+            </summary>
+            <param name="match"></param>
+            <param name="backup"></param>
+            <returns></returns>
+        </member>
+        <member name="T:kTVCSS.Tools.RconHelper">
+            <summary>
+            Помощь в ркон взаимодействии с сервером
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Tools.RconHelper.SendMessage(CoreRCON.RCON,System.String,kTVCSS.Game.Sourcemod.Colors)">
+            <summary>
+            Отправить сообщение в чат
+            </summary>
+            <param name="rcon">РКОН соединение</param>
+            <param name="message">Текст сообщения</param>
+            <param name="color">Цвет сообщения</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.RconHelper.SendCmd(CoreRCON.RCON,System.String)">
+            <summary>
+            Выполнить команду на сервере
+            </summary>
+            <param name="rcon">РКОН соединение</param>
+            <param name="cmd">Команда</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.RconHelper.LiveOnThree(CoreRCON.RCON,kTVCSS.Models.Match,System.Collections.Generic.List{CoreRCON.Parsers.Standard.Player},kTVCSS.ServerType)">
+            <summary>
+            Запустить лайв
+            </summary>
+            <param name="rcon">РКОН соединение</param>
+            <param name="match">Матч</param>
+            <param name="OnlinePlayers">Список онлайн игроков</param>
+            <param name="type">Тип сервера</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.RconHelper.Knives(CoreRCON.RCON,kTVCSS.Models.Match,kTVCSS.ServerType)">
+            <summary>
+            Запустить ножевой раунд
+            </summary>
+            <param name="rcon">РКОН соединение</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.RconHelper.RconReconnect(CoreRCON.RCON)">
+            <summary>
+            Переподключение по РКОНу
+            </summary>
+            <param name="rcon">РКОН соединение</param>
+            <returns></returns>
+        </member>
+        <member name="T:kTVCSS.Tools.ServerEvents">
+            <summary>
+            Серверные события
+            </summary>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.PrintPlayerInfo(System.String)">
+            <summary>
+            Напечатать инфу об игроке
+            </summary>
+            <param name="steamID">Стим айди</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.IsUserRegistered(System.String)">
+            <summary>
+            Проверка на наличие игрока в системе
+            </summary>
+            <param name="steamID">Стим айди</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.InsertConnectData(System.Int32,CoreRCON.Parsers.Standard.PlayerConnectedIPInfo)">
+            <summary>
+            Вставить лог об коннекте игрока
+            </summary>
+            <param name="serverId">Айди сервера</param>
+            <param name="player">Игрок</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.InsertConnectData(System.Int32,CoreRCON.Parsers.Standard.PlayerConnected)">
+            <summary>
+            Вставить лог коннекта игрока
+            </summary>
+            <param name="serverId">Айди сервера</param>
+            <param name="player">Игрок</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.InsertDisconnectData(System.Int32,CoreRCON.Parsers.Standard.PlayerDisconnected)">
+            <summary>
+            Вставить лог о дисконнекте игрока
+            </summary>
+            <param name="serverId">Айди сервера</param>
+            <param name="player">Игрок</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.AuthPlayer(System.String,System.String)">
+            <summary>
+            Авторизация игрока
+            </summary>
+            <param name="SteamID">Стим айди</param>
+            <param name="Name">Ник</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.CheckIsBanned(System.String)">
+            <summary>
+            Проверка на бан игрока
+            </summary>
+            <param name="steamID">Стим айди</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.InsertChatMessage(System.String,System.String,System.Int32)">
+            <summary>
+            Вставить сообщение игрока в БД
+            </summary>
+            <param name="steamId">Стим айди</param>
+            <param name="text">Текст сообщения</param>
+            <param name="serverId">Айди сервера</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.Tools.ServerEvents.GetPlayerRank(System.String)">
+            <summary>
+            Получить ранг игрока
+            </summary>
+            <param name="steamID">Стим айди</param>
+            <returns></returns>
+        </member>
+        <member name="T:kTVCSS.VKInteraction.Matches">
+            <summary>
+            Матчи для ВК
+            </summary>
+        </member>
+        <member name="M:kTVCSS.VKInteraction.Matches.SendMessageToConf(System.String)">
+            <summary>
+            Отправить сообщение в беседу проекта
+            </summary>
+            <param name="message">Сообщение</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.VKInteraction.Matches.GetMatchMVP(System.Int32)">
+            <summary>
+            Получить МВП матча
+            </summary>
+            <param name="ID">айди матча</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.VKInteraction.Matches.GetPlayerResults(System.Int32)">
+            <summary>
+            Получить результаты матча
+            </summary>
+            <param name="ID">Айди матча</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.VKInteraction.Matches.GetMatchResult(System.Int32)">
+            <summary>
+            Получить результат матча
+            </summary>
+            <param name="ID">Айди матча</param>
+            <returns></returns>
+        </member>
+        <member name="M:kTVCSS.VKInteraction.Matches.SendPlayerResult(kTVCSS.Models.PlayerPictureData,System.Int32)">
+            <summary>
+            Отправить картинку с результатом матча игроку
+            </summary>
+            <param name="player"></param>
+        </member>
+        <member name="M:kTVCSS.VKInteraction.Matches.PublishResult(kTVCSS.Models.MatchResultInfo,System.Int32)">
+            <summary>
+            Опубликовать результат матча на стену
+            </summary>
+            <param name="matchResultInfo">Результат матча</param>
+        </member>
+    </members>
+</doc>

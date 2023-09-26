@@ -38,8 +38,8 @@ namespace kTVCSS.Models
             }
             else
             {
-                MinPlayersToStart = 0;
-                MinPlayersToStop = 0;
+                MinPlayersToStart = 5;
+                MinPlayersToStop = 4;
             }
             IsNeedPauseOnPlayerTimeOut = true;
             CanPause = true;

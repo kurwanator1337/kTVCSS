@@ -34,6 +34,14 @@ namespace kTVCSS.Settings
                     Config = (Config)xmlSerializer.Deserialize(reader);
                 }
             }
+            else
+            {
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(Config));
+                using (XmlReader reader = XmlReader.Create("kTVCSS.cfg"))
+                {
+                    Config = (Config)xmlSerializer.Deserialize(reader);
+                }
+            }
         }
     }
 }
