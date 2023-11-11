@@ -268,6 +268,17 @@ namespace kTVCSS.VKInteraction
                     connection.Close();
                 }
 
+                string message = string.Empty;
+
+                if (player.IsVictory)
+                {
+                    message = $"Поздравляем с победой! Вы можете посмотреть статистику матча, перейдя по ссылке: https://ktvcss.ru/match/{matchId}";
+                }
+                else
+                {
+                    message = $"Вы проиграли, но не расстраивайтесь - без поражений не бывает и побед! Вы можете посмотреть статистику матча, перейдя по ссылке: https://ktvcss.ru/match/{matchId}";
+                }
+
                 if (!string.IsNullOrEmpty(vkId))
                 {
                     var messageParams = new MessagesSendParams
@@ -275,7 +286,7 @@ namespace kTVCSS.VKInteraction
                         GroupId = (ulong)Program.ConfigTools.Config.MainGroupID,
                         UserId = long.Parse(vkId),
                         RandomId = new Random().Next(),
-                        Message = $"Подробнее: https://ktvcss.ru/match/{matchId}",
+                        Message = message,
                         Attachments = new List<MediaAttachment>
                         {
                             photo.FirstOrDefault()

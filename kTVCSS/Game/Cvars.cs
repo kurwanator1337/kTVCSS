@@ -14,7 +14,7 @@ namespace kTVCSS.Game
         /// <summary>
         /// Фризтайм матча
         /// </summary>
-        public static int FREEZETIME_MATCH = 10;
+        public static int FREEZETIME_MATCH = 15;
         /// <summary>
         /// Фризтайм микса
         /// </summary>

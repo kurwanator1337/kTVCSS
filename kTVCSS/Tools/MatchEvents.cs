@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace kTVCSS.Tools
@@ -472,6 +474,26 @@ namespace kTVCSS.Tools
             catch (Exception ex)
             {
                 Program.Logger.Print(serverId, $"[Message] {ex.Message} [StackTrace] {ex.StackTrace} [InnerException] {ex.InnerException}", LogLevel.Error);
+            }
+            finally
+            {
+                try
+                {
+                    Thread updateCacheThread = new Thread(() =>
+                    {
+                        using (WebClient web = new WebClient())
+                        {
+                            web.DownloadString(new Uri("https://ktvcss.ru/api/RequestUpdateTotalPlayers"));
+                        }
+                    });
+                    updateCacheThread.IsBackground = true;
+                    updateCacheThread.Start();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex.ToString());
+                }
             }
         }
         /// <summary>

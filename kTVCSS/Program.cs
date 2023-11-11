@@ -38,11 +38,10 @@ namespace kTVCSS
         public static ConfigTools ConfigTools = new ConfigTools();
         public static List<Server> Servers = new List<Server>();
         public static List<string> ForbiddenWords { get; set; } = new List<string>();
-        public static List<string> AllowedPlayers = new List<string>();
-        public static List<string> JoinedPlayers = new List<string>();
+        public static List<MixMember> AllowedPlayers = new List<MixMember>();
         //public static List<Locale> Locales;
         //public static Locale CurrentLocale;
-        private static string moduleVersion = "RC2.1.1";
+        private static string moduleVersion = "RC2.1.3";
 
         public class Node
         {
@@ -498,19 +497,24 @@ namespace kTVCSS
                                 {
                                     case 3:
                                         {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", Colors.mediumseagreen);
+                                            await rcon.SendCommandAsync($"ktv_mvp \"{MatchPlayers.Find(x => x.SteamId == player.Key).Name}\" \"made a triple kill!\"");
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a triple kill!", info.Map, server.ID, match);
                                             break;
                                         }
                                     case 4:
                                         {
-                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", Colors.legendary);
+                                            await rcon.SendCommandAsync($"ktv_mvp \"{MatchPlayers.Find(x => x.SteamId == player.Key).Name}\" \"made a quad kill!\"");
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} made a quad kill!", info.Map, server.ID, match);
                                             break;
                                         }
                                     case 5:
                                         {
                                             await rcon.SendCommandAsync($"sm_csay {MatchPlayers.Find(x => x.SteamId == player.Key).Name} RAMPAGE!!!");
+                                            await rcon.SendCommandAsync($"ktv_mvp \"{MatchPlayers.Find(x => x.SteamId == player.Key).Name}\" \"MADE A RAMPAGE!!!\"");
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
+                                            await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
                                             await RconHelper.SendMessage(rcon, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", Colors.crimson);
                                             await MatchEvents.InsertMatchLog(match.MatchId, $"{MatchPlayers.Find(x => x.SteamId == player.Key).Name} MADE A RAMPAGE!!!", info.Map, server.ID, match);
                                             break;
@@ -1402,7 +1406,6 @@ namespace kTVCSS
                         if (server.ServerType == ServerType.Mix)
                         {
                             string map = string.Empty;
-                            JoinedPlayers.Add(connection.Player.SteamId);
                             using (SqlConnection sql = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                             {
                                 await sql.OpenAsync();
@@ -1411,9 +1414,10 @@ namespace kTVCSS
                                 {
                                     while (reader.Read())
                                     {
-                                        if (!AllowedPlayers.Contains(reader[0].ToString()))
+                                        string steam = reader[0].ToString();
+                                        if (!AllowedPlayers.Where(x => x.SteamID == steam).Any())
                                         {
-                                            AllowedPlayers.Add(reader[0].ToString());
+                                            AllowedPlayers.Add(new MixMember() { SteamID = steam });
                                         }
                                     }
                                 }
@@ -1431,8 +1435,6 @@ namespace kTVCSS
                                     }
                                 }
                             }
-
-
 
                             if (currentMapName != map)
                             {
@@ -1453,13 +1455,17 @@ namespace kTVCSS
                                 isMix = false;
                             }
 
-                            if (!AllowedPlayers.Contains(connection.Player.SteamId))
+                            if (!AllowedPlayers.Where(x => x.SteamID == connection.Player.SteamId).Any())
                             {
                                 await RconHelper.SendCmd(rcon, $"kickid {connection.Player.ClientId} you are don't participate the mix! https://ktvcss.ru/mixes");
                             }
+                            else
+                            {
+                                AllowedPlayers.FirstOrDefault(x => x.SteamID == connection.Player.SteamId).Joined = true;
+                            }
                         }
 
-                        // antichear
+                        // anticheat
                         bool needKick = false;
                         using (SqlConnection sql = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                         {
@@ -1523,7 +1529,7 @@ namespace kTVCSS
                             if (server.ServerType == ServerType.Mix)
                             {
                                 isMix = false;
-                                AllowedPlayers.Clear(); JoinedPlayers.Clear();
+                                AllowedPlayers.Clear();
                                 await MatchEvents.DeleteMix(ServerID);
                             }
                             await RconHelper.SendCmd(rcon, "tv_stoprecord");
@@ -1590,7 +1596,7 @@ namespace kTVCSS
                             if (server.ServerType == ServerType.Mix)
                             {
                                 isMix = false;
-                                AllowedPlayers.Clear(); JoinedPlayers.Clear();
+                                AllowedPlayers.Clear();
                                 await MatchEvents.DeleteMix(ServerID);
                             }
                             await RconHelper.SendCmd(rcon, "tv_stoprecord");
@@ -1755,7 +1761,7 @@ namespace kTVCSS
                 if (server.ServerType == ServerType.Mix)
                 {
                     isMix = false;
-                    AllowedPlayers.Clear(); JoinedPlayers.Clear();
+                    AllowedPlayers.Clear();
                     await MatchEvents.DeleteMix(ServerID);
                 }
 
@@ -1916,31 +1922,30 @@ namespace kTVCSS
                             await RconHelper.SendMessage(rcon, $"The mix start failed!", Colors.crimson);
                             await RconHelper.SendCmd(rcon, $"sm_kick @all [kTVCSS] Somebody didn't join the mix! https://ktvcss.ru/mixes");
                             isMix = false;
-                            var toBan = AllowedPlayers.Except(JoinedPlayers);
 
-                            // debug
+                            var toBan = AllowedPlayers.Where(x => x.Joined == false);
 
                             foreach (var player in toBan)
                             {
-                                Console.WriteLine("DEBUG:" + player);
-                            }
-
-                            //
-
-                            AllowedPlayers.Clear(); JoinedPlayers.Clear();
-
-                            await MatchEvents.DeleteMix(ServerID);
-
-                            using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
-                            {
-                                connection.Open();
-
-                                foreach (var player in toBan)
+                                using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                                 {
-                                    SqlCommand query = new SqlCommand($"UPDATE Players SET BLOCK = 1, BLOCKREASON = 'You didnt join the server' WHERE STEAMID = '{player}'", connection);
-                                    query.ExecuteNonQuery();
+                                    await connection.OpenAsync();
+
+                                    SqlCommand query = new SqlCommand("[BanPlayerBySteam]", connection)
+                                    {
+                                        CommandType = System.Data.CommandType.StoredProcedure
+                                    };
+
+                                    query.Parameters.AddWithValue("@STEAMID", player.SteamID);
+                                    query.Parameters.AddWithValue("@REASON", "You didn't join the mix!");
+
+                                    await query.ExecuteNonQueryAsync();
                                 }
                             }
+
+                            AllowedPlayers.Clear();
+
+                            await MatchEvents.DeleteMix(ServerID);
                         }
                     }
                 }
@@ -1999,7 +2004,7 @@ namespace kTVCSS
                                     if (server.ServerType == ServerType.Mix)
                                     {
                                         isMix = false;
-                                        AllowedPlayers.Clear(); JoinedPlayers.Clear();
+                                        AllowedPlayers.Clear();
                                         await MatchEvents.DeleteMix(ServerID);
                                     }
                                     await RconHelper.SendCmd(rcon, "tv_stoprecord");

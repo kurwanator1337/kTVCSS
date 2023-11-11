@@ -70,7 +70,7 @@ namespace kTVCSS.Tools
                 Program.Logger.Print(Program.Node.ServerID, "exec lo3", LogLevel.Info);
                 await rcon.SendCommandAsync("exec ktvcss/ruleset_global.cfg");
                 Thread.Sleep(500);
-                await rcon.SendCommandAsync("sm_csay LIVE on three restarts!!!");
+                await rcon.SendCommandAsync("ktv_message LIVE on three restarts!!!");
                 await rcon.SendCommandAsync("sys_say {mediumseagreen}LIVE on three restarts!!!;sys_say {mediumseagreen}LIVE on three restarts!!!;sys_say {mediumseagreen}LIVE on three restarts!!!;sys_say {mediumseagreen}LIVE on three restarts!!!;sys_say {mediumseagreen}LIVE on three restarts!!!;sys_say {mediumseagreen}LIVE on three restarts!!!;sys_say {mediumseagreen}LIVE on three restarts!!!");
                 Thread.Sleep(2000);
                 if (match.IsOvertime)
@@ -132,7 +132,7 @@ namespace kTVCSS.Tools
             try
             {
                 Program.Logger.Print(Program.Node.ServerID, "exec ko3", LogLevel.Info);
-                await rcon.SendCommandAsync("sm_csay KNIVES on three restarts!!!");
+                await rcon.SendCommandAsync("ktv_message KNIVES on three restarts!!!");
                 await rcon.SendCommandAsync("sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!;sys_say {mediumseagreen}KNIVES on three restarts!!!");
                 Thread.Sleep(2000);
                 await rcon.SendCommandAsync("clear;mp_restartgame 1;sys_say {mediumseagreen}Restart 1");
