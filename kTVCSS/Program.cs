@@ -41,7 +41,7 @@ namespace kTVCSS
         public static List<MixMember> AllowedPlayers = new List<MixMember>();
         //public static List<Locale> Locales;
         //public static Locale CurrentLocale;
-        private static string moduleVersion = "RC2.1.3";
+        private static string moduleVersion = "RC2.2";
 
         public class Node
         {
@@ -1684,6 +1684,18 @@ namespace kTVCSS
                                 }
                             }
                         }
+
+                        if (server.ServerType == ServerType.Mix)
+                        {
+                            try
+                            {
+                                AllowedPlayers.FirstOrDefault(x => x.SteamID == connection.Player.SteamId).Joined = false;
+                            }
+                            catch (Exception)
+                            {
+                                //
+                            }
+                        }
                         Logger.Print(server.ID, $"{connection.Player.Name} ({connection.Player.SteamId}) has been disconnected from {endpoint.Address}:{endpoint.Port} ({connection.Reason})", LogLevel.Trace);
                         //if (OnlinePlayers.Count() == 0 && NeedRestart)
                         //{
@@ -1888,6 +1900,19 @@ namespace kTVCSS
                     Thread.Sleep(1000);
                 }
                 OnlinePlayers.Clear();
+
+                if (server.ServerType == ServerType.Mix)
+                {
+                    Environment.Exit(0);
+                }
+
+                if (server.ServerType == ServerType.ClanMatch)
+                {
+                    if (!isBestOfThree)
+                    {
+                        Environment.Exit(0);
+                    }
+                }
             }
 
             private void Rcon_OnDisconnected()
