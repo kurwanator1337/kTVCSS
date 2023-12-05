@@ -41,7 +41,7 @@ namespace kTVCSS
         public static List<MixMember> AllowedPlayers = new List<MixMember>();
         //public static List<Locale> Locales;
         //public static Locale CurrentLocale;
-        private static string moduleVersion = "RC2.2";
+        private static string moduleVersion = "RC2.2.1";
 
         public class Node
         {

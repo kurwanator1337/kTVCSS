@@ -95,7 +95,30 @@ namespace kTVCSS.Tools
                 using (SqlConnection connection = new SqlConnection(Program.ConfigTools.Config.SQLConnectionString))
                 {
                     await connection.OpenAsync();
-                    SqlCommand query = new SqlCommand("DeleteMix", connection)
+
+                    SqlCommand query = new SqlCommand($"SELECT GUID FROM Mixes WHERE SERVERID = {id}", connection);
+                    var guid = await query.ExecuteScalarAsync();
+                    if (guid is not null)
+                    {
+                        try
+                        {
+                            Thread updateCacheThread = new Thread(() =>
+                            {
+                                using (WebClient web = new WebClient())
+                                {
+                                    web.DownloadString(new Uri($"https://ktvcss.ru/api/DeleteMixMemory?guid={guid.ToString()}"));
+                                }
+                            });
+                            updateCacheThread.IsBackground = true;
+                            updateCacheThread.Start();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+                    }
+
+                    query = new SqlCommand("DeleteMix", connection)
                     {
                         CommandType = System.Data.CommandType.StoredProcedure
                     };
